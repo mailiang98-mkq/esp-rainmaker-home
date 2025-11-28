@@ -1,0 +1,61 @@
+//
+// SPDX-FileCopyrightText: 2026 Espressif Systems (Shanghai) CO LTD
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+//
+// APP.xcconfig
+// Configuration file for APP iOS app bundle identifiers, versions, and build settings
+//
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+//
+
+// ============================================================================
+// CocoaPods Configuration
+// ============================================================================
+// PODS_ROOT and PODS_PODFILE_DIR_PATH are defined in project-level build settings
+
+// Include Pods configuration FIRST (order matters)
+// The build system will include the appropriate Pods xcconfig based on configuration
+#include? "Pods/Target Support Files/Pods-APP/Pods-APP.debug.xcconfig"
+#include? "Pods/Target Support Files/Pods-APP/Pods-APP.release.xcconfig"
+
+// ============================================================================
+// CONFIGURATION-DRIVEN iOS BUILD SETTINGS
+// ============================================================================
+// These properties are synced from .env file
+// Do not manually edit these values - update .env instead
+// ============================================================================
+
+// App Display Name (shown on home screen)
+APP_DISPLAY_NAME = ESP RainMaker Home
+
+// App Bundle Identifier (main app)
+APP_BUNDLE_ID = com.espressif.nova
+
+// App Group Identifier (for sharing data between app and extensions)
+APP_GROUP_ID = group.com.espressif.novahome
+
+// Matter Extension Bundle Identifier
+APP_MATTER_EXTENSION = com.espressif.nova.MatterExtension
+
+// App Version (marketing version)
+APP_VERSION = 3.5.0
+
+// App URL Scheme (used in Info.plist)
+APP_SCHEMA = rainmaker
+
+// Associated Domain for Universal Links (domain only, without applinks: prefix)
+ASSOCIATED_DOMAIN = agents.espressif.com
+
+// Associated Domain for entitlements (full format with applinks: prefix)
+ASSOCIATED_DOMAIN_ENTITLEMENT = applinks:agents.espressif.com
+
+// Matter Configuration
+// Matter Vendor ID (used in native code)
+MATTER_VENDOR_ID = 0x131B
+
+// Ecosystem Name (used in Matter module)
+MATTER_ECOSYSTEM_NAME = Rainmaker Home

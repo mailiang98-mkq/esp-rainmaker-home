@@ -131,7 +131,7 @@ class ESPMatterUtilityModule: NSObject {
       
       // Store in iOS Keychain
       let account = "user_noc_\(fabricId)"
-      let service = Bundle.main.bundleIdentifier ?? "com.espressif.nova"
+      let service = Bundle.bundleIdentifier()
       
       // Delete existing item first
       let deleteQuery: [String: Any] = [

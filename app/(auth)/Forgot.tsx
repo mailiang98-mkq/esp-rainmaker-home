@@ -19,7 +19,7 @@ import { Input, Button, ScreenWrapper, Header, Logo } from "@/components";
 
 // validations
 import { validateEmail } from "@/utils/validations";
-import APP_CONFIG from "@/app.json";
+import Constants from 'expo-constants';
 import { testProps } from "@/utils/testProps";
 
 /**
@@ -35,7 +35,7 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
   const toast = useToast();
 
-  const appVersion = APP_CONFIG.expo.version;
+  const appVersion = Constants.expoConfig?.version;
 
   // Form state
   const [email, setEmail] = useState("");

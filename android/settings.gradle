@@ -20,8 +20,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
     ex.autolinkLibrariesFromCommand(command)
   }
 }
-
-rootProject.name = 'ESP RainMaker Home'
+rootProject.name = 'com.espressif.novahome'
 
 dependencyResolutionManagement {
   versionCatalogs {

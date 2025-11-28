@@ -4,8 +4,14 @@
   "version": "3.5.0",
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "start:dev": "APP_ENV=development expo start -c",
+    "start:staging": "APP_ENV=staging expo start -c",
+    "start:prod": "APP_ENV=production expo start -c",
+    "prebuild": "npm run prebuild:android && npm run prebuild:ios",
+    "prebuild:android": "node scripts/sync-env-to-android.js",
+    "prebuild:ios": "node scripts/sync-env-to-ios.js",
+    "android": "npm run prebuild:android && expo run:android",
+    "ios": "npm run prebuild:ios && expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint"
@@ -26,7 +32,7 @@
     "@tamagui/core": "1.126.12",
     "@tamagui/toast": "1.126.12",
     "@types/react": "~18.3.12",
-    "axios": "^1.13.2",
+    "axios": "1.10.0",
     "burnt": "^0.13.0",
     "expo": "^52.0.0",
     "expo-blur": "~14.0.3",
@@ -84,5 +90,9 @@
     "jest-expo": "~52.0.6",
     "typescript": "^5.3.3"
   },
-  "private": true
+  "resolutions": {
+    "axios": "1.10.0"
+  },
+  "private": true,
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

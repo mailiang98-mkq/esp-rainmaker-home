@@ -11,7 +11,9 @@ import React
 public class ESPNotificationModule: RCTEventEmitter {
   
   private var deviceToken: String?
-  private let deviceTokenKey = "com.espressif.novahome.devicetoken"
+  private var deviceTokenKey: String {
+    return "\(Bundle.bundleIdentifier()).devicetoken"
+  }
   private var sendEvent = false
   private let eventKey = "ESPNotificationModule"
   

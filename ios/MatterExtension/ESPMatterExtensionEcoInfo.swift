@@ -17,7 +17,9 @@ class ESPMatterExtensionEcoInfo {
     static let shared = ESPMatterExtensionEcoInfo()
     var homesData: [String: String] = [String: String]()
     var roomsDataForHome: [String: [[String: String]]] = [String: [[String: String]]]()
-    static let groupIdKey = "group.com.espressif.novahome"
+    static var groupIdKey: String {
+        return Bundle.configValue(for: "APP_GROUP_ID")
+    }
     static let homesDataKey: String = "com.espressif.hmmatterdemo.homes"
     static let roomsDataKey: String = "com.espressif.hmmatterdemo.rooms"
     static let matterDevicesKey: String = "com.espressif.hmmatterdemo.devices"

@@ -57,7 +57,7 @@
             android:value="0" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.app.MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode"
             android:exported="true"
             android:launchMode="singleTask"
@@ -74,8 +74,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="myapp" />
-                <data android:scheme="com.espressif.novahome" />
+                <!-- Agents Deep link schemes from gradle.properties via manifestPlaceholders -->
+                <data android:scheme="${AGENTS_DEEP_LINK_SCHEME}" />
+                <data android:scheme="${applicationId}" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -83,8 +84,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="https" android:host="agents.espressif.com" 
-                android:pathPrefix="/try/agents" />
+                <!-- HTTPS deep links from gradle.properties via manifestPlaceholders -->
+                <data android:scheme="https" android:host="${AGENTS_DEEP_LINK_HOST}" 
+                android:pathPrefix="${AGENTS_DEEP_LINK_PATH_PREFIX}" />
             </intent-filter>
         </activity>
 
@@ -101,9 +103,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <!-- OAuth redirect URL from gradle.properties via manifestPlaceholders -->
                 <data
-                    android:host="com.espressif.novahome"
-                    android:scheme="rainmaker" />
+                    android:host="${THIRD_PARTY_AUTH_REDIRECT_HOST}"
+                    android:scheme="${THIRD_PARTY_AUTH_REDIRECT_SCHEME}" />
             </intent-filter>
         </activity>
 

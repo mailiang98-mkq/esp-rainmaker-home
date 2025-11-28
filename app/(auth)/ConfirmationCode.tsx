@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 // components
 import { ScreenWrapper, Header, Input, Button } from "@/components";
 
-import APP_CONFIG from "@/app.json";
+import Constants from 'expo-constants';
 import { testProps } from "@/utils/testProps";
 import { executePostLoginPipeline } from "@/utils/postLoginPipeline";
 
@@ -29,7 +29,7 @@ import { executePostLoginPipeline } from "@/utils/postLoginPipeline";
  *
  */
 const ConfirmationCodeScreen = () => {
-  const appVersion = APP_CONFIG.expo.version;
+  const appVersion = Constants.expoConfig?.version;
 
   const { t } = useTranslation();
   const { store, initUserCustomData, refreshESPRMUser, fetchNodesAndGroups } = useCDF();
