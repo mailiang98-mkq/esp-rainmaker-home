@@ -1,0 +1,26 @@
+default_platform(:android)
+
+platform :android do
+
+  lane :apk do
+    Dir.chdir("..") do
+      sh("./gradlew assembleRelease --parallel --build-cache")
+
+      artifacts_dir = "../artifacts/android"
+      apk_glob = "app/build/outputs/apk/release/*.apk"
+
+      sh("mkdir -p #{artifacts_dir}")
+
+      apks = Dir.glob(apk_glob)
+      if apks.empty?
+        sh("echo 'No APKs found at #{apk_glob}'")
+        sh("ls -la app/build/outputs/apk || true")
+        sh("ls -la app/build/outputs/apk/release || true")
+        UI.user_error!("APK not produced")
+      end
+
+      sh("cp #{apk_glob} #{artifacts_dir}/")
+    end
+  end
+
+end

@@ -1,0 +1,103 @@
+# GitLab CI/CD Pipeline for ESP RainMaker Home App
+
+stages:
+  - build
+  - test
+
+variables:
+  LANG: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+  NVM_DIR: "$HOME/.nvm"
+  ESP_AUTO_REPO_URL: "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.espressif.cn:6688/app-frameworks/esp-auto.git"
+  ESP_AUTO_BRANCH: "nova-home"
+
+
+before_script:
+  - export PATH="/usr/local/opt/python@3.10/libexec/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
+  - export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$PATH"
+
+  - if ! command -v node >/dev/null 2>&1; then echo "Node not in PATH — loading NVM"; export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"; export PATH="$HOME/.nvm/versions/node/v22.21.1/bin:$PATH"; fi
+
+  - if ! command -v node >/dev/null 2>&1; then echo "Node not available — aborting"; exit 1; fi
+
+  - node -v
+  - npm -v
+  - python3 --version
+  - which python3
+  - ruby -v
+  - echo "ANDROID_HOME=$ANDROID_HOME"
+  - echo "PATH=$PATH"
+
+
+###############################################################
+# ANDROID — MR builds APK
+###############################################################
+
+android_apk:
+  stage: build
+  tags: [mac-mobile-runner]
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+  script:
+    - npm ci
+
+    - if [ -z "${ANDROID_HOME:-}" ]; then echo "ANDROID_HOME is not set (configure it as a GitLab CI variable or runner env)"; exit 1; fi
+    - echo "sdk.dir=${ANDROID_HOME}" > android/local.properties
+    - cat android/local.properties
+
+    # Run Fastlane
+    - cd android/fastlane
+    - bundle install
+    - bundle exec fastlane android apk
+
+  artifacts:
+    paths:
+      - artifacts/android/
+    expire_in: 1 day
+
+###############################################################
+# ANDROID — Run tests
+###############################################################
+
+android_test:
+  stage: test
+  tags: [mac-mobile-qa]
+  needs:
+    - job: android_apk
+      artifacts: true
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+  script:
+    - set -euo pipefail
+    - APK_PATH="${CI_PROJECT_DIR}/artifacts/android/app-release.apk"
+    - if [ ! -f "${APK_PATH}" ]; then echo "APK not found at ${APK_PATH}"; ls -la artifacts/android || true; exit 1; fi
+    - echo "APK_PATH=${APK_PATH}"
+
+    # Checkout esp-auto tests
+    - rm -rf esp-auto
+    - git clone --depth 1 --branch "${ESP_AUTO_BRANCH}" "${ESP_AUTO_REPO_URL}" esp-auto
+    - cd esp-auto
+
+    # Run sanity tests
+    - mkdir -p artifacts/android
+    - cp "${APK_PATH}" artifacts/android/app-release.apk
+    - ls -la artifacts/android
+
+    - python3 --version
+    - python3 -m venv .venv
+    - . .venv/bin/activate
+    - python -m pip install -U pip
+    - if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+    - python -c "import pytest" >/dev/null 2>&1 || python -m pip install -U pytest
+    - MODEL="${MODEL:-SM-S711B}"
+    - CHIP="${CHIP:-esp32c3}"
+    - MARKER="${MARKER:-sanity}"
+
+    - |
+      python -m pytest \
+        --model "${MODEL}" \
+        --chip "${CHIP}" \
+        -m "${MARKER}" \
+        --tb=short \
+        --disable-warnings \
+        -v

@@ -1,0 +1,6 @@
+source "https://rubygems.org"
+
+# Android CI only: Fastlane is used to run the `android apk` lane.
+gem "fastlane"
+
+
