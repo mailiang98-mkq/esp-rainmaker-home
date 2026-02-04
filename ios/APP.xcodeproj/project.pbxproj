@@ -88,7 +88,6 @@
 		8728E48C2E99195700DF9B82 /* RequestHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestHandler.swift; sourceTree = "<group>"; };
 		8728E4902E9919D700DF9B82 /* ESPMatterExtensionEcoInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPMatterExtensionEcoInfo.swift; sourceTree = "<group>"; };
 		8728E4912E9919D700DF9B82 /* ESPMatterExtLocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPMatterExtLocalStorage.swift; sourceTree = "<group>"; };
-		8728E49B2E991C1300DF9B82 /* APP.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = APP.entitlements; sourceTree = "<group>"; };
 		94D7943BDE76E78EC62286AA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = APP/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = APP/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
@@ -97,6 +96,7 @@
 		F10B4D102E66E4A9000C0687 /* ESPDiscoveryModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPDiscoveryModule.m; sourceTree = "<group>"; };
 		F10B4D112E66E4A9000C0687 /* ESPDiscoveryModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPDiscoveryModule.swift; sourceTree = "<group>"; };
 		F122E49F2F2C8FFC00DD5981 /* APP.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = APP.xcconfig; sourceTree = "<group>"; };
+		F13E55C22F5ACC4400791ED0 /* APP.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = APP.entitlements; sourceTree = "<group>"; };
 		F15D5FEA2E559899005F3B57 /* ESPSoftAPModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPSoftAPModule.m; sourceTree = "<group>"; };
 		F15D5FEB2E559899005F3B57 /* ESPSoftAPModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPSoftAPModule.swift; sourceTree = "<group>"; };
 		F18184B52E4B1C33002C7B0A /* ESPAppUtilityModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPAppUtilityModule.m; sourceTree = "<group>"; };
@@ -143,7 +143,7 @@
 		13B07FAE1A68108700A75B9A /* APP */ = {
 			isa = PBXGroup;
 			children = (
-				8728E49B2E991C1300DF9B82 /* APP.entitlements */,
+				F13E55C22F5ACC4400791ED0 /* APP.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
@@ -504,9 +504,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-APP/Pods-APP-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-APP/Pods-APP-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -521,9 +525,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-APP/Pods-APP-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-APP/Pods-APP-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -723,10 +731,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -782,10 +787,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

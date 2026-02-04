@@ -45,6 +45,9 @@ android_apk:
     - echo "sdk.dir=${ANDROID_HOME}" > android/local.properties
     - cat android/local.properties
 
+    # Clear stale Metro/Babel transform cache to avoid stale module resolution
+    - rm -rf /tmp/metro-* "${TMPDIR:-/tmp}/metro-"* "${TMPDIR:-/tmp}/haste-map-"* 2>/dev/null || true
+
     # Run Fastlane
     - cd android/fastlane
     - bundle install

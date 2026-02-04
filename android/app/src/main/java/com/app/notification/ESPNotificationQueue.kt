@@ -84,6 +84,7 @@ object ESPNotificationQueue {
                         val jsonObject = JSONObject(value)
                         val nestedMap = mapFromJson(jsonObject)
                         updatedData[key] = nestedMap
+                        updatedData["event_data_payload_raw"] = value
                     } catch (e: Exception) {
                         updatedData[key] = value
                     }

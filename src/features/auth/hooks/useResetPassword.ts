@@ -1,0 +1,150 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useCDF } from "@shared/hooks/useCDF";
+import { useToast } from "@shared/hooks/useToast";
+import { useTranslation } from "react-i18next";
+import {
+  createCodeValidator,
+  createPasswordValidator,
+  createConfirmPasswordValidator,
+} from "@features/auth/utils/authHelper";
+
+export function useResetPassword() {
+  const { t } = useTranslation();
+  const { store } = useCDF();
+  const { email } = useLocalSearchParams();
+  const toast = useToast();
+
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isCodeValid, setIsCodeValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [isConfirmPasswordValid, setIsConfirmPasswordValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout>();
+
+  const codeValidator = createCodeValidator(t("auth.validation.invalidCode"));
+  const passwordValidator = createPasswordValidator(t);
+  const confirmPasswordValidator = useCallback(
+    createConfirmPasswordValidator(() => newPassword, t),
+    [newPassword, t]
+  );
+
+  const handleCodeChange = (value: string, isValid: boolean) => {
+    setCode(value);
+    setIsCodeValid(isValid);
+  };
+
+  const handlePasswordChange = (value: string, isValid: boolean) => {
+    const newPwd = value.trim();
+    setNewPassword(newPwd);
+    setIsPasswordValid(isValid);
+    if (confirmPassword.trim()) {
+      setIsConfirmPasswordValid(confirmPassword.trim() === newPwd);
+    }
+  };
+
+  const handleConfirmPasswordChange = (value: string, isValid: boolean) => {
+    setConfirmPassword(value.trim());
+    setIsConfirmPasswordValid(isValid);
+  };
+
+  useEffect(() => {
+    if (countdown > 0) {
+      timerRef.current = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [countdown]);
+
+  const handleResendCode = async () => {
+    if (countdown > 0) return;
+
+    setIsLoading(true);
+    try {
+      const res = await store?.userStore.auth?.forgotPassword({
+        username: email as string,
+      });
+      if (res) {
+        toast.showSuccess(t("auth.verification.heading"));
+        setCountdown(60);
+      }
+    } catch (error: unknown) {
+      const err = error as { description?: string };
+      toast.showError(
+        t("auth.errors.verificationCodeSendFailed"),
+        err.description || t("auth.errors.fallback")
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (
+      !isCodeValid ||
+      !code.trim() ||
+      !isPasswordValid ||
+      !newPassword.trim() ||
+      !isConfirmPasswordValid ||
+      !confirmPassword.trim()
+    ) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await store?.userStore.auth?.setNewPassword({
+        username: email as string,
+        newPassword: newPassword,
+        verificationCode: code,
+      });
+      if (res) {
+        toast.showSuccess(t("auth.forgotPassword.resetSuccess"));
+        const { router } = await import("expo-router");
+        router.dismissTo({
+          pathname: "/(auth)/Login",
+          params: { email },
+        });
+      }
+    } catch (error: unknown) {
+      const err = error as { description?: string };
+      toast.showError(
+        t("auth.errors.passwordResetFailed"),
+        err.description || t("auth.errors.fallback")
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    code,
+    newPassword,
+    confirmPassword,
+    isCodeValid,
+    isPasswordValid,
+    isConfirmPasswordValid,
+    isLoading,
+    countdown,
+    codeValidator,
+    passwordValidator,
+    confirmPasswordValidator,
+    handleCodeChange,
+    handlePasswordChange,
+    handleConfirmPasswordChange,
+    handleResendCode,
+    handleResetPassword,
+  };
+}

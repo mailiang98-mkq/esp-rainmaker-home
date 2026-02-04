@@ -2,41 +2,174 @@
 
 This document provides detailed information on how to configure and customize the ESP RainMaker Home App to suit your specific needs.
 
+> **Everything you need to customise for a white-label or custom-backend build can be set in the `.env` file.** No source files need to be edited for the configurations listed in the [Environment Variables](#environment-variables-env) section.
+
 ## Table of Contents
 
-- [SDK Configuration](#sdk-configuration)
+- [Environment Variables (.env)](#environment-variables-env)
+  - [App Identity & Branding](#app-identity--branding)
+  - [Version Information](#version-information)
+  - [SDK Configuration](#sdk-configuration)
+  - [Feature Flags](#feature-flags)
+  - [Third-Party Auth (OAuth)](#third-party-auth-oauth)
+  - [Deep Links](#deep-links)
+  - [Matter Configuration](#matter-configuration)
+  - [Legal & Website Links](#legal--website-links)
+  - [Scan Configuration](#scan-configuration)
 - [Device & Parameter Configuration](#device--parameter-configuration)
 - [Theme Customization](#theme-customization)
 - [Localization](#localization)
 - [Advanced Customization](#advanced-customization)
-- [API Configuration](#api-configuration)
+- [Source-Level Configuration](#source-level-configuration)
+  - [config/sdk.config.ts](#configsdkconfigts)
+  - [config/features.config.ts](#configfeaturesconfigts)
+  - [config/runtime.config.ts](#configruntimeconfigts)
+  - [config/agent.config.ts](#configagentconfigts)
+  - [src/integrations/index.ts — CDF Bootstrap](#srcintegrationsindexts--cdf-bootstrap)
 
-## SDK Configuration
+## Environment Variables (.env)
 
-The app can be customized through the SDK configuration files:
+The `.env` file is the **single place** to configure the app for a different backend, brand, or feature set. All values are injected into the Expo build via `app.config.ts` and synced to native Android / iOS build configs by the prebuild scripts.
 
-### [`rainmaker.config.ts`](../rainmaker.config.ts) - Main SDK Configuration
+### Setup
 
-```typescript
-export const SDKConfig = {
-  baseUrl: "https://api.rainmaker.espressif.com",
-  version: "v1",
-  authUrl: "https://3pauth.rainmaker.espressif.com",
-  clientId: "1h7ujqjs8140n17v0ahb4n51m2",
-  redirectUrl: "rainmaker://com.espressif.novahome/success",
-  customStorageAdapter: asyncStorageAdapter,
-  localDiscoveryAdapter: EspLocalDiscoveryAdapter,
-  localControlAdapter: ESPLocalControlAdapter,
-  provisionAdapter: provisionAdapter,
-  notificationAdapter: ESPNotificationAdapter,
-  oauthAdapter: espOauthAdapter,
-  appUtilityAdapter: ESPAppUtilityAdapter,
-};
-
-export const CDFConfig = {
-  autoSync: true, // Enable automatic data synchronization
-};
+```bash
+cp .env.example .env
+# Edit .env with your values
+npm run prebuild   # syncs values to android/ and ios/ native configs
 ```
+
+Re-run `npm run prebuild` (or just `npm run android` / `npm run ios`) any time you change `.env`.
+
+---
+
+### App Identity & Branding
+
+| Variable                     | Description                                         | Default                        |
+| ---------------------------- | --------------------------------------------------- | ------------------------------ |
+| `APP_NAME`                   | Display name shown on the device home screen        | `ESP RainMaker Home`           |
+| `APP_SLUG`                   | Expo slug (used for OTA and deep links)             | `esp-rainmaker-home`           |
+| `APP_SCHEMA`                 | URL scheme for deep links (`<schema>://`)           | `rainmaker`                    |
+| `IOS_APP_APPLICATION_ID`     | iOS bundle identifier                               | `com.espressif.nova`           |
+| `ANDROID_APP_APPLICATION_ID` | Android application ID                              | `com.espressif.novahome`       |
+| `IOS_APP_GROUP_ID`           | iOS App Group ID (used for notification extensions) | `group.com.espressif.novahome` |
+
+---
+
+### Version Information
+
+| Variable               | Description                       |
+| ---------------------- | --------------------------------- |
+| `APP_VERSION`          | Semantic version shown in the app |
+| `ANDROID_VERSION_CODE` | Android integer version code      |
+
+---
+
+### SDK Configuration
+
+The active SDK and its API endpoints are fully controlled from `.env`.
+
+| Variable      | Description                                         | Default                               |
+| ------------- | --------------------------------------------------- | ------------------------------------- |
+| `ACTIVE_SDK`  | SDK to use: `rainmaker-base-sdk` or `rmng-base-sdk` | `rainmaker-base-sdk`                  |
+| `BASE_URL`    | ESP RainMaker API base URL                          | `https://api.rainmaker.espressif.com` |
+| `API_VERSION` | API version path segment                            | `v1`                                  |
+
+These values are read by `app.config.ts` and passed to the SDK adaptor via `config/sdk.config.ts` at startup — no source file edits required.
+
+---
+
+### Feature Flags
+
+Feature flags use a **two-level gating** system:
+
+- **Level 2 — SDK capability** (hard gate): if the active SDK does not support a feature, it is disabled regardless of `.env`.
+- **Level 1 — `.env` switch** (soft gate): can only _disable_ a feature that the SDK supports. Set the variable to `false` to turn it off.
+
+| Variable                  | Feature                            | Default |
+| ------------------------- | ---------------------------------- | ------- |
+| `ENABLE_SCENES`           | Scenes management                  | `true`  |
+| `ENABLE_SCHEDULES`        | Schedules management               | `true`  |
+| `ENABLE_AUTOMATIONS`      | Automations                        | `true`  |
+| `ENABLE_LOCAL_CONTROL`    | Local device control               | `true`  |
+| `ENABLE_NOTIFICATIONS`    | Push notifications                 | `true`  |
+| `ENABLE_GROUP_SHARING`    | Home / group sharing               | `true`  |
+| `ENABLE_OTA`              | Over-the-air firmware updates      | `true`  |
+| `ENABLE_AI_AGENT`         | AI Agent chat feature              | `true`  |
+| `ENABLE_THIRD_PARTY_AUTH` | OAuth (Google / Apple sign-in)     | `true`  |
+| `ENABLE_VOICE_ASSISTANTS` | Voice assistant integrations       | `true`  |
+| `ENABLE_CDF_AUTOSYNC`     | Automatic CDF data synchronization | `true`  |
+
+> **Note:** `ENABLE_NOTIFICATIONS` only controls whether the notification feature is active in the app. For Android push notifications to be delivered, you must also provide a valid [`android/app/google-services.json`](#android-push-notifications-google-servicesjson).
+
+---
+
+### Third-Party Auth (OAuth)
+
+| Variable                             | Description                               | Default                                      |
+| ------------------------------------ | ----------------------------------------- | -------------------------------------------- |
+| `THIRD_PARTY_AUTH_CLIENT_ID`         | Cognito / OAuth client ID                 | `1h7ujqjs8140n17v0ahb4n51m2`                 |
+| `THIRD_PARTY_AUTH_AUTH_URL`          | OAuth authorization endpoint              | `https://3pauth.rainmaker.espressif.com`     |
+| `THIRD_PARTY_AUTH_REDIRECT_SCHEME`   | URL scheme for OAuth redirect             | `rainmaker`                                  |
+| `THIRD_PARTY_AUTH_REDIRECT_HOST`     | Host component of OAuth redirect URL      | `com.espressif.novahome`                     |
+| `THIRD_PARTY_AUTH_REDIRECT_URL`      | Full OAuth redirect URL                   | `rainmaker://com.espressif.novahome/success` |
+| `THIRD_PARTY_AUTH_ENABLED_PROVIDERS` | Comma-separated list of enabled providers | `Google,SignInWithApple`                     |
+
+---
+
+### Deep Links
+
+| Variable                       | Description                         | Default                |
+| ------------------------------ | ----------------------------------- | ---------------------- |
+| `AGENTS_DEEP_LINK_SCHEME`      | URL scheme for AI Agent deep links  | `rainmaker`            |
+| `AGENTS_DEEP_LINK_HOST`        | Host for AI Agent deep links        | `agents.espressif.com` |
+| `AGENTS_DEEP_LINK_PATH_PREFIX` | Path prefix for AI Agent deep links | `/try/agents`          |
+
+---
+
+### Matter Configuration
+
+| Variable                | Description                                | Default          |
+| ----------------------- | ------------------------------------------ | ---------------- |
+| `MATTER_VENDOR_ID`      | Matter vendor ID for commissioning         | `0x131B`         |
+| `MATTER_ECOSYSTEM_NAME` | Ecosystem name shown during Matter pairing | `Rainmaker Home` |
+
+---
+
+### Legal & Website Links
+
+These URLs appear in the app's settings / about screen.
+
+| Variable              | Description         | Default                                                    |
+| --------------------- | ------------------- | ---------------------------------------------------------- |
+| `WEBSITE_LINK`        | Product website URL | `https://rainmaker.espressif.com`                          |
+| `TERMS_OF_USE_LINK`   | Terms of use URL    | `https://rainmaker.espressif.com/docs/terms-of-use.html`   |
+| `PRIVACY_POLICY_LINK` | Privacy policy URL  | `https://rainmaker.espressif.com/docs/privacy-policy.html` |
+
+---
+
+### Scan Configuration
+
+| Variable                    | Description                                  | Default |
+| --------------------------- | -------------------------------------------- | ------- |
+| `ENABLE_SCAN_CONFIGURATION` | Enable QR-code-based runtime config override | `true`  |
+
+When enabled, tapping the app logo 5 times on the login screen opens a QR scanner that can override `BASE_URL`, `API_VERSION`, and OAuth settings at runtime without a new build.
+
+---
+
+### Android Push Notifications (`google-services.json`)
+
+Android push notifications require a valid **Firebase** configuration file in addition to `ENABLE_NOTIFICATIONS=true`.
+
+The repository ships a placeholder at `android/app/google-services.json.template`. You must replace `android/app/google-services.json` with your own project's file:
+
+1. Go to the [Firebase Console](https://console.firebase.google.com/) and open (or create) your project.
+2. Navigate to **Project Settings → Your apps → Android app**.
+3. Download `google-services.json`.
+4. Copy it to `android/app/google-services.json`, replacing the placeholder.
+
+> ⚠️ **Without a valid `google-services.json`, Android push notifications will not work.** The app will build and run, but no notifications will be delivered.
 
 ## Device & Parameter Configuration
 
@@ -115,7 +248,6 @@ export const PARAM_CONTROLS = [
     control: ToggleSwitch,
     dataTypes: DATA_TYPE_BOOL,
     hide: true,
-    roomLabel: "Power",
   },
   {
     name: "Brightness",
@@ -123,7 +255,6 @@ export const PARAM_CONTROLS = [
     control: BrightnessSlider,
     dataTypes: DATA_TYPE_INT,
     paramType: ESPRM_BRIGHTNESS_PARAM_TYPE,
-    roomLabel: "Brightness",
   },
   {
     name: "CCT",
@@ -372,163 +503,92 @@ Add new parameter control types in `components/ParamControls/` to support custom
 
 #### App Metadata
 
-Modify app name and bundle identifiers in [`app.json`](../app.json):
+App name, slug, version, and bundle identifiers are all controlled via `.env` — no need to edit `app.config.ts` directly. See the [App Identity & Branding](#app-identity--branding) and [Version Information](#version-information) tables above.
 
-```json
-{
-  "expo": {
-    "name": "Your Custom App Name",
-    "slug": "your-custom-slug",
-    "version": "1.0.0",
-    "bundleIdentifier": "com.yourcompany.yourapp"
-    // ... other configurations
-  }
-}
-```
+## Source-Level Configuration
 
-## API Configuration
+The files below sit **outside** `.env` and require source edits for structural changes (e.g. adding a new SDK, changing AI Agent endpoints, or wiring a new feature flag). Understanding these caveats prevents hard-to-debug runtime issues.
 
-### Custom API Endpoint
+---
 
-Customize the ESP RainMaker API endpoint and authentication settings in [`rainmaker.config.ts`](../rainmaker.config.ts):
+### `config/sdk.config.ts`
 
-```typescript
-export const SDKConfig = {
-  baseUrl: "https://your-custom-api.com", // Custom API endpoint
-  version: "v1",
-  authUrl: "https://your-custom-auth.com", // Custom OAuth endpoint
-  clientId: "your-client-id", // OAuth client ID
-  redirectUrl: "yourapp://com.yourcompany.yourapp/success", // OAuth redirect URL
-  customStorageAdapter: asyncStorageAdapter,
-  localDiscoveryAdapter: EspLocalDiscoveryAdapter,
-  localControlAdapter: ESPLocalControlAdapter,
-  provisionAdapter: provisionAdapter,
-  notificationAdapter: ESPNotificationAdapter,
-  oauthAdapter: espOauthAdapter,
-  appUtilityAdapter: ESPAppUtilityAdapter,
-};
-```
+This is the **SDK wiring layer** — it reads `.env` values from `app.config.ts` extras, merges any runtime config (QR scan), and assembles the config objects passed to each SDK adaptor.
 
-### Environment-Specific Configuration
+**Important caveats:**
 
-You can create environment-specific configurations:
+- **`ActiveSDK`** is resolved from `ACTIVE_SDK` in `.env`. Changing the active SDK requires a rebuild — it is baked in at build time.
+- **`getRMSDKConfig()`** merges values in priority order: _runtime config (QR scan) → `.env` → hardcoded fallback_. If a QR-scanned config is present it always wins over `.env` for `baseUrl`, `version`, `authUrl`, `clientId`, and `redirectUrl`.
+- **`SDK_FEATURE_MAP`** is the Level 2 hard gate for feature flags. If you integrate a new SDK adaptor, you **must** add its entry here listing which features it supports. Features absent from the map default to disabled.
+- **`CDFConfig.autoSync`** is driven by `ENABLE_CDF_AUTOSYNC` in `.env`. Setting it to `false` disables automatic CDF data synchronisation — device state will only refresh on explicit user action.
+- **`getMatterSDKConfig()`** extends the RM SDK config with the Matter vendor ID and Matter native adaptor. It is only called for `rainmaker-base-sdk`.
 
-```typescript
-// Development configuration
-const developmentConfig = {
-  baseUrl: "api.staging.rainmaker.espressif.com",
-};
+---
 
-// Production configuration
-const productionConfig = {
-  baseUrl: "https://api.rainmaker.espressif.com",
-};
+### `config/features.config.ts`
 
-// Use appropriate configuration based on environment
-export const SDKConfig = __DEV__ ? developmentConfig : productionConfig;
-```
+This file resolves the final feature flag state used throughout the app.
 
-### Custom Adapters
+**Important caveats:**
 
-You can implement custom adapters for specific functionality:
+- **Always call `getFeatures()` as a function** — it is intentionally not a `const` export. It reads `ActiveSDK` at call time, making it safe if the SDK is switched at runtime. Caching its return value across a SDK switch will produce stale flags.
+- **`getEnabledOAuthProviders()`** returns an empty array when `thirdPartyAuth` is disabled at either gate level. The Login screen calls this to decide which OAuth buttons to render.
+- You cannot enable a feature via `.env` that the SDK does not support — Level 2 (`SDK_FEATURE_MAP`) is always the hard ceiling.
 
-#### Storage Adapter
+---
 
-```typescript
-// Actual storage adapter structure from ESPAsyncStorage.ts
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ESPRMStorageAdapterInterface } from "@espressif/rainmaker-base-sdk";
+### `config/runtime.config.ts`
 
-export const asyncStorageAdapter: ESPRMStorageAdapterInterface = {
-  setItem: async (name: string, value: string) => {
-    try {
-      await AsyncStorage.setItem(name, value);
-    } catch (error) {
-      throw error;
-    }
-  },
-  getItem: async (name: string): Promise<string | null> => {
-    try {
-      const response = await AsyncStorage.getItem(name);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-  removeItem: async (name: string) => {
-    try {
-      await AsyncStorage.removeItem(name);
-    } catch (error) {
-      throw error;
-    }
-  },
-  clear: async () => {
-    try {
-      await AsyncStorage.clear();
-    } catch (error) {
-      throw error;
-    }
-  },
-};
-```
+Manages the **QR-code-based runtime config** that can override `.env` SDK settings without a rebuild.
 
-#### Notification Adapter
+**Important caveats:**
 
-```typescript
-// Actual notification adapter structure from ESPNotificationAdapter.ts
-export const ESPNotificationAdapter = {
-  currentListener: null as EmitterSubscription | null,
+- `runtimeConfigManager.loadFromStorage()` **must be called once at app startup** (it is called inside `initializeApp()` in `src/integrations/index.ts`). It must complete before any SDK config is read.
+- After scanning a new QR config, the overrides take effect on the **next app launch** — the current session continues using the previously loaded config.
+- To revert to `.env` defaults, call `runtimeConfigManager.reset()` and restart the app. This clears the persisted storage keys defined in `config/runtime.keys.config.ts`.
+- The scanned payload must match the `ScannedConfigPayload` interface (`sdk` + `config` fields). An invalid payload is silently ignored.
 
-  addNotificationListener: async (
-    callback: (data: Record<string, any>) => void
-  ): Promise<() => void> => {
-    try {
-      if (ESPNotificationAdapter.currentListener) {
-        ESPNotificationAdapter.removeNotificationListener();
-      }
+---
 
-      // Listen for incoming notifications and handle them
-      const notificationListener = DeviceEventEmitter.addListener(
-        "ESPNotificationModule",
-        (data: Record<string, any>) => {
-          callback(data); // Invoke the callback with the received data
-        }
-      );
+### `config/agent.config.ts`
 
-      // Save listener reference for removal
-      ESPNotificationAdapter.currentListener = notificationListener;
+Contains the **AI Agent API URLs** and default identifiers.
 
-      // Return a cleanup function to remove the notification listener
-      return () => {
-        ESPNotificationAdapter.removeNotificationListener();
-      };
-    } catch (error) {
-      return () => {}; // Return a no-op cleanup function in case of an error
-    }
-  },
+**Important caveat:**
 
-  removeNotificationListener: (): void => {
-    try {
-      if (ESPNotificationAdapter.currentListener) {
-        ESPNotificationAdapter.currentListener.remove();
-        ESPNotificationAdapter.currentListener = null;
-      }
-    } catch (error) {
-      throw error;
-    }
-  },
+- These values are **hardcoded in source** and are not driven by `.env`. If you need to point the AI Agent at a different backend (e.g. a self-hosted deployment), edit this file directly:
 
-  getNotificationPlatform: async (): Promise<string> => {
-    try {
-      const platform = await ESPNotificationModule.getNotificationPlatform();
-      return platform;
-    } catch (error) {
-      console.error("Error getting notification platform:", error);
-      throw error;
-    }
-  },
-};
-```
+  ```typescript
+  export const AGENTS_API_BASE_URL = "https://api.agents.espressif.com";
+  export const AGENTS_WEBSOCKET_BASE_URL = "wss://api.agents.espressif.com";
+  export const DEFAULT_AGENT_ID = "esp_rainmaker_control";
+  export const RAINMAKER_MCP_CONNECTOR_URL =
+    "https://mcp.rainmaker.espressif.com/api/mcp";
+  ```
+
+---
+
+### `src/integrations/index.ts` — CDF Bootstrap
+
+This is the **app-level initialisation entry point**. It wires all SDK adaptors into the CDF runtime and must not be bypassed.
+
+**Important caveats:**
+
+- **Adding a new SDK adaptor** requires two steps:
+  1. Instantiate and return it from `AdaptorFactory.createAll()`.
+  2. Add its feature capabilities to `SDK_FEATURE_MAP` in `config/sdk.config.ts`.
+     Skipping step 2 means all features for the new SDK will be hard-disabled.
+
+- **`CDFBootstrap` is a singleton.** Calling `initialize()` multiple times is safe (it is a no-op after the first successful call). Do not call `reset()` in production — it clears all registered adaptors and requires a full re-initialisation.
+
+- **Execution order inside `initializeApp()` is fixed:**
+  1. Load persisted runtime config from storage.
+  2. Boot CDF and register all SDK adaptors.
+  3. Configure the Matter SDK as a standalone side-effect (only for `rainmaker-base-sdk`).
+
+  Do not reorder these steps — the SDK config read in step 2 depends on the runtime config loaded in step 1.
+
+- **Matter SDK** is configured outside CDF as a standalone side-effect. It is only initialised when `ActiveSDK === "rainmaker-base-sdk"`. Adding Matter support to a new SDK requires a corresponding block here.
 
 ---
 

@@ -4,11 +4,59 @@ This document provides solutions to common issues you might encounter while deve
 
 ## Table of Contents
 
+- [Environment Verification](#environment-verification)
 - [General Issues](#general-issues)
 - [iOS-Specific Issues](#ios-specific-issues)
 - [Android-Specific Issues](#android-specific-issues)
 - [Development Build Issues](#development-build-issues)
 - [Network & Connectivity Issues](#network--connectivity-issues)
+
+## Environment Verification
+
+Before diving into specific issues, verify your development environment is correctly set up.
+
+### Using Expo Doctor
+
+```bash
+# Run from the project root
+npx expo-doctor
+```
+
+This checks:
+- Correct versions of Expo SDK dependencies
+- Mismatched or incompatible package versions
+- Missing or misconfigured native modules
+- `app.config.ts` / `app.json` schema issues
+
+### Using React Native Doctor
+
+```bash
+# Run from the project root
+npx react-native doctor
+```
+
+This checks:
+- Node.js version compatibility
+- JDK installation (Android)
+- Android SDK and `ANDROID_HOME` environment variable
+- Xcode and CocoaPods installation (iOS/macOS)
+- Ruby version (required for CocoaPods)
+- Connected devices and emulators
+
+### Common Environment Fixes
+
+If either doctor reports issues:
+
+```bash
+# Fix Expo dependency versions automatically
+npx expo install --fix
+
+# Re-run doctor to confirm all issues are resolved
+npx expo-doctor
+npx react-native doctor
+```
+
+---
 
 ## General Issues
 

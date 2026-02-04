@@ -290,7 +290,10 @@
       "addDeviceDescription": "点击下方或右上角的按钮。",
       "homeBannerTitle": "欢迎使用",
       "addYourFirstDeviceBannerTitle": "添加您的第一个设备！",
-      "addYourFirstDeviceBannerDescription": "点击下方或右上角的按钮。"
+      "addYourFirstDeviceBannerDescription": "点击下方或右上角的按钮。",
+      "migrationPromptTitle": "Migration update",
+      "migrationPromptMessage": "If some devices aren’t visible, please re-add them under your preferred home.",
+      "migrationPromptUnderstood": "Got it"
     },
     "rooms": {
       "title": "房间",
@@ -807,7 +810,6 @@
       "noEventSelectedDescription": "添加事件以创建您的自动化。点击 + 按钮开始。",
       "noActionsSelected": "未选择操作",
       "noActionsSelectedDescription": "添加设备操作以 {{action}} 您的自动化。点击 + 按钮开始。",
-      "nameAlreadyExists": "已存在此名称的自动化",
       "automationUpdated": "自动化已更新",
       "automationUpdatedMessage": "自动化已成功更新",
       "automationDeleted": "自动化已删除",

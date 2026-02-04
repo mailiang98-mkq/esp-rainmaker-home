@@ -1,0 +1,108 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState } from "react";
+import { useCDF } from "@shared/hooks/useCDF";
+import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
+import { useToast } from "@shared/hooks/useToast";
+import {
+  createEmailValidator,
+  createPasswordValidator,
+  createConfirmPasswordValidator,
+} from "@features/auth/utils/authHelper";
+
+export function useSignup() {
+  const { store } = useCDF();
+  const { t } = useTranslation();
+  const router = useRouter();
+  const toast = useToast();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [isConfirmPasswordValid, setIsConfirmPasswordValid] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const emailValidator = createEmailValidator(t);
+  const passwordValidator = createPasswordValidator(t);
+  const confirmPasswordValidator = createConfirmPasswordValidator(
+    () => password,
+    t
+  );
+
+  const handleEmailChange = (value: string, isValid: boolean) => {
+    setEmail(value.trim());
+    setIsEmailValid(isValid);
+  };
+
+  const handlePasswordChange = (value: string, isValid: boolean) => {
+    setPassword(value.trim());
+    setIsPasswordValid(isValid);
+  };
+
+  const handleConfirmPasswordChange = (value: string, isValid: boolean) => {
+    setConfirmPassword(value.trim());
+    setIsConfirmPasswordValid(isValid);
+  };
+
+  const signup = async () => {
+    if (
+      !isEmailValid ||
+      !isPasswordValid ||
+      !isConfirmPasswordValid ||
+      !consentChecked
+    ) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await store?.userStore.auth?.getSignUpCode({
+        username: email,
+        password: password,
+      });
+      if (res) {
+        toast.showSuccess(t("auth.verification.heading"));
+        router.push({
+          pathname: "/(auth)/ConfirmationCode",
+          params: { email, password },
+        });
+      }
+    } catch (error: unknown) {
+      const err = error as { description?: string };
+      console.error("Failed to send sign up code:", error);
+      toast.showError(
+        t("auth.errors.verificationCodeSendFailed"),
+        err.description || t("auth.errors.fallback")
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    email,
+    password,
+    confirmPassword,
+    isEmailValid,
+    isPasswordValid,
+    isConfirmPasswordValid,
+    consentChecked,
+    setConsentChecked,
+    isLoading,
+    emailValidator,
+    passwordValidator,
+    confirmPasswordValidator,
+    handleEmailChange,
+    handlePasswordChange,
+    handleConfirmPasswordChange,
+    signup,
+  };
+}

@@ -14,14 +14,29 @@ public class ESPNotificationModule: RCTEventEmitter {
   private var deviceTokenKey: String {
     return "\(Bundle.bundleIdentifier()).devicetoken"
   }
-  private var sendEvent = false
+  
+  private var listenerEnabled = true
   private let eventKey = "ESPNotificationModule"
   
-  // Singleton instance - made non-optional with lazy initialization
-  @objc public static let shared = ESPNotificationModule()
+  /// AppDelegate uses this for token storage; push delivery must use the bridge module (see `bridgeModuleInstance`).
+  private static var isSharedSingletonInit = false
+  private static weak var bridgeModuleInstance: ESPNotificationModule?
   
-  private override init() {
-    super.init()
+  @objc public static let shared: ESPNotificationModule = {
+    // Use `ESPNotificationModule`, not `Self` — covariant `Self` is not allowed in stored property initializers.
+    ESPNotificationModule.isSharedSingletonInit = true
+    let instance = ESPNotificationModule()
+    ESPNotificationModule.isSharedSingletonInit = false
+    return instance
+  }()
+  
+  /// Bridge-registered module instance (has `RCTEventEmitter` plumbing). The `shared` singleton is not connected to the bridge.
+  /// Uses `disabledObservation` like `ESPDiscoveryModule` so `sendEvent` reaches JS when the app listens via `DeviceEventEmitter` only (no native `addListener` call).
+  public override init() {
+    super.init(disabledObservation: ())
+    if !Self.isSharedSingletonInit {
+      Self.bridgeModuleInstance = self
+    }
   }
   
   override public static func moduleName() -> String {
@@ -74,33 +89,98 @@ public class ESPNotificationModule: RCTEventEmitter {
   /// Add the notification listener.
   @objc(addNotificationListener)
   func addNotificationListener() {
-    // Enable sending of events related to push notifications
-    self.sendEvent = true
+    listenerEnabled = true
   }
   
   /// Removes the notification listener.
   @objc(removeNotificationListener)
   func removeNotificationListener() {
-    // Disable sending of events related to push notifications
-    self.sendEvent = false
+    listenerEnabled = false
   }
   
+  // MARK: - AppDelegate entry points (forward to bridge module)
   
-  // Method to handle silent notifications
+  /// AppDelegate calls this on `shared`. Events must be emitted from the bridge `RCTEventEmitter` instance or JS never receives them.
   @objc(handleSilentNotification:)
   func handleSilentNotification(_ userInfo: [String: Any]) {
-    // Handle silent notification logic here
-    if sendEvent {
-      sendEvent(withName: self.eventKey, body: userInfo)
-    }
+    Self.bridgeModuleInstance?.emitNotificationToJSIfListening(userInfo)
   }
   
-  // Method to handle push notifications
   @objc(handlePushNotification:)
   func handlePushNotification(_ userInfo: [String: Any]) {
-    // Handle push notification logic here
-    if sendEvent {
-      sendEvent(withName: self.eventKey, body: userInfo)
+    Self.bridgeModuleInstance?.emitNotificationToJSIfListening(userInfo)
+  }
+  
+  private func emitNotificationToJSIfListening(_ userInfo: [String: Any]) {
+    guard listenerEnabled else { return }
+    sendEvent(withName: self.eventKey, body: normalizeNotificationUserInfoForBridge(userInfo))
+  }
+  
+  /// Matches Android `ESPNotificationQueue.sendToJS`: parse JSON string `event_data_payload` and set `event_data_payload_raw`.
+  private func normalizeEventDataPayloadInUserInfo(_ userInfo: [String: Any]) -> [String: Any] {
+    var updated: [String: Any] = [:]
+    for (key, value) in userInfo {
+      guard key == "event_data_payload" else {
+        updated[key] = value
+        continue
+      }
+      let (payload, raw) = Self.eventDataPayloadAndRaw(from: value)
+      updated["event_data_payload"] = payload
+      if let raw = raw {
+        updated["event_data_payload_raw"] = raw
+      }
     }
+    return updated
+  }
+  
+  /// Parses `event_data_payload` (string JSON vs dict) and optional canonical JSON string for `event_data_payload_raw`.
+  private static func eventDataPayloadAndRaw(from value: Any) -> (payload: Any, raw: String?) {
+    if let jsonString = value as? String {
+      if let data = jsonString.data(using: .utf8),
+         let obj = try? JSONSerialization.jsonObject(with: data),
+         let dict = obj as? [String: Any] {
+        return (dict, jsonString)
+      }
+      return (value, nil)
+    }
+    if let dict = value as? [String: Any] {
+      return (dict, jsonUTF8String(from: dict))
+    }
+    if let nsDict = value as? NSDictionary {
+      return (nsDict, jsonUTF8String(from: nsDict))
+    }
+    return (value, nil)
+  }
+  
+  private static func jsonUTF8String(from object: Any) -> String? {
+    guard JSONSerialization.isValidJSONObject(object),
+          let data = try? JSONSerialization.data(withJSONObject: object),
+          let raw = String(data: data, encoding: .utf8) else { return nil }
+    return raw
+  }
+  
+  /// Keeps APNS `data.*` nested so Rainmaker SDK `transformNotificationData` (iOS paths) matches; aligns `event_data_payload` like Android.
+  private func normalizeNotificationUserInfoForBridge(_ userInfo: [String: Any]) -> [String: Any] {
+    guard let dataVal = userInfo["data"] else {
+      return normalizeEventDataPayloadInUserInfo(userInfo)
+    }
+    var out = userInfo
+    if let inner = dataVal as? [String: Any] {
+      out["data"] = normalizeEventDataPayloadInUserInfo(inner)
+    } else if let inner = dataVal as? NSDictionary {
+      out["data"] = normalizeEventDataPayloadInUserInfo(Self.stringKeyedDictionary(from: inner))
+    }
+    return out
+  }
+  
+  /// Converts `NSDictionary` from ObjC to `[String: Any]` for merging.
+  private static func stringKeyedDictionary(from ns: NSDictionary) -> [String: Any] {
+    var map: [String: Any] = [:]
+    ns.enumerateKeysAndObjects { key, value, _ in
+      if let k = key as? String {
+        map[k] = value
+      }
+    }
+    return map
   }
 }

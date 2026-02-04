@@ -1,0 +1,202 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useCallback, useState, useRef, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
+import { useObserver } from "mobx-react-lite";
+import { useCDF } from "@shared/hooks/useCDF";
+import { useToast } from "@shared/hooks/useToast";
+import { useFocusEffect } from "@react-navigation/native";
+import { useSchedule } from "@context/schedules.context";
+import type { ESPCDFSchedule } from "@store";
+
+/**
+ * Hook for Schedules list screen
+ * Manages schedule list fetching and actions
+ */
+export const useSchedulesList = () => {
+  const toast = useToast();
+  const router = useRouter();
+  const { t } = useTranslation();
+  const { store } = useCDF();
+  const { resetState } = useSchedule();
+  const { scheduleStore } = store;
+
+  // Refs to store latest values for stable callbacks
+  // MobX stores are stable, so we can use them directly
+  // Only toast and t need refs since they might change
+  const toastRef = useRef(toast);
+  const tRef = useRef(t);
+
+  // Initialize refs immediately
+  toastRef.current = toast;
+  tRef.current = t;
+
+  const [isLoading, setIsLoading] = useState(true);
+  const isFetchingRef = useRef(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [scheduleLoadingStates, setScheduleLoadingStates] = useState<
+    Record<string, string>
+  >({});
+  const [isScheduleNameDialogVisible, setIsScheduleNameDialogVisible] =
+    useState(false);
+  const [scheduleName, setScheduleName] = useState("");
+
+  /**
+   * Fetches latest schedule data from ESPCDFGroup instance
+   * Uses group.getSchedules() which reads from the group's nodeDetails to get latest data.
+   * The operation uses the ESPCDFGroup instance directly, ensuring we always get the latest data.
+   * Follows the same pattern as getScenes - gets data directly from the ESPCDFGroup instance.
+   * Stable callback (no deps) to avoid useFocusEffect recursion; reads store at call time.
+   * MobX stores are stable references, so we can access them via closure.
+   */
+  const fetchSchedules = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    try {
+      setIsLoading(true);
+      // Clear existing schedules before fetching new ones
+      scheduleStore.clear();
+
+      // Get current home group - this is an ESPCDFGroup instance
+      const currentHome = store.getCurrentHome();
+      if (currentHome && currentHome.operations.getSchedules) {
+        await currentHome.getSchedules();
+      }
+    } catch (error) {
+      console.error("Error fetching schedules:", error);
+      // Use refs for toast and t since they might change
+      // Safety check to ensure refs are initialized
+      if (toastRef.current && tRef.current) {
+        toastRef.current.showError(tRef.current("schedule.errors.fallback"));
+      }
+    } finally {
+      isFetchingRef.current = false;
+      setIsLoading(false);
+    }
+  }, []); // Empty deps - MobX stores are stable and accessed via closure
+
+  // Update refs when values change (after fetchSchedules is defined)
+  useEffect(() => {
+    toastRef.current = toast;
+    tRef.current = t;
+  }, [toast, t]);
+
+  /**
+   * Effect: Updates schedules when screen comes into focus.
+   * Empty deps so this runs only on focus change, not when fetchSchedules identity changes (avoids recursion).
+   */
+  useFocusEffect(
+    useCallback(() => {
+      fetchSchedules();
+    }, []), // Empty deps - only run on focus change
+  );
+
+  // Handle add schedule
+  const handleAddSchedule = () => {
+    resetState();
+    setScheduleName("");
+    setIsScheduleNameDialogVisible(true);
+  };
+
+  // Handle schedule name confirmation
+  const handleScheduleNameConfirm = (name: string) => {
+    if (name.trim()) {
+      setIsScheduleNameDialogVisible(false);
+      router.push({
+        pathname: "/(schedule)/CreateSchedule",
+        params: {
+          scheduleName: name.trim(),
+        },
+      } as any);
+    }
+  };
+
+  // Handle schedule action (enable/disable/edit/delete)
+  const handleScheduleAction = async (
+    schedule: ESPCDFSchedule,
+    action: string,
+  ) => {
+    if (!schedule) return;
+    setScheduleLoadingStates((prev) => ({ ...prev, [schedule.id]: action }));
+
+    try {
+      switch (action) {
+        case "enable": {
+          await schedule.enable();
+          toastRef.current?.showSuccess(
+            tRef.current("schedule.schedules.scheduleEnabledSuccessfully"),
+          );
+          break;
+        }
+        case "disable": {
+          await schedule.disable();
+          toastRef.current?.showError(
+            tRef.current("schedule.schedules.someDevicesFailedUpdate"),
+          );
+          break;
+        }
+        case "edit": {
+          router.push({
+            pathname: "/(schedule)/CreateSchedule",
+            params: {
+              scheduleName: schedule.name,
+              scheduleId: schedule.id,
+            },
+          } as any);
+          break;
+        }
+        case "delete": {
+          await schedule.remove();
+          toastRef.current?.showSuccess(
+            tRef.current("schedule.schedules.scheduleDeletedSuccessfully"),
+          );
+          break;
+        }
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error(`Error performing ${action} on schedule:`, error);
+      toastRef.current?.showError(tRef.current("schedule.errors.fallback"));
+    } finally {
+      setTimeout(() => {
+        setScheduleLoadingStates((prev) => {
+          const newState = { ...prev };
+          delete newState[schedule.id];
+          return newState;
+        });
+      }, 1000);
+    }
+  };
+
+  /**
+   * Get schedules list from store
+   * Use useObserver to track MobX observable changes
+   * When schedules are added/updated in the store via getSchedules(), this will automatically update
+   */
+  const schedulesList = useObserver(() => {
+    // Access scheduleStore.schedulesList inside useObserver to track MobX observable changes
+    return scheduleStore.schedulesList;
+  });
+
+  return {
+    schedulesList,
+    isLoading,
+    isEditing,
+    scheduleLoadingStates,
+    isScheduleNameDialogVisible,
+    scheduleName,
+    fetchSchedules,
+    setIsEditing,
+    handleAddSchedule,
+    handleScheduleNameConfirm,
+    handleScheduleAction,
+    setIsScheduleNameDialogVisible,
+    setScheduleName,
+  };
+};

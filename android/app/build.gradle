@@ -170,6 +170,10 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            crunchPngs true
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -227,7 +231,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-common-ktx:21.0.0'
 
     // Google Play Services Matter APIs
-//    implementation 'com.google.android.gms:play-services-base:18.8.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
 
     implementation 'commons-codec:commons-codec:1.19.0'
@@ -238,7 +241,7 @@ dependencies {
     // Protobuf dependency for Matter TLV and certificate handling
     implementation 'com.google.protobuf:protobuf-javalite:4.32.1'
 
-    // Google Play Services Matter APIs for commissioning UI (exactly like ESP RainMaker)
+    // Google Play Services Matter APIs for commissioning UI
     implementation 'com.google.android.gms:play-services-base:18.8.0'
     implementation 'com.google.android.gms:play-services-home:16.0.0'
 
