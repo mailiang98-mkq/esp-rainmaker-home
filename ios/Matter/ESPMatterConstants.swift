@@ -6,10 +6,36 @@
 
 import Foundation
 
+// MARK: - Configuration Helper Extension
+extension Bundle {
+    /// Get configuration value from Info.plist
+    /// - Parameter key: Configuration key name
+    /// - Returns: Configuration value as String
+    /// - Important: Fatal error if key is not found in Info.plist
+    static func configValue(for key: String) -> String {
+        guard let value = Bundle.main.infoDictionary?[key] as? String else {
+            fatalError("\(key) not found in Info.plist")
+        }
+        return value
+    }
+    
+    /// Get bundle identifier
+    /// - Returns: Bundle identifier as String
+    /// - Important: Fatal error if bundle identifier is not found
+    static func bundleIdentifier() -> String {
+        guard let value = Bundle.main.bundleIdentifier else {
+            fatalError("Bundle identifier not found")
+        }
+        return value
+    }
+}
+
 struct ESPMatterConstants {
     
     /// Matter data keys
-    static let groupIdKey = "group.com.espressif.novahome"
+    static var groupIdKey: String {
+        return Bundle.configValue(for: "APP_GROUP_ID")
+    }
     static let homesDataKey: String = "com.espressif.hmmatterdemo.homes"
     static let roomsDataKey: String = "com.espressif.hmmatterdemo.rooms"
     static let matterDevicesKey: String = "com.espressif.hmmatterdemo.devices"
@@ -17,7 +43,9 @@ struct ESPMatterConstants {
     static let matterStepsKey: String = "com.espressif.hmmatterdemo.step"
     static let matterUUIDKey: String = "com.espressif.hmmatterdemo.commissionerUUID"
     static let onboardingPayloadKey: String = "com.espressif.hmmatterdemo.onboardingPayload"
-    static let bundleId = Bundle.main.bundleIdentifier ?? "com.espressif.nova"
+    static var bundleId: String {
+        return Bundle.bundleIdentifier()
+    }
     
     /// Device ID storage
     static let chipDeviceId: String = "ChipDeviceId"
@@ -142,7 +170,9 @@ struct ESPMatterConstants {
     static let iosCommissioningCompleted = "iOS commissioning completed successfully"
     static let confirmationResponseSent = "Confirmation response sent and commissioning completed"
     static let nocResponseProcessed = "NOC response processed successfully"
-    static let ecosystemName = "ESP RainMaker Home"
+    static var ecosystemName: String {
+        return Bundle.configValue(for: "MATTER_ECOSYSTEM_NAME")
+    }
     
     // MARK: - Post Message Types
     static let issueNodeNocResponse = "ISSUE_NODE_NOC_RESPONSE"

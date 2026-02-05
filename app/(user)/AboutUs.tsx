@@ -28,7 +28,7 @@ import {
 } from "@/components";
 
 // config
-import APP_CONFIG from "@/app.json";
+import Constants from 'expo-constants';
 
 /**
  * AboutUs
@@ -38,7 +38,7 @@ import APP_CONFIG from "@/app.json";
 const AboutUs: React.FC = () => {
   // Hooks
   const { t } = useTranslation();
-  const appVersion = APP_CONFIG.expo.version;
+  const appVersion = Constants.expoConfig?.version;
 
   /**
    * Website click handler

@@ -6,6 +6,19 @@ apply plugin: "com.google.gms.google-services"
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
 /**
+ * Helper function to read properties from gradle.properties
+ * @param key Property key name
+ * @return Property value (throws error if not found)
+ */
+def getProp = { key ->
+    def value = project.findProperty(key)
+    if (value == null) {
+        throw new GradleException("Required property '$key' not found in gradle.properties")
+    }
+    return value
+}
+
+/**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
@@ -87,7 +100,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.espressif.novahome'
+    namespace 'com.app'
     
     // Configure native libraries path
     sourceSets {
@@ -96,11 +109,44 @@ android {
         }
     }
     defaultConfig {
-        applicationId 'com.espressif.novahome'
+        applicationId "com.espressif.novahome"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 36
-        versionName "3.5.0"
+        versionCode getProp("ANDROID_VERSION_CODE").toInteger()
+        versionName getProp("APP_VERSION")
+        
+        // Configure app name from gradle.properties
+        resValue "string", "app_name", getProp("APP_NAME")
+        
+        // Notification strings from gradle.properties
+        resValue "string", "notification_title", getProp("APP_NOTIFICATION_DEFAULT_TITLE")
+        resValue "string", "notification_body", getProp("APP_NOTIFICATION_DEFAULT_BODY")
+        
+        // BuildConfig fields from gradle.properties
+        buildConfigField "String", "THIRD_PARTY_AUTH_REDIRECT_URL", "\"${getProp("THIRD_PARTY_AUTH_REDIRECT_URL")}\""
+        buildConfigField "String", "APP_NOTIFICATION_DEFAULT_TITLE", "\"${getProp("APP_NOTIFICATION_DEFAULT_TITLE")}\""
+        buildConfigField "String", "APP_NOTIFICATION_DEFAULT_BODY", "\"${getProp("APP_NOTIFICATION_DEFAULT_BODY")}\""
+        
+        // Matter configuration from gradle.properties
+        // Parse hex vendor ID (e.g., "0x131B" -> 4891)
+        // Default to 0x0 if not provided or empty
+        def matterVendorIdStr = project.findProperty("MATTER_VENDOR_ID")
+        if (matterVendorIdStr == null || matterVendorIdStr.isEmpty()) {
+            matterVendorIdStr = "0x0"
+        }
+        def matterVendorIdInt = matterVendorIdStr.startsWith("0x") || matterVendorIdStr.startsWith("0X") 
+            ? Integer.parseInt(matterVendorIdStr.substring(2), 16) 
+            : Integer.parseInt(matterVendorIdStr)
+        buildConfigField "int", "MATTER_VENDOR_ID", "${matterVendorIdInt}"
+        
+        // Manifest placeholders from gradle.properties
+        manifestPlaceholders = [
+            AGENTS_DEEP_LINK_SCHEME: getProp("AGENTS_DEEP_LINK_SCHEME"),
+            AGENTS_DEEP_LINK_HOST: getProp("AGENTS_DEEP_LINK_HOST"),
+            AGENTS_DEEP_LINK_PATH_PREFIX: getProp("AGENTS_DEEP_LINK_PATH_PREFIX"),
+            THIRD_PARTY_AUTH_REDIRECT_SCHEME: getProp("THIRD_PARTY_AUTH_REDIRECT_SCHEME"),
+            THIRD_PARTY_AUTH_REDIRECT_HOST: getProp("THIRD_PARTY_AUTH_REDIRECT_HOST")
+        ]
     }
     signingConfigs {
         debug {

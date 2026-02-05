@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 // components
 import { ScreenWrapper, Header, Input, Button } from "@/components";
 
-import APP_CONFIG from "@/app.json";
+import Constants from 'expo-constants';
 
 /**
  * ResetPasswordScreen component that handles password reset with OTP verification.
@@ -31,7 +31,7 @@ import APP_CONFIG from "@/app.json";
  * It combines OTP verification and password reset into a single step.
  */
 const ResetPasswordScreen = () => {
-  const appVersion = APP_CONFIG.expo.version;
+  const appVersion = Constants.expoConfig?.version;
 
   const { t } = useTranslation();
   const { store } = useCDF();

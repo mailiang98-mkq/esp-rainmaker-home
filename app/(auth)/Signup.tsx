@@ -27,7 +27,7 @@ import { Checkbox } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import { testProps } from "@/utils/testProps";
 
-import APP_CONFIG from "@/app.json";
+import Constants from "expo-constants";
 import { validateEmail } from "@/utils/validations";
 
 /**
@@ -52,7 +52,7 @@ export default function SignupScreen() {
   const [consentChecked, setConsentChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const appVersion = APP_CONFIG.expo.version;
+  const appVersion = Constants.expoConfig?.version;
 
   /**
    * Email validator for use with Input component

@@ -417,7 +417,7 @@ class ESPMatterModule: RCTEventEmitter {
   private func checkUserNOCExists(fabricId: String) -> Bool {
     
     let account = "user_noc_\(fabricId)"
-    let service = Bundle.main.bundleIdentifier ?? "com.espressif.nova"
+    let service = Bundle.bundleIdentifier()
     
     let query: [String: Any] = [
       kSecClass as String: kSecClassGenericPassword,
@@ -489,8 +489,10 @@ class ESPMatterModule: RCTEventEmitter {
       rootCertificate: rootCADerBytes
     )
     
-    // Set vendor ID
-    params.vendorID = NSNumber(value: 0xFFF1) // Espressif vendor ID
+    // Set vendor ID from configuration
+    let vendorIdString = Bundle.configValue(for: "MATTER_VENDOR_ID")
+    let vendorId = UInt16(strtoul(vendorIdString.replacingOccurrences(of: "0x", with: ""), nil, 16))
+    params.vendorID = NSNumber(value: vendorId)
     params.operationalCertificateIssuer = self
     params.operationalCertificateIssuerQueue = matterQueue
     

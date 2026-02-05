@@ -30,7 +30,7 @@ import { UserCircle, X } from "lucide-react-native";
 import google from "@/assets/images/google.png";
 import signinwithapple from "@/assets/images/apple.png";
 
-import APP_CONFIG from "@/app.json";
+import Constants from 'expo-constants';
 import { validateEmail } from "@/utils/validations";
 import { CDF_EXTERNAL_PROPERTIES } from "@/utils/constants";
 import { testProps } from "@/utils/testProps";
@@ -43,7 +43,7 @@ import { executePostLoginPipeline } from "@/utils/postLoginPipeline";
  *
  */
 export default function LoginScreen() {
-  const ENABLED_OAUTH_PROVIDERS = APP_CONFIG.features.enabledOauth;
+  const ENABLED_OAUTH_PROVIDERS = Constants.expoConfig?.extra?.enabledThirdPartyProviders || [];
   const OAUTH_PROVIDER_IMAGES = {
     google: google,
     signinwithapple: signinwithapple,
@@ -70,7 +70,7 @@ export default function LoginScreen() {
     steps: Array<{ name: string; status: "pending" | "running" | "completed" | "failed" }>;
   } | null>(null);
 
-  const appVersion = APP_CONFIG.expo.version;
+  const appVersion = Constants.expoConfig?.version;
 
   /**
    * Maps technical step names to user-friendly messages
