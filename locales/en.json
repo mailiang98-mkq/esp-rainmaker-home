@@ -137,7 +137,7 @@
     "login": {
       "signInButton": "Sign in",
       "forgotPassword": "Forgot password",
-      "thirdPartyLogin": "Third party account login",
+      "thirdPartyLogin": "Third-party account login",
       "navigateToSignUp": "Don't have an account? Sign up",
       "settingUpAccount": "Setting up your account",
       "settingUpHomes": "Setting up homes",
@@ -157,7 +157,7 @@
     "verification": {
       "title": "Verification Code",
       "heading": "A verification code is on the way",
-      "subtitle": "Please enter the 6 digit code sent to you at {{email}}",
+      "subtitle": "Please enter the 6-digit code sent to you at {{email}}",
       "verifyButton": "Verify",
       "resendCode": "I haven't received a code"
     },
@@ -549,7 +549,7 @@
         "devicesFound": "{{count}} Device Found",
         "devicesFoundPlural": "{{count}} Devices Found",
         "noDevicesFound": "No Devices Found",
-        "scanAgain": "Scan Again ?",
+        "scanAgain": "Scan Again?",
         "deviceConnected": "Device connected successfully",
         "requestingPermission": "Checking location permission...",
         "noLocationPermission": "Location Access Required",
@@ -673,7 +673,7 @@
       "checkOTAUpdateError": "Failed to check for updates",
       "otaUpdateStartError": "Failed to start update",
       "failedToUpdateTimezone": "Failed to update timezone",
-       "noReadmeURLProvided": "No README URL provided"
+      "noReadmeURLProvided": "No README URL provided"
     },
     "chart": {
       "title": "Chart",
@@ -891,7 +891,7 @@
       "scheduleDisabledSuccessfully": "Schedule disabled successfully",
       "scheduleDeletedSuccessfully": "Schedule deleted successfully",
       "someDevicesFailedUpdate": "Some devices failed to update schedule",
-      "someDevicesNotConnected": "Some devices are Offline",
+      "someDevicesNotConnected": "Some devices are offline",
       "createSchedule": "Create Schedule",
       "scheduleNamePlaceholder": "Schedule Name",
       "editSchedule": "Edit Schedule"
@@ -937,7 +937,7 @@
       "scheduleSyncSuccessfully": "Schedule synced successfully",
       "someDevicesFailedUpdate": "Some devices failed to update schedule",
       "someDevicesFailedDelete": "Some devices failed to delete schedule",
-      "someDevicesNotConnected": "Some devices are Offline",
+      "someDevicesNotConnected": "Some devices are offline",
       "time": "Time",
       "repeat": "Repeat",
       "repeatDays": {
