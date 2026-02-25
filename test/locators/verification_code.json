@@ -1,0 +1,49 @@
+{
+  "back_button": {
+    "by": "id",
+    "value": "button_back"
+  },
+  "title": {
+    "by": "id",
+    "value": "title",
+    "text": "Verification Code"
+  },
+  "title_text": {
+    "by": "id",
+    "value": "text_title_confirmation_code",
+    "text": "A verification code is on the way"
+  },
+  "subtitle_text": {
+    "by": "id",
+    "value": "text_subtitle_confirmation_code",
+    "text": "Please enter the 6 digit code sent to you"
+  },
+  "verification_code_input": {
+    "by": "id",
+    "value": "input_confirmation_code",
+    "text": "Verification code input"
+  },
+  "verify_button": {
+    "by": "id",
+    "value": "button_verify_confirmation_code",
+    "text": "Verify"
+  },
+  "resend_code_button": {
+    "by": "id",
+    "value": "button_resend_confirmation_code"
+  },
+  "resend_code_text": {
+    "by": "id",
+    "value": "text_confirmation_code",
+    "text": "I haven't received a code"
+  },
+  "app_version_text": {
+    "by": "id",
+    "value": "text_app_version_verification_code"
+  },
+  "error_message": {
+    "by": "id",
+    "value": "text_error_message",
+    "text": "Error message"
+  }
+}

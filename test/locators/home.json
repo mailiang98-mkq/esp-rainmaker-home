@@ -1,0 +1,42 @@
+{
+  "title": {
+    "by": "id",
+    "value": "title",
+    "text": "My Devices"
+  },
+  "home_button": {
+    "by": "accessibility_id",
+    "value": "Home",
+    "text": "Home"
+  },
+  "room_button": {
+    "by": "accessibility_id",
+    "value": "Room",
+    "text": "Room"
+  },
+  "scene_button": {
+    "by": "accessibility_id",
+    "value": "Scene",
+    "text": "Scene"
+  },
+  "user_button": {
+    "by": "id",
+    "value": "button_tab_user",
+    "text": "User"
+  },
+  "nickname_input": {
+    "by": "id",
+    "value": "input_nickname",
+    "text": "Nickname Input"
+  },
+  "nickname_skip_button": {
+    "by": "id",
+    "value": "button_skip",
+    "text": "Skip"
+  },
+  "nickname_add_button": {
+    "by": "id",
+    "value": "button_add",
+    "text": "Add"
+  }
+}

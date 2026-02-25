@@ -1,0 +1,17 @@
+{
+  "title": {
+    "by": "id",
+    "value": "title",
+    "text": "Account and Security"
+  },
+  "change_password_button": {
+    "by": "id",
+    "value": "button_change_password",
+    "text": "Change Password"
+  },
+  "delete_account_button": {
+    "by": "id",
+    "value": "button_danger_delete_account",
+    "text": "Delete Account"
+  }
+}

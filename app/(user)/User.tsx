@@ -370,7 +370,7 @@ const User: React.FC<UserProps> = () => {
             { ...globalStyles.shadowElevationForLightTheme },
           ]}
         >
-          <LogoutButton onPress={handleLogout} />
+          <LogoutButton onPress={handleLogout} qaId="button_logout_user"/>
         </View>
       </ScreenWrapper>
 

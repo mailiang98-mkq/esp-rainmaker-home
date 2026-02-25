@@ -8,8 +8,6 @@ variables:
   LANG: en_US.UTF-8
   LC_ALL: en_US.UTF-8
   NVM_DIR: "$HOME/.nvm"
-  ESP_AUTO_REPO_URL: "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.espressif.cn:6688/app-frameworks/esp-auto.git"
-  ESP_AUTO_BRANCH: "nova-home"
 
 
 before_script:
@@ -40,6 +38,8 @@ android_apk:
     - if: $CI_MERGE_REQUEST_ID
   script:
     - npm ci
+
+    - if [ -f .env.example ]; then cp .env.example .env; echo "Created .env from .env.example"; else echo ".env.example not found, skipping"; fi
 
     - if [ -z "${ANDROID_HOME:-}" ]; then echo "ANDROID_HOME is not set (configure it as a GitLab CI variable or runner env)"; exit 1; fi
     - echo "sdk.dir=${ANDROID_HOME}" > android/local.properties
@@ -73,22 +73,18 @@ android_test:
     - if [ ! -f "${APK_PATH}" ]; then echo "APK not found at ${APK_PATH}"; ls -la artifacts/android || true; exit 1; fi
     - echo "APK_PATH=${APK_PATH}"
 
-    # Checkout esp-auto tests
-    - rm -rf esp-auto
-    - git clone --depth 1 --branch "${ESP_AUTO_BRANCH}" "${ESP_AUTO_REPO_URL}" esp-auto
-    - cd esp-auto
+    - if [ -f .env.example ]; then cp .env.example .env; fi
+    - mkdir -p test/artifacts/android
+    - cp "${APK_PATH}" test/artifacts/android/app-release.apk
+    - ls -la test/artifacts/android
 
-    # Run sanity tests
-    - mkdir -p artifacts/android
-    - cp "${APK_PATH}" artifacts/android/app-release.apk
-    - ls -la artifacts/android
-
-    - python3 --version
+    - cd test
     - python3 -m venv .venv
     - . .venv/bin/activate
     - python -m pip install -U pip
-    - if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
-    - python -c "import pytest" >/dev/null 2>&1 || python -m pip install -U pytest
+    - pip install -r requirements.txt
+    - python scripts/ci_setup_config.py
+
     - MODEL="${MODEL:-SM-S711B}"
     - CHIP="${CHIP:-esp32c3}"
     - MARKER="${MARKER:-sanity}"

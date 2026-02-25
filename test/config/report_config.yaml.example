@@ -1,0 +1,37 @@
+# HTML Report configuration options, hosting and email delivery configs.
+# Copy to report_config.yaml and set env vars, or run ci_setup_config.py in CI.
+# Values substituted from env (see ci_setup_config.py).
+
+local_hosting:
+  artifacts_dir: "~/esp-auto-reports/artifacts"
+  reports_dir: "~/esp-auto-reports/html"
+  http_server_port: 8000
+  base_url: "http://esp-auto-mac.local:8000"
+  auto_start_server: false
+  cleanup_days: 15
+
+report:
+  include_charts: true
+  include_videos: true
+  include_screenshots: true
+  title: "ESP Rainmaker Home App Test Report"
+  brand_name: "ESPRESSIF SYSTEMS"
+  test_lab: "Pune"
+
+email:
+  smtp_server: "${EMAIL_SMTP_SERVER:-smtp.office365.com}"
+  smtp_port: ${EMAIL_SMTP_PORT:-587}
+  sender: "${EMAIL_SENDER}"
+  password: "${EMAIL_PASSWORD}"
+  subject_template: "{date} - {status} - Home App Test Report"
+  send_on_completion: true
+  attach_report: false
+  attach_screenshot: true
+
+stakeholders:
+  default:
+    recipients: ${STAKEHOLDER_DEFAULT_RECIPIENTS:-[]}
+  sanity:
+    recipients: ${STAKEHOLDER_SANITY_RECIPIENTS:-[]}
+  regression:
+    recipients: ${STAKEHOLDER_REGRESSION_RECIPIENTS:-[]}

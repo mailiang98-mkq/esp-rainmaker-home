@@ -1,0 +1,73 @@
+{
+  "logo": {
+    "by": "id",
+    "value": "logo_login"
+  },
+  "email_input": {
+    "by": "id",
+    "value": "input_email",
+    "text": "Email"
+  },
+  "password_input": {
+    "by": "id",
+    "value": "input_password",
+    "text": "Password"
+  },
+  "password_toggle": {
+    "by": "id",
+    "value": "button_toggle_password"
+  },
+  "error_message": {
+    "by": "id",
+    "value": "text_error_message"
+  },
+  "login_button": {
+    "by": "id",
+    "value": "button_login",
+    "text": "Sign in"
+  },
+  "forgot_password_button": {
+    "by": "id",
+    "value": "button_forgot_password"
+  },
+  "forgot_password_text": {
+    "by": "id",
+    "value": "text_forgot_password",
+    "text": "Forgot Password"
+  },
+  "signup_button": {
+    "by": "id",
+    "value": "button_signup",
+    "text": "Sign Up"
+  },
+  "signup_text": {
+    "by": "id",
+    "value": "text_signup",
+    "text": "Don't have an account? Sign up"
+  },
+  "3p_login_text": {
+    "by": "id",
+    "value": "text_3plogin",
+    "text": "Third party account login"
+  },
+  "google_login_button": {
+    "by": "id",
+    "value": "button_3p_Google"
+  },
+  "logo_google": {
+    "by": "id",
+    "value": "image_3p_Google"
+  },
+  "logo_apple": {
+    "by": "id",
+    "value": "image_3p_SignInWithApple"
+  },
+  "apple_login_button": {
+    "by": "id",
+    "value": "button_3p_SignInWithApple"
+  },
+  "app_version_text": {
+    "by": "id",
+    "value": "text_app_version_login"
+  }
+}

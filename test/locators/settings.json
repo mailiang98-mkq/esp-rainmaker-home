@@ -1,0 +1,12 @@
+{
+  "title": {
+    "by": "id",
+    "value": "title",
+    "text": "Settings"
+  },
+  "account_security_item": {
+    "by": "id",
+    "value": "button_item_account-security_settings",
+    "text": "Account and Security"
+  }
+}

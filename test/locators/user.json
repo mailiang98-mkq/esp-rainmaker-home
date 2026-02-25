@@ -1,0 +1,37 @@
+{
+  "title": {
+    "by": "id",
+    "value": "title",
+    "text": "My Profile"
+  },
+  "logout_button": {
+    "by": "id",
+    "value": "button_logout_user",
+    "text": "Log Out"
+  },
+  "settings_button": {
+    "by": "id",
+    "value": "button_settings",
+    "text": "Settings"
+  },
+  "alert_title": {
+    "by": "id",
+    "value": "text_title_logout_user",
+    "text": "Log Out"
+  },
+  "alert_message": {
+    "by": "id",
+    "value": "text_description_logout_user",
+    "text": "Are you sure you want to log out? If you log out from the application, the agents which are configured from your account will also get logged out."
+  },
+  "alert_confirm_button": {
+    "by": "id",
+    "value": "button_confirm_dialog",
+    "text": "Yes, Log Out"
+  },
+  "alert_cancel_button": {
+    "by": "id",
+    "value": "button_cancel_dialog",
+    "text": "Stay Logged In"
+  }
+}

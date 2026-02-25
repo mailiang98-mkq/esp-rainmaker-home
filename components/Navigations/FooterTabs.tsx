@@ -74,7 +74,7 @@ const FooterTabs: React.FC<FooterTabsProps> = ({ tabs }) => {
     const iconColor = isActive ? tokens.colors.primary : tokens.colors.gray;
 
     return (
-      <TouchableOpacity {...testProps(`button_tab_${tab.label}`)}
+      <TouchableOpacity {...testProps(`button_tab_${tab.label.toLowerCase()}`)}
         key={tab.route}
         style={styles.item}
         onPress={() => handleTabPress(tab.route, tab.label)}

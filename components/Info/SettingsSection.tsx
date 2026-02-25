@@ -43,7 +43,7 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({ children,
         backgroundColor: tokens.colors.white,
       }}
     >
-      <View style={globalStyles.settingsSection}>{children}</View>
+      <View {...(qaId ? testProps(`view_${qaId}`) : {})} style={globalStyles.settingsSection}>{children}</View>
     </ContentWrapper>
   );
 };
