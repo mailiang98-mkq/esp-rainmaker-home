@@ -190,7 +190,7 @@ const DeleteAccount: React.FC = () => {
             keyboardType="numeric"
             maxLength={6}
             autoFocus
-            qaId="delete_account"
+            qaId="code_delete_account"
           />
         </View>
 

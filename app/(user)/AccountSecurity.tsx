@@ -76,7 +76,7 @@ const AccountSecurity: React.FC = () => {
         }} qaId="screen_wrapper_account_security"
       >
         {!isThirdPartyLogin && (
-          <SettingsSection>
+          <SettingsSection qaId="section_account_security">
             <SettingsItem
               icon={<Key size={20} color={tokens.colors.primary} />}
               title={t("user.accountSecurity.changePassword")}

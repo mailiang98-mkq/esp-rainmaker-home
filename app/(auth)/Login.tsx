@@ -443,7 +443,7 @@ export default function LoginScreen() {
 
           {/* Forgot Password Button */}
           <TouchableOpacity {...testProps("button_forgot_password")} onPress={forgotPwd}>
-            <Text {...testProps("text_forgotpassword")} style={globalStyles.forgotPasswordText}>
+            <Text {...testProps("text_forgot_password")} style={globalStyles.forgotPasswordText}>
               {t("auth.login.forgotPassword")}
             </Text>
           </TouchableOpacity>

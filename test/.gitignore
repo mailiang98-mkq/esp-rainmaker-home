@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test artifacts
+*.html
+*.log
+# Allow report template and assets
+!templates/espressif_logo.png
+!templates/report_template.html
+debug/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Appium/Test artifacts
+*.mp4
+*.png
+!templates/espressif_logo.png
+*.jpg
+*.jpeg
+screenshots/
+recordings/
+appium_*.log
+
+# Backup files
+*.bak
+*.backup
+*.shbk
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+IMPLEMENTATION_PLAN.md
+
+# Config with secrets (use .example as template; CI generates from env vars)
+config/deployment.yaml
+config/report_config.yaml
+config/app.yaml
+

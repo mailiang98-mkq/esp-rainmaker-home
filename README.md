@@ -55,6 +55,7 @@ npm run ios -- --device
 - **Cross-Platform** - Native iOS and Android apps with consistent UX
 - **Push Notifications** - Stay informed about device status and system events
 - **Customizable UI** - Themeable interface with support for custom device panels
+- **Test Automation** - Scenario-driven Appium-based UI tests for Android and iOS using Pytest-BDD([test/README.md](test/README.md))
 
 ## 🚀 Getting Started
 

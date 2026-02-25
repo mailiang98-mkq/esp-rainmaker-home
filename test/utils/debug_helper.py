@@ -1,0 +1,295 @@
+# SPDX-FileCopyrightText: 2026 Espressif Systems (Shanghai) CO LTD
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+"""
+Debug utilities for capturing test artifacts on failure
+"""
+import os
+import time
+import base64
+import logging
+import subprocess
+from pathlib import Path
+
+from utils.common_utils import safe_test_name
+from typing import Optional, Dict
+
+logger = logging.getLogger(__name__)
+
+# Import artifact host (optional, to avoid circular imports)
+try:
+    from utils.artifact_host import get_artifact_host
+    ARTIFACT_HOST_AVAILABLE = True
+except ImportError:
+    ARTIFACT_HOST_AVAILABLE = False
+    logger.warning("Artifact host not available")
+
+class DebugHelper:
+    def __init__(self, debug_dir: str = "debug", use_artifact_host: bool = True, artifact_host=None):
+        self.debug_dir = Path(debug_dir)
+        self.debug_dir.mkdir(exist_ok=True)
+        self.use_artifact_host = use_artifact_host and ARTIFACT_HOST_AVAILABLE
+        self._artifact_host = artifact_host
+        if self.use_artifact_host and not self._artifact_host:
+            try:
+                self._artifact_host = get_artifact_host()
+            except Exception as e:
+                logger.warning(f"Could not initialize artifact host: {e}")
+                self.use_artifact_host = False
+    
+    def _get_test_debug_dir(self, test_name: str, timestamp: str = None) -> Path:
+        """Get test-specific debug directory: timestamp_test_name"""
+        timestamp = timestamp or time.strftime("%H%M%S_%d%m%Y")
+        safe_name = safe_test_name(test_name, max_len=120)
+        test_debug_dir = self.debug_dir / f"{timestamp}_{safe_name}"
+        test_debug_dir.mkdir(exist_ok=True)
+        return test_debug_dir
+        
+    def capture_screenshot(self, driver, test_name: str, timestamp: str = None) -> Optional[str]:
+        """Capture screenshot and return file path"""
+        try:
+            timestamp = timestamp or time.strftime("%H%M%S_%d%m%Y")
+            model = getattr(driver, '_test_info', {}).get('model', 'unknown')
+            
+            test_debug_dir = self._get_test_debug_dir(test_name, timestamp)
+            screenshot_path = test_debug_dir / f"screenshot_{model}.png"
+            
+            driver.save_screenshot(str(screenshot_path))
+            logger.info(f"Screenshot saved: {os.path.abspath(screenshot_path)}")
+            return os.path.abspath(screenshot_path)
+            
+        except Exception as e:
+            logger.error(f"Failed to capture screenshot: {e}")
+            return None
+    
+    def get_screenshot_base64(self, driver, test_name: str, timestamp: str = None) -> Optional[str]:
+        """
+        Get screenshot as base64 for HTML reports.
+        Captures a screenshot and returns its base64 encoding.
+        """
+        screenshot_path = self.capture_screenshot(driver, test_name, timestamp)
+        
+        if screenshot_path and os.path.exists(screenshot_path):
+            try:
+                with open(screenshot_path, 'rb') as f:
+                    return base64.b64encode(f.read()).decode()
+            except Exception as e:
+                logger.error(f"Failed to encode screenshot to base64: {e}")
+                return None
+        return None
+    
+    def capture_page_source(self, driver, test_name: str, timestamp: str = None) -> Optional[str]:
+        """Capture page XML dump"""
+        try:
+            timestamp = timestamp or time.strftime("%H%M%S_%d%m%Y")
+            model = getattr(driver, '_test_info', {}).get('model', 'unknown')
+            platform = getattr(driver, '_test_info', {}).get('platform', 'unknown')
+            
+            test_debug_dir = self._get_test_debug_dir(test_name, timestamp)
+            xml_path = test_debug_dir / f"page_source_{model}.xml"
+            
+            # Get page source with timeout
+            page_source = driver.page_source
+            
+            if not page_source or page_source.strip() == "":
+                logger.warning("Page source is empty or None")
+                return None
+            
+            # Save with proper encoding
+            with open(xml_path, 'w', encoding='utf-8', errors='replace') as f:
+                f.write(f"<!-- Platform: {platform}, Model: {model}, Timestamp: {timestamp} -->\n")
+                f.write(page_source)
+            
+            file_size = os.path.getsize(xml_path)
+            logger.info(f"Page source saved: {xml_path} ({file_size} bytes)")
+            return os.path.abspath(xml_path)
+            
+        except Exception as e:
+            logger.error(f"Failed to capture page source: {e}")
+            return None
+    
+    def start_screen_recording(self, driver, test_name: str) -> Optional[str]:
+        """Start screen recording"""
+        try:
+            model = getattr(driver, '_test_info', {}).get('model', 'unknown')
+            platform = getattr(driver, '_test_info', {}).get('platform', 'android')
+            safe_name = safe_test_name(test_name, max_len=120)
+            
+            if platform.lower() == 'android':
+                # Android screen recording options
+                options = {
+                    'videoSize': '1280x720',
+                    'timeLimit': '600',  # 10 minutes max
+                    'bitRate': '4000000'  # 4 Mbps
+                }
+                driver.start_recording_screen(**options)
+                logger.info(f"Android screen recording started for {model}")
+                return f"recording_{safe_name}_{model}"
+            elif platform.lower() == 'ios':
+                options = {
+                    'videoType': 'h264',
+                    'videoQuality': 'medium',
+                    'timeLimit': '600'  # 10 minutes max
+                }
+                driver.start_recording_screen(**options)
+                logger.info(f"iOS screen recording started for {model}")
+                return f"recording_{safe_name}_{model}"
+            else:
+                logger.warning(f"Screen recording not supported for platform: {platform}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Failed to start screen recording: {e}")
+            return None
+    
+    def stop_screen_recording(self, driver, recording_id: str, timestamp: str = None) -> Optional[str]:
+        """Stop screen recording and save file"""
+        try:
+            if not recording_id:
+                return None
+                
+            timestamp = timestamp or time.strftime("%H%M%S_%d%m%Y")
+            # Extract test name from recording_id (format: recording_test_name_model)
+            # Remove 'recording_' prefix and model suffix
+            if recording_id.startswith('recording_'):
+                parts = recording_id.split('_')
+                if len(parts) >= 3:  # recording_test_name_model
+                    test_name = '_'.join(parts[1:-1])  # Get test_name part
+                else:
+                    test_name = parts[1] if len(parts) > 1 else 'unknown'
+            else:
+                test_name = 'unknown'
+            
+            test_debug_dir = self._get_test_debug_dir(test_name, timestamp)
+            video_path = test_debug_dir / f"recording.mp4"
+            
+            video_data = driver.stop_recording_screen()
+            video_bytes = base64.b64decode(video_data)
+            
+            with open(video_path, 'wb') as f:
+                f.write(video_bytes)
+            
+            logger.info(f"Screen recording saved: {video_path}")
+            return str(video_path)
+            
+        except Exception as e:
+            logger.error(f"Failed to stop screen recording: {e}")
+            return None
+    
+    def capture_adb_logs(self, driver, test_name: str, timestamp: str = None) -> Optional[str]:
+        """
+        Capture app-relevant ADB logcat logs (filtered by package / last N lines).
+        """
+        try:
+            model = getattr(driver, '_test_info', {}).get('model', 'unknown')
+            platform = getattr(driver, '_test_info', {}).get('platform', 'android')
+
+            if platform.lower() != 'android':
+                return None
+
+            timestamp = timestamp or time.strftime("%H%M%S_%d%m%Y")
+            test_debug_dir = self._get_test_debug_dir(test_name, timestamp)
+            log_path = test_debug_dir / f"adb_logs_{model}.txt"
+
+            udid = driver.capabilities.get('udid')
+            adb_prefix = ['adb', '-s', udid] if udid else ['adb']
+
+            package = driver.capabilities.get('appPackage', 'com.espressif.novahome')
+
+            # Try app-filtered logs first: get PID and filter by --pid
+            content = ""
+            pid = None
+            try:
+                pid_cmd = adb_prefix + ['shell', 'pidof', '-s', package]
+                pid_result = subprocess.run(pid_cmd, capture_output=True, text=True, timeout=5)
+                pid = (pid_result.stdout or '').strip() if pid_result.returncode == 0 else None
+                if pid:
+                    logcat_cmd = adb_prefix + ['logcat', '-d', '--pid', pid]
+                    result = subprocess.run(logcat_cmd, capture_output=True, text=True, timeout=30)
+                    content = result.stdout or ''
+            except Exception:
+                pass
+
+            # Fallback when app has exited (crash): last 8000 lines
+            if not content:
+                logcat_cmd = adb_prefix + ['logcat', '-d', '-t', '8000']
+                result = subprocess.run(logcat_cmd, capture_output=True, text=True, timeout=30)
+                content = result.stdout or ""
+
+            with open(log_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+            logger.info("ADB logs saved: %s", log_path)
+            return str(log_path)
+
+        except Exception as e:
+            logger.error("Failed to capture ADB logs: %s", e)
+            return None
+    
+    def capture_all_artifacts(self, driver, test_name: str, recording_id: str = None, 
+                               run_id: str = None) -> dict:
+        """Capture all debug artifacts on test failure"""
+        timestamp = time.strftime("%H%M%S_%d%m%Y")
+        artifacts = {}
+        artifact_paths = {}
+        
+        # Screenshot
+        screenshot_path = self.capture_screenshot(driver, test_name, timestamp)
+        if screenshot_path:
+            artifacts['screenshot'] = screenshot_path
+            artifact_paths['screenshot'] = screenshot_path
+            
+            # Get base64 from the same screenshot file
+            try:
+                with open(screenshot_path, 'rb') as f:
+                    screenshot_b64 = base64.b64encode(f.read()).decode()
+                    artifacts['screenshot_b64'] = screenshot_b64
+            except Exception as e:
+                logger.error(f"Failed to encode screenshot to base64: {e}")
+        
+        # Page source/XML dump
+        xml_path = self.capture_page_source(driver, test_name, timestamp)
+        if xml_path:
+            artifacts['page_source'] = xml_path
+            artifact_paths['page_source'] = xml_path
+        
+        # Screen recording
+        if recording_id:
+            video_path = self.stop_screen_recording(driver, recording_id, timestamp)
+            if video_path:
+                artifacts['video'] = video_path
+                artifact_paths['video'] = video_path
+        
+        # ADB logs
+        adb_logs_path = self.capture_adb_logs(driver, test_name, timestamp)
+        if adb_logs_path:
+            artifacts['adb_logs'] = adb_logs_path
+            artifact_paths['log'] = adb_logs_path
+        
+        # Organize artifacts using artifact host if available
+        if self.use_artifact_host and self._artifact_host and artifact_paths:
+            try:
+                if run_id:
+                    self._artifact_host.current_run_id = run_id
+                
+                organized = self._artifact_host.organize_all_artifacts(
+                    artifact_paths, test_name, run_id
+                )
+                
+                for artifact_type, org_data in organized.items():
+                    url = org_data.get('url')
+                    local_path = org_data.get('local_path')
+                    if url:
+                        if artifact_type == 'log':
+                            artifacts['log_url'] = url
+                            if 'adb_logs' in artifacts:
+                                artifacts['adb_logs_url'] = url
+                        artifacts[f'{artifact_type}_url'] = url
+                    if local_path:
+                        artifacts[f'{artifact_type}_organized_path'] = local_path
+            except Exception as e:
+                logger.error(f"Failed to organize artifacts: {e}", exc_info=True)
+        
+        return artifacts

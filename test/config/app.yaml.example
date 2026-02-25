@@ -1,0 +1,14 @@
+# App under test: package IDs, paths, and device config for Appium (Android/iOS).
+# Copy to app.yaml and set env vars, or run ci_setup_config.py in CI.
+# CI sets ANDROID_PATH from ANDROID_HOME if unset.
+# adb_path is derived from android_path (android_path/platform-tools/adb) when not set in config.
+
+rainmaker-home:
+  activity: "${APP_ACTIVITY:-com.app.MainActivity}"
+  android_path: "${ANDROID_PATH}"
+  apk_path: "artifacts/android/app-release.apk"
+  package: "${ANDROID_APP_APPLICATION_ID}"
+  bundle_id: "${IOS_APP_APPLICATION_ID}"
+  xcode_org_id: "${XCODE_ORG_ID}"
+  xcode_signing_id: "${XCODE_SIGNING_ID:-Apple Development}"
+  updated_wda_bundle_id: "${UPDATED_WDA_BUNDLE_ID:-com.espressif.WebDriverAgentRunner}"

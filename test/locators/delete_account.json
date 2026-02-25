@@ -1,0 +1,46 @@
+{
+  "title": {
+    "by": "id",
+    "value": "title",
+    "text": "Delete Account"
+  },
+  "notice_title": {
+    "by": "id",
+    "value": "text_title_notice",
+    "text": "Important Notice"
+  },
+  "notice_subtitle": {
+    "by": "id",
+    "value": "text_subtitle_notice"
+  },
+  "delete_account_button": {
+    "by": "id",
+    "value": "button_delete_account",
+    "text": "Delete Account"
+  },
+  "verification_title": {
+    "by": "id",
+    "value": "text_title_delete_account"
+  },
+  "verification_subtitle": {
+    "by": "id",
+    "value": "text_subtitle_delete_account"
+  },
+  "code_input": {
+    "by": "id",
+    "value": "input_code_delete_account"
+  },
+  "verify_button": {
+    "by": "id",
+    "value": "button_verify_delete_account",
+    "text": "Verify"
+  },
+  "resend_button": {
+    "by": "id",
+    "value": "button_resend_delete_account"
+  },
+  "resend_counter_text": {
+    "by": "id",
+    "value": "text_counter_delete_account"
+  }
+}

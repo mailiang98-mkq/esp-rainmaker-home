@@ -78,10 +78,13 @@ const SettingsItem: React.FC<SettingsItemProps> = ({
 
   const ItemContent = () => (
     <>
-      <View style={globalStyles.settingsItem}>
+      <View
+        style={globalStyles.settingsItem}
+        {...(qaId ? testProps(`view_${qaId}`) : {})}
+      >
         <View style={globalStyles.settingsItemLeft}>
           <View style={globalStyles.settingsItemIcon}>{icon}</View>
-          <Text style={globalStyles.settingsItemText}>{title}</Text>
+          <Text {...(qaId ? testProps(`text_${qaId}`) : {})} style={globalStyles.settingsItemText}>{title}</Text>
         </View>
         {renderRightElement()}
       </View>
@@ -91,13 +94,13 @@ const SettingsItem: React.FC<SettingsItemProps> = ({
 
   if (type === "navigation" && onPress) {
     return (
-      <Pressable {...(qaId ? testProps(qaId) : {})}  onPress={onPress}>
+      <Pressable {...(qaId ? testProps(`button_${qaId}`) : {})}  onPress={onPress}>
         <ItemContent />
       </Pressable>
     );
   }
 
-  return <ItemContent {...(qaId ? testProps(qaId) : {})}  />;
+  return <ItemContent />;
 };
 
 export default SettingsItem;

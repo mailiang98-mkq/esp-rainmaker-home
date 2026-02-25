@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ report_title }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .header .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .header .logo {
+            max-width: 200px;
+            height: auto;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .job-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .info-item label {
+            display: block;
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .info-item value {
+            display: block;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .download-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .download-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .summary-section {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-stats {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .summary-stats h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .stat-item .value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-item .label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .stat-item.pass .value { color: #20c997; }
+        .stat-item.fail .value { color: #dc3545; }
+        .stat-item.abort .value { color: #6c757d; }
+        
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+        
+        .test-summary {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .test-summary h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f8f9fa;
+        }
+        
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s;
+            float: left;
+        }
+        
+        .progress-fill.pass {
+            background: #20c997;
+        }
+        
+        .progress-fill.fail {
+            background: #dc3545;
+        }
+        
+        .progress-bar {
+            overflow: hidden;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-badge.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge.running {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-badge.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .log-link {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .log-link:hover {
+            text-decoration: underline;
+        }
+        
+        .category-header {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .test-details-row {
+            display: none;
+        }
+        
+        .test-details-row.expanded {
+            display: table-row;
+        }
+        
+        .test-details-cell {
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 2px solid #667eea;
+        }
+        
+        .test-details-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .test-log-section {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .test-log-section h4 {
+            margin: 0 0 10px 0;
+            color: #667eea;
+            font-size: 14px;
+        }
+        
+        .test-log-content {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .expand-toggle {
+            cursor: pointer;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            user-select: none;
+        }
+        
+        .expand-toggle:hover {
+            text-decoration: underline;
+        }
+        
+        .expand-toggle::before {
+            content: "▶ ";
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .expand-toggle.expanded::before {
+            transform: rotate(90deg);
+        }
+        
+        @media (max-width: 768px) {
+            .summary-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .test-details-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="espressif_logo.png" alt="ESPRESSIF" class="logo" />
+            </div>
+            <h1>{{ report_title }}</h1>
+            <div class="job-info">
+                <div class="info-item">
+                    <label>Created</label>
+                    <value>{{ created_time }}</value>
+                </div>
+                <div class="info-item">
+                    <label>Test Lab</label>
+                    <value>{{ test_lab }}</value>
+                </div>
+                <div class="info-item">
+                    <label>Chipset</label>
+                    <value>{{ chipset }}</value>
+                </div>
+                <div class="info-item">
+                    <label>Execution Time</label>
+                    <value>{{ execution_time }}</value>
+                </div>
+            </div>
+            {% if download_url %}
+            <a href="{{ download_url }}" class="download-link">Download Build Artifacts</a>
+            {% endif %}
+        </div>
+        
+        <div class="summary-section">
+            <div class="summary-stats">
+                <h2>Test Summary</h2>
+                <div class="stat-grid">
+                    <div class="stat-item pass">
+                        <div class="value">{{ total_pass }}</div>
+                        <div class="label">Pass</div>
+                    </div>
+                    <div class="stat-item fail">
+                        <div class="value">{{ total_fail }}</div>
+                        <div class="label">Fail</div>
+                    </div>
+                    <div class="stat-item abort">
+                        <div class="value">{{ total_abort }}</div>
+                        <div class="label">Abort</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="value">{{ total_tests }}</div>
+                        <div class="label">Total Tests</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="value">{{ pass_percentage }}%</div>
+                        <div class="label">Pass %</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Overall Test Result</h2>
+                <div class="chart-wrapper">
+                    <canvas id="testResultChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-summary">
+            <h2>Test Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Suite Name</th>
+                        <th>Pass %</th>
+                        <th>Pass</th>
+                        <th>Fail</th>
+                        <th>Log</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category, suites in test_categories.items() %}
+                    {% if suites %}
+                    <tr>
+                        <td colspan="7" class="category-header">{{ category }}</td>
+                    </tr>
+                    {% for suite in suites %}
+                    <tr>
+                        <td>{{ suite.id }}</td>
+                        <td>
+                            <a href="#" class="expand-toggle" onclick="toggleTestDetails('suite-{{ suite.id }}'); return false;">{{ suite.name }}</a>
+                        </td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill pass" 
+                                     style="width: {{ suite.pass_percentage }}%"></div>
+                                <div class="progress-fill fail" 
+                                     style="width: {{ 100 - suite.pass_percentage }}%"></div>
+                            </div>
+                            <span style="margin-left: 10px; clear: both; display: block;">{{ suite.pass_percentage }}%</span>
+                        </td>
+                        <td>{{ suite.pass_count }}</td>
+                        <td>{{ suite.fail_count }}</td>
+                        <td>
+                            {% if suite.tests|length > 0 %}
+                            <a href="#" class="log-link" onclick="toggleTestDetails('suite-{{ suite.id }}'); return false;">View</a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge {{ suite.status }}">{{ suite.status }}</span>
+                        </td>
+                    </tr>
+                    <tr id="suite-{{ suite.id }}" class="test-details-row">
+                        <td colspan="7" class="test-details-cell">
+                            <div class="test-details-content">
+                                {% for test in suite.tests %}
+                                <div class="test-log-section">
+                                    <h4>Test: {{ test.nodeid.split('::')[-1] }}</h4>
+                                    <div><strong>Status:</strong> {{ test.outcome|upper }}</div>
+                                    <div><strong>Duration:</strong> {{ "%.2f"|format(test.duration) }}s</div>
+                                    {% if test.artifacts.video_url %}
+                                    <div><strong>Video:</strong> <a href="{{ test.artifacts.video_url }}" target="_blank" class="log-link">View Recording</a></div>
+                                    {% endif %}
+                                    {% if test.artifacts.screenshot_url %}
+                                    <div><strong>Screenshot:</strong> <a href="{{ test.artifacts.screenshot_url }}" target="_blank" class="log-link">View Screenshot</a></div>
+                                    {% endif %}
+                                    {% if test.artifacts.adb_logs_url %}
+                                    <div><strong>ADB Logs:</strong> <a href="{{ test.artifacts.adb_logs_url }}" target="_blank" class="log-link">View ADB Logs</a></div>
+                                    {% endif %}
+                                    {% if test.artifacts.page_source_url %}
+                                    <div><strong>Page Source:</strong> <a href="{{ test.artifacts.page_source_url }}" target="_blank" class="log-link">View Page Source</a></div>
+                                    {% endif %}
+                                    {# Only show log_url if adb_logs_url is not present to avoid duplicates #}
+                                    {% if test.artifacts.log_url and not test.artifacts.adb_logs_url %}
+                                    <div><strong>Log:</strong> <a href="{{ test.artifacts.log_url }}" target="_blank" class="log-link">View Log</a></div>
+                                    {% endif %}
+                                    {% if test.logs or test.stdout or test.stderr %}
+                                    <h4 style="margin-top: 15px;">Test Logs</h4>
+                                    <div class="test-log-content">
+{% if test.stdout %}<strong>STDOUT:</strong>
+{{ test.stdout }}
+
+{% endif %}{% if test.stderr %}<strong>STDERR:</strong>
+{{ test.stderr }}
+
+{% endif %}{% if test.logs %}<strong>LOGS:</strong>
+{{ test.logs }}
+{% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Appium Server Logs Section - Common for all tests -->
+    {% if appium_log_url %}
+    <div class="section" style="margin-top: 40px; padding: 20px; background: #e3f2fd; border: 2px solid #2196f3; border-radius: 8px;">
+        <h2 style="color: #1976d2; font-size: 20px; margin-bottom: 15px; display: flex; align-items: center;">
+            <span style="font-size: 24px; margin-right: 10px;">📱</span>
+            Appium Server Logs
+        </h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+            Server logs for entire test run - shared across all tests
+        </p>
+        <div>
+            <a href="{{ appium_log_url }}" target="_blank" class="log-link" style="font-size: 16px; font-weight: bold; color: #1976d2; text-decoration: none; padding: 10px 20px; background: white; border: 2px solid #1976d2; border-radius: 4px; display: inline-block;">
+                View Appium Server Logs →
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <script>
+        // Toggle test details expansion
+        function toggleTestDetails(suiteId) {
+            const row = document.getElementById(suiteId);
+            const toggle = event.target.closest('.expand-toggle');
+            
+            if (row.classList.contains('expanded')) {
+                row.classList.remove('expanded');
+                if (toggle) toggle.classList.remove('expanded');
+            } else {
+                row.classList.add('expanded');
+                if (toggle) toggle.classList.add('expanded');
+            }
+        }
+        
+        // Chart.js configuration
+        const ctx = document.getElementById('testResultChart').getContext('2d');
+        const chartData = {
+            labels: ['Pass', 'Abort', 'Fail'],
+            datasets: [{
+                data: [{{ total_pass }}, {{ total_abort }}, {{ total_fail }}],
+                backgroundColor: [
+                    '#20c997',  // Teal for Pass
+                    '#6c757d',  // Dark Blue/Gray for Abort
+                    '#dc3545'   // Red for Fail
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        };
+        
+        new Chart(ctx, {
+            type: 'pie',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

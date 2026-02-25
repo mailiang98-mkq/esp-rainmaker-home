@@ -17,8 +17,8 @@ import { useToast } from "@/hooks/useToast";
 import { useTranslation } from "react-i18next";
 // components
 import { ScreenWrapper, Header, Input, Button } from "@/components";
-
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
+import { testProps } from "@/utils/testProps";
 
 /**
  * ResetPasswordScreen component that handles password reset with OTP verification.
@@ -251,27 +251,32 @@ const ResetPasswordScreen = () => {
 
   return (
     <>
-      <Header showBack label={t("auth.forgotPassword.resetTitle")} />
-      <ScreenWrapper style={globalStyles.screenWrapper}>
+      <Header showBack label={t("auth.forgotPassword.resetTitle")} qaId="header_reset_password" />
+      <ScreenWrapper style={globalStyles.screenWrapper} qaId="screen_wrapper_reset_password">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
           keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
-          <ScrollView 
+          <ScrollView
+            {...testProps("scroll_reset_password")}
             contentContainerStyle={globalStyles.scrollViewContent}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={[globalStyles.heading, globalStyles.verificationTitle]}>
+            <Text
+              {...testProps("text_title_reset_password")}
+              style={[globalStyles.heading, globalStyles.verificationTitle]}
+            >
               {t("auth.forgotPassword.resetHeading")}
             </Text>
             <Text
+              {...testProps("text_subtitle_reset_password")}
               style={[globalStyles.subHeading, globalStyles.verificationSubtitle]}
             >
               {t("auth.verification.subtitle", { email: email as string })}
             </Text>
 
-            <View style={globalStyles.verificationContainer}>
+            <View {...testProps("view_reset_password")} style={globalStyles.verificationContainer}>
               {/* Code Input */}
               <Input
                 initialValue={code}
@@ -283,10 +288,11 @@ const ResetPasswordScreen = () => {
                 keyboardType="numeric"
                 maxLength={6}
                 autoFocus
+                qaId="reset_password_code"
               />
             </View>
 
-            <View style={[globalStyles.inputContainer]}>
+            <View {...testProps("view_input_reset_password")} style={[globalStyles.inputContainer]}>
               {/* New Password Input */}
               <Input
                 isPassword
@@ -296,6 +302,7 @@ const ResetPasswordScreen = () => {
                 validator={passwordValidator}
                 validateOnChange={true}
                 debounceDelay={500}
+                qaId="new_password_reset_password"
               />
 
               {/* Confirm Password Input */}
@@ -309,6 +316,7 @@ const ResetPasswordScreen = () => {
                 validator={confirmPasswordValidator}
                 validateOnChange={true}
                 debounceDelay={500}
+                qaId="confirm_password_reset_password"
               />
 
               {/* Reset Password Button */}
@@ -326,14 +334,17 @@ const ResetPasswordScreen = () => {
                   isLoading
                 }
                 isLoading={isLoading}
+                qaId="button_reset_password"
               />
 
               {/* Resend Code Button with countdown */}
               <TouchableOpacity
+                {...testProps("button_resend_reset_password")}
                 onPress={handleResendCode}
                 disabled={countdown > 0 || isLoading}
               >
                 <Text
+                  {...testProps("text_resend_reset_password")}
                   style={[
                     globalStyles.linkText,
                     countdown > 0 && { opacity: 0.5 },
@@ -348,7 +359,7 @@ const ResetPasswordScreen = () => {
           </ScrollView>
         </KeyboardAvoidingView>
         {/* App Version Text */}
-        <Text style={globalStyles.versionText}>
+        <Text {...testProps("text_app_version_reset_password")} style={globalStyles.versionText}>
           {t("layout.shared.version")} {appVersion}
         </Text>
       </ScreenWrapper>

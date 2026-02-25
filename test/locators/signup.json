@@ -1,0 +1,66 @@
+{
+  "back_button": {
+    "by": "id",
+    "value": "button_back"
+  },
+  "title": {
+    "by": "id",
+    "value": "title",
+    "text": "Sign Up"
+  },
+  "logo": {
+    "by": "id",
+    "value": "logo_signup",
+    "text": "Logo"
+  },
+  "email_input": {
+    "by": "id",
+    "value": "input_email",
+    "text": "Email"
+  },
+  "password_input": {
+    "by": "id",
+    "value": "input_password",
+    "text": "Password"
+  },
+  "confirm_password_input": {
+    "by": "id",
+    "value": "input_confirm_password",
+    "text": "Confirm Password"
+  },
+  "password_toggle": {
+    "by": "id",
+    "value": "button_toggle_password"
+  },
+  "terms_checkbox": {
+    "by": "id",
+    "value": "checkbox_terms_consent"
+  },
+  "terms_text": {
+    "by": "id",
+    "value": "typo_consent",
+    "text": "I agree to the Terms of Use and Privacy Policy"
+  },
+  "signup_button": {
+    "by": "id",
+    "value": "button_signup",
+    "text": "Confirm"
+  },
+  "signin_button": {
+    "by": "id",
+    "value": "button_signin"
+  },
+  "signin_text": {
+    "by": "id",
+    "value": "text_navigate_to_signin",
+    "text": "Already have an account? Sign in"
+  },
+  "app_version_text": {
+    "by": "id",
+    "value": "text_app_version_signup"
+  },
+  "error_message": {
+    "by": "id",
+    "value": "text_error_message"
+  }
+}

@@ -1,0 +1,14 @@
+# Backend and email-testing config: Rainmaker API URI, Mailosaur for verification emails.
+# Copy to deployment.yaml and set env vars, or run ci_setup_config.py in CI.
+# Placeholders: ${VAR} or ${VAR:-default}. CI sets DEPLOYMENT_URI from BASE_URL + API_VERSION if unset.
+
+mailosaur:
+  api_key: "${MAILOSAUR_API_KEY}"
+  server_id: "${MAILOSAUR_SERVER_ID}"
+  domain: "${MAILOSAUR_DOMAIN}"
+
+production:
+  broker: "${DEPLOYMENT_BROKER:-a1p72mufdu6064-ats.iot.us-east-1.amazonaws.com}"
+  ses_email: "${DEPLOYMENT_SES_EMAIL:-noreply-esp-rainmaker@espressif.com}"
+  uri: "${DEPLOYMENT_URI}"
+  password: "${DEPLOYMENT_PASSWORD:-Welcome01}"
