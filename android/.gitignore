@@ -14,5 +14,8 @@ local.properties
 release/
 sign/
 
+# Firebase / Google Services (use template for compilation)
+app/google-services.json
+
 # Bundle artifacts
 *.jsbundle

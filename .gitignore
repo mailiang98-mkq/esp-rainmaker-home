@@ -80,5 +80,8 @@ web-build/
 
 count_lines.py
 
+# Firebase / Google Services (use template for compilation)
+android/app/google-services.json
+
 # Cursor
 .cursor/

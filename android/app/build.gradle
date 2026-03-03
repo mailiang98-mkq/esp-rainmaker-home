@@ -3,6 +3,17 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 apply plugin: "com.google.gms.google-services"
 
+def googleServicesFile = file("google-services.json")
+if (!googleServicesFile.exists()) {
+    def templateFile = file("google-services.json.template")
+    if (templateFile.exists()) {
+        logger.warn("google-services.json not found — copying from template (placeholder values)")
+        templateFile.withInputStream { is -> googleServicesFile.withOutputStream { os -> os << is } }
+    } else {
+        logger.warn("google-services.json not found and no template available — Firebase features will fail")
+    }
+}
+
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
 /**

@@ -27,6 +27,7 @@ const PATHS = {
   buildGradle: path.join(ROOT, 'android/app/build.gradle'),
   settingsGradle: path.join(ROOT, 'android/settings.gradle'),
   googleServices: path.join(ROOT, 'android/app/google-services.json'),
+  googleServicesTemplate: path.join(ROOT, 'android/app/google-services.json.template'),
 };
 
 /* =====================================================
@@ -184,8 +185,21 @@ function updateApplicationId(appId) {
   }
 }
 
+function ensureGoogleServicesExists() {
+  if (fs.existsSync(PATHS.googleServices)) return true;
+
+  if (fs.existsSync(PATHS.googleServicesTemplate)) {
+    fs.copyFileSync(PATHS.googleServicesTemplate, PATHS.googleServices);
+    console.log(`  ✓ google-services.json created from template (placeholder values)`);
+    return true;
+  }
+
+  console.warn(`  ⚠ google-services.json not found and no template available`);
+  return false;
+}
+
 function updateGoogleServices(appId) {
-  if (!fs.existsSync(PATHS.googleServices)) return;
+  if (!ensureGoogleServicesExists()) return;
 
   try {
     const json = JSON.parse(read(PATHS.googleServices));
