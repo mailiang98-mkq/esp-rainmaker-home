@@ -20,6 +20,7 @@ import {
   ESPCDFCreateHomeRequestParams,
   AddDeviceParams,
   ESPCDFSubscribeToNodeUpdatesRequestParams,
+  ESPCDFMatterPrecommissionInfo,
 } from "../types";
 import {
   ESPCDFOperationEventEmitter,
@@ -362,5 +363,53 @@ export class ESPCDFUser implements ESPCDFUserInterface {
       return;
     }
     return this.operations.unsubscribeFromNodeUpdates();
+  }
+
+  // Matter commissioning operations (available when ESPRMMatterBase adaptor is active)
+
+  async getGroupsAndFabrics(): Promise<ESPCDFGroup[]> {
+    if (!this.operations.getGroupsAndFabrics) {
+      throw new Error(
+        "getGroupsAndFabrics not available on current adaptor"
+      );
+    }
+    return this.runAndEmit(
+      "getGroupsAndFabrics",
+      () => this.operations.getGroupsAndFabrics!(),
+      (result) => result
+    );
+  }
+
+  async prepareFabricForMatterCommissioning(
+    group: ESPCDFGroup
+  ): Promise<ESPCDFGroup> {
+    if (!this.operations.prepareFabricForMatterCommissioning) {
+      throw new Error(
+        "prepareFabricForMatterCommissioning not available on current adaptor"
+      );
+    }
+    return this.runAndEmit(
+      "prepareFabricForMatterCommissioning",
+      () => this.operations.prepareFabricForMatterCommissioning!(group),
+      (result) => result
+    );
+  }
+
+  async isUserNocAvailableForFabric(fabricId: string): Promise<boolean> {
+    if (!this.operations.isUserNocAvailableForFabric) {
+      return false;
+    }
+    return this.operations.isUserNocAvailableForFabric(fabricId);
+  }
+
+  async storePrecommissionInfo(
+    info: ESPCDFMatterPrecommissionInfo
+  ): Promise<void> {
+    if (!this.operations.storePrecommissionInfo) {
+      throw new Error(
+        "storePrecommissionInfo not available on current adaptor"
+      );
+    }
+    return this.operations.storePrecommissionInfo(info);
   }
 }

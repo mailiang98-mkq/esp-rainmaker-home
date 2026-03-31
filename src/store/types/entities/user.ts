@@ -8,6 +8,7 @@ import {
   ESPCDFAPIResponse,
   ESPCDFPaginatedAPIResponse,
   ESPCDFAPIDataResponse,
+  ESPCDFGroupInterface,
 } from "../../types";
 import type { GroupStoreCallbacks } from "../callbacks";
 import type {
@@ -46,7 +47,9 @@ export type ESPCDFUserOperationType =
   | "createHome"
   | "addDevice"
   | "subscribeToNodeUpdates"
-  | "unsubscribeFromNodeUpdates";
+  | "unsubscribeFromNodeUpdates"
+  | "getGroupsAndFabrics"
+  | "prepareFabricForMatterCommissioning";
 
 export interface ESPCDFUserInfo {
   id: string;
@@ -131,6 +134,16 @@ export interface ESPCDFUserOperation {
    * Unsubscribe from node updates and release subscription manager resources.
    */
   unsubscribeFromNodeUpdates?(): Promise<void>;
+
+  // Optional Matter commissioning operations
+  getGroupsAndFabrics?(): Promise<ESPCDFGroup[]>;
+  prepareFabricForMatterCommissioning?(
+    group: ESPCDFGroup
+  ): Promise<ESPCDFGroup>;
+  isUserNocAvailableForFabric?(fabricId: string): Promise<boolean>;
+  storePrecommissionInfo?(
+    info: ESPCDFMatterPrecommissionInfo
+  ): Promise<void>;
 }
 
 export interface ESPCDFSubscribeToNodeUpdatesRequestParams {
@@ -195,4 +208,17 @@ export interface ESPCDFCreateGroupRequest {
   type?: string;
   mutuallyExclusive?: boolean;
   metadata?: Record<string, any>;
+}
+
+export interface ESPCDFMatterPrecommissionInfo {
+  groupId: string;
+  fabricId: string;
+  name: string;
+  userNoc: string;
+  matterUserId: string;
+  rootCa: string;
+  ipk?: string;
+  groupCatIdOperate?: string;
+  groupCatIdAdmin?: string;
+  userCatId?: string;
 }

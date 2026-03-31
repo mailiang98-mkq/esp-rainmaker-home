@@ -17,6 +17,8 @@ import {
   ESPCDFGroupSharingInfoInterface,
   ESPCDFScheduleCreateInput,
   ESPCDFAutomationCreateInput,
+  ESPCDFIssueUserNoCResponse,
+  ESPCDFCommissioningProgress,
 } from "../types";
 import { ESPCDFNode } from "./ESPCDFNode";
 import { ESPCDFScene } from "./ESPCDFScene";
@@ -45,6 +47,7 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
   customData?: Record<string, any>;
   isMatter?: boolean;
   fabricId?: string;
+  fabricDetails?: Record<string, any>;
   _raw: any;
   operations: ESPCDFGroupOperation;
   readonly events: ESPCDFOperationEventEmitter<
@@ -72,6 +75,7 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
     this.customData = groupData.customData;
     this.isMatter = groupData.isMatter;
     this.fabricId = groupData.fabricId;
+    this.fabricDetails = groupData.fabricDetails;
     this._raw = groupData._raw;
     this.events = new ESPCDFOperationEventEmitter<
       ESPCDFGroup,
@@ -410,5 +414,36 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
 
   async leave(): Promise<ESPCDFAPIResponse> {
     return this.runAndEmit("leave", () => this.operations.leave(), () => this);
+  }
+
+  // Matter fabric commissioning operations (only when isMatter === true)
+
+  async issueUserNoC(): Promise<ESPCDFIssueUserNoCResponse> {
+    if (!this.operations.issueUserNoC) {
+      throw new Error(
+        "issueUserNoC not available - group is not a Matter fabric"
+      );
+    }
+    return this.runAndEmit(
+      "issueUserNoC",
+      () => this.operations.issueUserNoC!(),
+      (result) => result
+    );
+  }
+
+  async startCommissioning(
+    qrData: string,
+    onProgress?: (message: ESPCDFCommissioningProgress) => void
+  ): Promise<() => void> {
+    if (!this.operations.startCommissioning) {
+      throw new Error(
+        "startCommissioning not available - group is not a Matter fabric"
+      );
+    }
+    return this.runAndEmit(
+      "startCommissioning",
+      () => this.operations.startCommissioning!(qrData, onProgress),
+      () => ({ qrData })
+    );
   }
 }

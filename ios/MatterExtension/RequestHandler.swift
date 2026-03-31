@@ -11,10 +11,10 @@ import MatterSupport
 class RequestHandler: MatterAddDeviceExtensionRequestHandler {
     override func validateDeviceCredential(_ deviceCredential: MatterAddDeviceExtensionRequestHandler.DeviceCredential) async throws {
         // Use this function to perform additional attestation checks if that is useful for your ecosystem.
-      DispatchQueue.main.async {
-        ESPMatterExtensionEcoInfo.shared.saveCertDeclaration(certDeclaration: deviceCredential.certificationDeclaration)
-        ESPMatterExtensionEcoInfo.shared.saveAttestationInfo(attestationInfo: deviceCredential.deviceAttestationCertificate)
-      }
+        await MainActor.run {
+            ESPMatterExtensionEcoInfo.shared.saveCertDeclaration(certDeclaration: deviceCredential.certificationDeclaration)
+            ESPMatterExtensionEcoInfo.shared.saveAttestationInfo(attestationInfo: deviceCredential.deviceAttestationCertificate)
+        }
     }
 
     override func selectWiFiNetwork(from wifiScanResults: [MatterAddDeviceExtensionRequestHandler.WiFiScanResult]) async throws -> MatterAddDeviceExtensionRequestHandler.WiFiNetworkAssociation {
@@ -31,9 +31,10 @@ class RequestHandler: MatterAddDeviceExtensionRequestHandler {
 
     override func commissionDevice(in home: MatterAddDeviceRequest.Home?, onboardingPayload: String, commissioningID: UUID) async throws {
         // Use this function to commission the device with your Matter stack.
-      DispatchQueue.main.async {
-        ESPMatterExtensionEcoInfo.shared.saveOnboardingPayload(onboardingPayload: onboardingPayload)
-      }
+        // MainActor + await: ensure app group UserDefaults are written before this returns, so the host app can read the payload immediately after MatterAddDeviceRequest.perform().
+        await MainActor.run {
+            ESPMatterExtensionEcoInfo.shared.saveOnboardingPayload(onboardingPayload: onboardingPayload)
+        }
     }
 
     override func rooms(in home: MatterAddDeviceRequest.Home?) async -> [MatterAddDeviceRequest.Room] {
@@ -44,8 +45,8 @@ class RequestHandler: MatterAddDeviceExtensionRequestHandler {
 
     override func configureDevice(named name: String, in room: MatterAddDeviceRequest.Room?) async {
         // Use this function to configure the (now) commissioned device with the given name and room.
-      DispatchQueue.main.async {
-        ESPMatterExtensionEcoInfo.shared.saveDeviceName(deviceName: name)
-      }
+        await MainActor.run {
+            ESPMatterExtensionEcoInfo.shared.saveDeviceName(deviceName: name)
+        }
     }
 }

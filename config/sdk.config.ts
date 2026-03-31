@@ -91,4 +91,10 @@ export const SDK_FEATURE_MAP: Record<string, Record<string, boolean>> = {
     // API-only / env-controlled — always true at SDK level
     aiAgent: true, thirdPartyAuth: true, voiceAssistants: true,
   },
+  'rainmaker-matter-sdk': {
+    scenes: true, schedules: true, automations: true, localControl: true,
+    notifications: true, groupSharing: true, ota: true,
+    aiAgent: true, thirdPartyAuth: true, voiceAssistants: true,
+    matterCommissioning: true,
+  },
 };
