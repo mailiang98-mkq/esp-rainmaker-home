@@ -122,7 +122,7 @@ export interface ESPCDFGroupInterface {
   subGroups?: ESPCDFGroupInterface[];
   isPrimaryUser?: boolean;
   totalNodes?: number;
-  parentGroupId?: string;
+  parentId?: string;
   type?: string;
   mutuallyExclusive?: boolean;
   description?: string;

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
@@ -25,15 +25,17 @@ import { globalStyles } from "@shared/theme/globalStyleSheet";
 
 // Types
 import { AddUserModalProps } from "@src/types/global";
+import { getGroupSharingAllowedTypes } from "@features/group/utils/settingsHelpers";
+import { getFeatures } from "@config/features.config";
 
 /**
  * AddUserModal Component
  *
  * Modal dialog for adding new users to share the device.
- * Handles email input and validation.
+ * Handles invite identifier and validation.
  *
  * Features:
- * - Email input
+ * - Email and/or 6-character user code (per SDK `groupSharingAllowedTypes`)
  * - Input validation
  * - Loading state
  * - Success/error handling
@@ -45,42 +47,46 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   onClose,
   onAdd,
   email,
-  handleEmailChange,
+  handleInviteChange,
   isLoading,
-  validateEmail,
+  inviteValidator,
+  isInviteValid,
   makePrimary = false,
   onMakePrimaryChange,
   transfer = false,
   onTransferChange,
   transferAndAssignRole = false,
   onTransferAndAssignRoleChange,
+  contentContainerStyle,
 }) => {
   const { t } = useTranslation();
+  const transferGroupSharingEnabled = getFeatures().transferGroupSharing;
 
-  /**
-   * Email validator for use with Input component - adapts the parent's validateEmail function
-   */
-  const emailValidator = (
-    emailInput: string,
-  ): { isValid: boolean; error?: string } => {
-    if (!emailInput.trim()) {
-      return { isValid: false };
-    }
-    const isValid = validateEmail(emailInput);
-    if (!isValid) {
-      return {
-        isValid: false,
-        error: t("group.validation.pleaseEnterValidEmail"),
-      };
-    }
-    return { isValid: true };
-  };
+  const inviteFieldProps = useMemo(() => {
+    const allowed = getGroupSharingAllowedTypes();
+    const allowsUserCode = allowed.includes("userCode");
+    const allowsEmail = allowed.includes("email");
+    const both = allowsEmail && allowsUserCode;
+    return {
+      description: both
+        ? t("group.settings.addUserModalDescriptionEmailOrUserCode")
+        : t("group.settings.addUserModalDescription"),
+      placeholder: both
+        ? t("group.settings.addUserModalEmailOrUserCodePlaceholder")
+        : allowsUserCode && !allowsEmail
+          ? t("group.settings.addUserModalUserCodePlaceholder")
+          : t("group.settings.addUserModalEmailPlaceholder"),
+      inputMode: (both || allowsUserCode ? "text" : "email") as
+        | "text"
+        | "email",
+      keyboardType: (both || allowsUserCode ? "default" : "email-address") as
+        | "default"
+        | "email-address",
+    };
+  }, [t]);
 
-  /**
-   * Email field change handler - adapts to work with new Input component
-   */
-  const handleFieldChange = (value: string) => {
-    handleEmailChange(value);
+  const handleFieldChange = (value: string, isValid: boolean) => {
+    handleInviteChange(value, isValid);
   };
 
   /**
@@ -128,22 +134,24 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       onRequestClose={onClose}
     >
       <View style={globalStyles.modalOverlay}>
-        <View style={globalStyles.modalContent}>
+        <View style={[globalStyles.modalContent, contentContainerStyle]}>
           <Text style={globalStyles.modalTitle}>
             {t("group.settings.addUserModalTitle")}
           </Text>
           <Text style={globalStyles.modalDescription}>
-            {t("group.settings.addUserModalDescription")}
+            {inviteFieldProps.description}
           </Text>
           <Input
+            key={inviteFieldProps.placeholder}
             icon="mail-open"
-            placeholder={t("group.settings.addUserModalEmailPlaceholder")}
+            placeholder={inviteFieldProps.placeholder}
             initialValue={email}
             onFieldChange={handleFieldChange}
-            validator={emailValidator}
+            validator={inviteValidator}
             validateOnChange={true}
             debounceDelay={500}
-            inputMode="email"
+            inputMode={inviteFieldProps.inputMode}
+            keyboardType={inviteFieldProps.keyboardType}
             style={{ width: "100%" }}
           />
 
@@ -188,89 +196,101 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             </Text>
           </TouchableOpacity>
 
-          {/* Transfer Group Checkbox */}
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 5,
-              marginBottom: 10,
-            }}
-            onPress={() => handleTransferChange(!transfer)}
-            disabled={isLoading}
-          >
-            <View
-              style={[
-                globalStyles.checkbox,
-                {
-                  backgroundColor: transfer
-                    ? tokens.colors.primary
-                    : "transparent",
-                  borderColor: transfer
-                    ? tokens.colors.primary
-                    : tokens.colors.bg2,
-                  marginRight: 12,
-                },
-              ]}
-            >
-              {transfer && (
-                <Check size={12} color={tokens.colors.white} strokeWidth={3} />
-              )}
-            </View>
-            <Text
+          {/* Transfer Group Checkbox — SDK / env gated */}
+          {transferGroupSharingEnabled && (
+            <TouchableOpacity
               style={{
-                flex: 1,
-                fontSize: 14,
-                color: tokens.colors.black,
-                lineHeight: 20,
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 5,
+                marginBottom: 10,
               }}
+              onPress={() => handleTransferChange(!transfer)}
+              disabled={isLoading}
             >
-              {t("group.settings.transferGroupDescription")}
-            </Text>
-          </TouchableOpacity>
+              <View
+                style={[
+                  globalStyles.checkbox,
+                  {
+                    backgroundColor: transfer
+                      ? tokens.colors.primary
+                      : "transparent",
+                    borderColor: transfer
+                      ? tokens.colors.primary
+                      : tokens.colors.bg2,
+                    marginRight: 12,
+                  },
+                ]}
+              >
+                {transfer && (
+                  <Check
+                    size={12}
+                    color={tokens.colors.white}
+                    strokeWidth={3}
+                  />
+                )}
+              </View>
+              <Text
+                style={{
+                  flex: 1,
+                  fontSize: 14,
+                  color: tokens.colors.black,
+                  lineHeight: 20,
+                }}
+              >
+                {t("group.settings.transferGroupDescription")}
+              </Text>
+            </TouchableOpacity>
+          )}
 
           {/* Transfer Group and Assign New Role Checkbox */}
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 5,
-              marginBottom: 10,
-            }}
-            onPress={() =>
-              handleTransferAndAssignRoleChange(!transferAndAssignRole)
-            }
-            disabled={isLoading}
-          >
-            <View
-              style={[
-                globalStyles.checkbox,
-                {
-                  backgroundColor: transferAndAssignRole
-                    ? tokens.colors.primary
-                    : "transparent",
-                  borderColor: transferAndAssignRole
-                    ? tokens.colors.primary
-                    : tokens.colors.bg2,
-                  marginRight: 12,
-                },
-              ]}
-            >
-              {transferAndAssignRole && (
-                <Check size={12} color={tokens.colors.white} strokeWidth={3} />
-              )}
-            </View>
-            <Text
+          {transferGroupSharingEnabled && (
+            <TouchableOpacity
               style={{
-                flex: 1,
-                fontSize: 14,
-                color: tokens.colors.black,
-                lineHeight: 20,
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 5,
+                marginBottom: 10,
               }}
+              onPress={() =>
+                handleTransferAndAssignRoleChange(!transferAndAssignRole)
+              }
+              disabled={isLoading}
             >
-              {t("group.settings.transferAndAssignRoleDescription")}
-            </Text>
-          </TouchableOpacity>
+              <View
+                style={[
+                  globalStyles.checkbox,
+                  {
+                    backgroundColor: transferAndAssignRole
+                      ? tokens.colors.primary
+                      : "transparent",
+                    borderColor: transferAndAssignRole
+                      ? tokens.colors.primary
+                      : tokens.colors.bg2,
+                    marginRight: 12,
+                  },
+                ]}
+              >
+                {transferAndAssignRole && (
+                  <Check
+                    size={12}
+                    color={tokens.colors.white}
+                    strokeWidth={3}
+                  />
+                )}
+              </View>
+              <Text
+                style={{
+                  flex: 1,
+                  fontSize: 14,
+                  color: tokens.colors.black,
+                  lineHeight: 20,
+                }}
+              >
+                {t("group.settings.transferAndAssignRoleDescription")}
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <View style={globalStyles.modalActions}>
             <ActionButton
@@ -288,7 +308,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
             <ActionButton
               onPress={onAdd}
-              disabled={isLoading}
+              disabled={isLoading || !isInviteValid}
               variant="primary"
               style={{ flex: 1 }}
             >

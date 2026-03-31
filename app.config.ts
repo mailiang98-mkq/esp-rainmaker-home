@@ -2,7 +2,6 @@ export default {
   expo: {
     name: process.env.APP_NAME || "ESP RainMaker Home",
     slug: process.env.APP_SLUG || "esp-rainmaker-home",
-    scheme: process.env.APP_SCHEME || "esp-rainmaker-home",
     version: process.env.APP_VERSION || "3.5.0",
     orientation: "portrait",
     icon: "./src/assets/images/logo.png",
@@ -74,6 +73,19 @@ export default {
       matterSdk: {
         vendorId: process.env.MATTER_VENDOR_ID,
       },
+      // RMNG SDK (namespaced)
+      rmngSdk: {
+        baseUrl: process.env.RMNG_BASE_URL,
+        apiPath: process.env.RMNG_API_PATH,
+        userApiBase: process.env.RMNG_USER_API_BASE,
+        userApiBaseUrl: process.env.RMNG_USER_API_BASE_URL,
+        userApiPath: process.env.RMNG_USER_API_PATH,
+        identityId: process.env.RMNG_IDENTITY_ID,
+        awsRegion: process.env.RMNG_AWS_REGION,
+        userPoolId: process.env.RMNG_USER_POOL_ID,
+        clientId: process.env.RMNG_CLIENT_ID,
+        iotEndpoint: process.env.RMNG_IOT_ENDPOINT,
+      },
 
       // Active SDK identifier
       activeSdk: process.env.ACTIVE_SDK || 'rainmaker-base-sdk',
@@ -101,6 +113,7 @@ export default {
           : [],
         enableVoiceAssistants: process.env.ENABLE_VOICE_ASSISTANTS !== 'false',
         enableCdfAutoSync: process.env.ENABLE_CDF_AUTOSYNC !== 'false',
+        enableControlGroups: process.env.ENABLE_CONTROL_GROUPS !== 'false',
       }
 
     }

@@ -12,6 +12,8 @@ import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 import { useDeviceSelection } from "@features/provision/hooks";
 import type { ScheduleDeviceSelectionData } from "@src/types/global";
+import { useCDF } from "@shared/hooks/useCDF";
+import { ESPRMNGBaseAdaptorIdentifier } from "@config/sdk.identifiers";
 
 // Components
 import { Header, ScreenWrapper } from "@shared/components";
@@ -36,6 +38,9 @@ import DeviceSelectionList from "@shared/components/DeviceSelectionList";
  */
 export const ScheduleDeviceSelectionScreen = observer(() => {
   const { t } = useTranslation();
+  const { store } = useCDF();
+  const allowOfflineForSchedule =
+    store.getActiveAdaptorIdentifier() === ESPRMNGBaseAdaptorIdentifier;
   const {
     devices,
     selectedDevices,
@@ -70,6 +75,7 @@ export const ScheduleDeviceSelectionScreen = observer(() => {
               getDeviceActionValues={getDeviceActionValues}
               onDeviceSelect={handleDeviceSelect}
               onDeviceDelete={handleDeviceDelete}
+              treatOfflineAsOnline={allowOfflineForSchedule}
             />
 
             {/* Footer Actions */}

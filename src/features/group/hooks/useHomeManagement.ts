@@ -40,7 +40,7 @@ export interface UseHomeManagementResult {
   /** When options provided: handlers that handle toast and close dialog */
   handleCreateHome?: (newHomeName: string) => Promise<void>;
   handleRefresh?: () => Promise<void>;
-  /** Formatted description for a home (device/room counts); requires options. */
+  /** Formatted description for a home (device/group/room counts); requires options. */
   formatHomeDescription?: (home: ESPCDFGroup) => string;
 }
 
@@ -100,7 +100,8 @@ export function useHomeManagement(
           return { status: "success" };
         }
         return { status: "error" };
-      } catch {
+      } catch (error) {
+        console.error("Error creating home:", error);
         return { status: "error" };
       } finally {
         setLoading(false);

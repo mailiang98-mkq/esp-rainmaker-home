@@ -13,13 +13,16 @@ import {
   createCodeValidator,
   createPasswordValidator,
   createConfirmPasswordValidator,
+  isUsernameAllowedForAuth,
 } from "@features/auth/utils/authHelper";
+import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 
 export function useResetPassword() {
   const { t } = useTranslation();
   const { store } = useCDF();
-  const { email } = useLocalSearchParams();
+  const { username } = useLocalSearchParams();
   const toast = useToast();
+  const usernameFromRoute = typeof username === "string" ? username : "";
 
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -71,10 +74,19 @@ export function useResetPassword() {
   const handleResendCode = async () => {
     if (countdown > 0) return;
 
+    if (
+      !isUsernameAllowedForAuth(
+        usernameFromRoute,
+        getAuthAllowedUsernameTypes()
+      )
+    ) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await store?.userStore.auth?.forgotPassword({
-        username: email as string,
+        username: usernameFromRoute,
       });
       if (res) {
         toast.showSuccess(t("auth.verification.heading"));
@@ -103,10 +115,19 @@ export function useResetPassword() {
       return;
     }
 
+    if (
+      !isUsernameAllowedForAuth(
+        usernameFromRoute,
+        getAuthAllowedUsernameTypes()
+      )
+    ) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await store?.userStore.auth?.setNewPassword({
-        username: email as string,
+        username: usernameFromRoute,
         newPassword: newPassword,
         verificationCode: code,
       });
@@ -115,7 +136,7 @@ export function useResetPassword() {
         const { router } = await import("expo-router");
         router.dismissTo({
           pathname: "/(auth)/Login",
-          params: { email },
+          params: { username: usernameFromRoute },
         });
       }
     } catch (error: unknown) {

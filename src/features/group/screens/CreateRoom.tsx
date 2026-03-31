@@ -14,6 +14,8 @@ import {
   CreateRoomNameSection,
   CreateRoomDeviceSection,
   CreateRoomFooter,
+  GroupSharing,
+  AddUserModal,
 } from "@features/group/components";
 import { testProps } from "@shared/utils/testProps";
 import { useToast } from "@shared/hooks/useToast";
@@ -21,6 +23,7 @@ import {
   useCreateRoom,
   type UseCreateRoomOptions,
 } from "@features/group/hooks";
+import { getFeatures } from "@config/features.config";
 
 /**
  * Create Room screen – UI / presentation layer.
@@ -55,6 +58,28 @@ const CreateRoom = () => {
     handleUpdate,
     handleDelete,
     confirmDelete,
+    isRoomSharePrimary,
+    roomSharedUsers,
+    roomPendingUsers,
+    roomSharedByUser,
+    isAddingRoomUser,
+    setIsAddingRoomUser,
+    newRoomUserInvite,
+    makeRoomUserPrimary,
+    setMakeRoomUserPrimary,
+    transferRoom,
+    setTransferRoom,
+    transferRoomAndAssignRole,
+    setTransferRoomAndAssignRole,
+    isAddingRoomUserLoading,
+    removeRoomUserLoading,
+    handleAddRoomUser,
+    handleRemoveRoomUser,
+    handleRemoveRoomPendingUser,
+    handleCloseAddRoomUserModal,
+    handleRoomInviteChange,
+    roomInviteValidator,
+    isRoomInviteValid,
   } = useCreateRoom({
     homeId: id,
     roomId,
@@ -63,6 +88,8 @@ const CreateRoom = () => {
     t,
     router: router as UseCreateRoomOptions["router"],
   });
+
+  const subGroupSharingEnabled = getFeatures().subGroupSharing;
 
   return (
     <>
@@ -120,6 +147,22 @@ const CreateRoom = () => {
             placeholderTestId="text_create_room"
           />
 
+          {subGroupSharingEnabled && room && (
+            <GroupSharing
+              sharedUsers={roomSharedUsers}
+              pendingUsers={roomPendingUsers}
+              sharedByUser={roomSharedByUser}
+              onRemoveUser={handleRemoveRoomUser}
+              onRemovePendingUser={handleRemoveRoomPendingUser}
+              onAddUser={() => setIsAddingRoomUser(true)}
+              isPrimaryUser={isRoomSharePrimary}
+              isLoading={
+                removeRoomUserLoading || isAddingRoomUserLoading
+              }
+              containerStyle={{ marginTop: tokens.spacing._15 }}
+            />
+          )}
+
           <CreateRoomFooter
             saveLabel={t("layout.shared.save")}
             deleteLabel={t("layout.shared.delete")}
@@ -132,6 +175,25 @@ const CreateRoom = () => {
             onDelete={handleDelete}
           />
         </ScrollView>
+
+        {subGroupSharingEnabled && room && (
+          <AddUserModal
+            visible={isAddingRoomUser}
+            onClose={handleCloseAddRoomUserModal}
+            onAdd={handleAddRoomUser}
+            email={newRoomUserInvite}
+            handleInviteChange={handleRoomInviteChange}
+            isLoading={isAddingRoomUserLoading}
+            inviteValidator={roomInviteValidator}
+            isInviteValid={isRoomInviteValid}
+            makePrimary={makeRoomUserPrimary}
+            onMakePrimaryChange={setMakeRoomUserPrimary}
+            transfer={transferRoom}
+            onTransferChange={setTransferRoom}
+            transferAndAssignRole={transferRoomAndAssignRole}
+            onTransferAndAssignRoleChange={setTransferRoomAndAssignRole}
+          />
+        )}
       </ScreenWrapper>
 
       <ConfirmationDialog

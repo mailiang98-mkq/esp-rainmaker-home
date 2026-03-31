@@ -121,7 +121,10 @@ const ParamControlWrap = observer(
             value: state.value,
             onValueChange: handleValueChange,
             disabled: disabled,
-            meta: getParamBounds(param),
+            meta: {
+              ...getParamBounds(param),
+              dataType: param.dataType,
+            },
           },
         );
       });

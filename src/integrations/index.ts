@@ -6,10 +6,15 @@
 
 import { ESPCDF, AdaptorRegistry, initCDF, ESPSDKAdaptor } from "@store";
 import { ESPRMBaseSDKAdaptor, ESPRMBaseAdaptorIdentifier } from '@sdk-adaptors/ESPRMBase';
+import { ESPRMNGBaseSDKAdaptor, ESPRMNGBaseAdaptorIdentifier } from '@sdk-adaptors/ESPRMNGBase';
 import { ESPRMMatterBaseSDKAdaptor, ESPRMMatterBaseAdaptorIdentifier } from '@sdk-adaptors/ESPRMMatterBase';
-import { ActiveSDK, getRMSDKConfig, getMatterSDKConfig } from '@config/sdk.config';
 import { runtimeConfigManager } from '@config/runtime.config';
-
+import {
+    getResolvedActiveSdk,
+    getRMSDKConfig,
+    getRMNGSDKConfig,
+    getMatterSDKConfig,
+  } from '@config/sdk.config';
 /**
  * Available adaptor identifiers.
  * Add new SDK adaptor identifiers here as new integrations are added.
@@ -17,6 +22,7 @@ import { runtimeConfigManager } from '@config/runtime.config';
 export const ADAPTOR_IDENTIFIERS = {
     ESPRM_BASE: ESPRMBaseAdaptorIdentifier,
     ESPRM_MATTER_BASE: ESPRMMatterBaseAdaptorIdentifier,
+    ESPRMNG_BASE: ESPRMNGBaseAdaptorIdentifier,
 } as const;
 
 /**
@@ -28,6 +34,7 @@ class AdaptorFactory {
         return [
             new ESPRMBaseSDKAdaptor(getRMSDKConfig()),
             new ESPRMMatterBaseSDKAdaptor(getMatterSDKConfig()),
+            new ESPRMNGBaseSDKAdaptor(getRMNGSDKConfig()),
         ];
     }
 }
@@ -84,7 +91,10 @@ class CDFBootstrap {
             });
 
             this.safeExecute(
-                () => this.sdkRegistry.setActiveAdaptor(ActiveSDK as string),
+                () =>
+                    this.sdkRegistry.setActiveAdaptor(
+                        getResolvedActiveSdk() as string
+                    ),
                 '[CDFBootstrap] Failed to set active adaptor:'
             );
 
@@ -112,7 +122,10 @@ class CDFBootstrap {
             throw new Error('[CDFBootstrap] CDF instance not initialized. Call initialize() first.');
         }
         this.safeExecute(
-            () => this.cdfInstance!.sdkAdaptorRegistry.setActiveAdaptor(ActiveSDK as string),
+            () =>
+                this.cdfInstance!.sdkAdaptorRegistry.setActiveAdaptor(
+                    getResolvedActiveSdk() as string
+                ),
             '[CDFBootstrap] Failed to sync active adaptor:'
         );
     }

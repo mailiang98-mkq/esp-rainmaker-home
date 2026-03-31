@@ -4,15 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@shared/hooks/useToast";
+import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 import {
-  createEmailValidator,
+  createAuthUsernameValidator,
   createPasswordValidator,
   createConfirmPasswordValidator,
+  isUsernameAllowedForAuth,
 } from "@features/auth/utils/authHelper";
 
 export function useSignup() {
@@ -30,7 +32,10 @@ export function useSignup() {
   const [consentChecked, setConsentChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const emailValidator = createEmailValidator(t);
+  const emailValidator = useMemo(
+    () => createAuthUsernameValidator(getAuthAllowedUsernameTypes(), t),
+    [t]
+  );
   const passwordValidator = createPasswordValidator(t);
   const confirmPasswordValidator = createConfirmPasswordValidator(
     () => password,
@@ -59,6 +64,11 @@ export function useSignup() {
       !isConfirmPasswordValid ||
       !consentChecked
     ) {
+      return;
+    }
+
+    const allowed = getAuthAllowedUsernameTypes();
+    if (!isUsernameAllowedForAuth(email, allowed)) {
       return;
     }
 

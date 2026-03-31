@@ -4,33 +4,78 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // Hooks
 import { useCDF } from "@shared/hooks/useCDF";
 import { useToast } from "@shared/hooks/useToast";
+import { useTranslation } from "react-i18next";
+import type { ESPCDFGroupSharingRequest } from "@store";
+import { ESPCDFGroupSharingStatus } from "@store";
+import type { SharingItem } from "@src/types/global";
+
+type ActionLoadingEntry = {
+  acceptLoading?: boolean;
+  declineLoading?: boolean;
+};
+
+function stableRequestId(item: { id: string }): string {
+  return item.id;
+}
 
 export const useNotificationCenter = () => {
   const { store, syncHomeWithNodes } = useCDF();
   const toast = useToast();
+  const { t } = useTranslation();
 
   const user = store?.userStore.user;
-  const [sharingList, setSharingList] = useState<any[]>([]);
+  const [sharingList, setSharingList] = useState<SharingItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [actionLoadingById, setActionLoadingById] = useState<
+    Record<string, ActionLoadingEntry>
+  >({});
 
   useEffect(() => {
     loadSharingRequests();
   }, []);
 
+  const mapGroupSharingRequestToSharingItem = (
+    request: ESPCDFGroupSharingRequest,
+  ): SharingItem => {
+    const status: SharingItem["status"] =
+      request.status === ESPCDFGroupSharingStatus.rejected
+        ? "declined"
+        : request.status;
+
+    return {
+      type: "group",
+      id: request.id,
+      request,
+      groupIds: request.groupIds,
+      primaryUsername: request.primaryUsername,
+      timestamp: request.timestamp,
+      status,
+      accept: async () => {
+        await request.accept();
+      },
+      decline: async () => {
+        await request.decline();
+      },
+    };
+  };
+
   const loadSharingRequests = async () => {
     setIsLoading(true);
     try {
-      const sharingRequests: any[] = [];
-      const groupSharingRequests = await user?.getReceivedGroupSharingRequests();
-      if (groupSharingRequests) {
-        sharingRequests.push(...groupSharingRequests.data);
-      }
-      setSharingList(sharingRequests.sort((a: any, b: any) => b.timestamp - a.timestamp));
+      const groupSharingRequests =
+        await user?.getReceivedGroupSharingRequests();
+
+      const requests = groupSharingRequests?.data ?? [];
+      const sharingItems = requests
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .map(mapGroupSharingRequestToSharingItem);
+
+      setSharingList(sharingItems);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -48,46 +93,72 @@ export const useNotificationCenter = () => {
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   };
 
-  const handleAccept = async (request: any, accept: boolean) => {
-    setIsLoading(true);
+  const handleAccept = async (item: SharingItem, accept: boolean) => {
+    const key = stableRequestId(item);
+
+    setActionLoadingById((prev) => ({
+      ...prev,
+      [key]: accept
+        ? { acceptLoading: true, declineLoading: false }
+        : { acceptLoading: false, declineLoading: true },
+    }));
+
     try {
-      request.loading = true;
       if (accept) {
-        request.acceptLoading = true;
-        await request.accept();
+        await item.accept();
+        const shouldFetchFirstPage = true;
+        await syncHomeWithNodes(shouldFetchFirstPage);
       } else {
-        request.declineLoading = true;
-        await request.decline();
+        await item.decline();
       }
       setSharingList((prev) =>
         prev.map((item) =>
-          item.id === request.id
+          item.id === key
             ? { ...item, status: accept ? "accepted" : "declined" }
             : item
         )
       );
-      const shouldFetchFirstPage = true;
-      syncHomeWithNodes(shouldFetchFirstPage);
-
-      if (request.type === "group") {
-        store.groupStore.currentHomeId = request.groupIds[0];
+      if (item.type === "group" && item.groupIds[0]) {
+        store.groupStore.currentHomeId = item.groupIds[0];
       }
-      setIsLoading(false);
+      await loadSharingRequests();
+      toast.showSuccess(
+        accept
+          ? t("user.notifications.sharingRequestAccepted")
+          : t("user.notifications.sharingRequestDeclined")
+      );
     } catch (error) {
       toast.showError("Failed to update request");
       console.error("Error updating request:", error);
     } finally {
-      request.loading = false;
-      request.acceptLoading = false;
-      request.declineLoading = false;
-      setIsLoading(false);
+      setActionLoadingById((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
     }
   };
+
+  const getActionLoadingForRequest = useCallback(
+    (item: SharingItem) => {
+      const key = stableRequestId(item);
+      const s = actionLoadingById[key];
+      const acceptLoading = Boolean(s?.acceptLoading);
+      const declineLoading = Boolean(s?.declineLoading);
+      return {
+        acceptLoading,
+        declineLoading,
+        loading: acceptLoading || declineLoading,
+      };
+    },
+    [actionLoadingById]
+  );
 
   return {
     sharingList,
     isLoading,
     formatTimestamp,
     handleAccept,
+    getActionLoadingForRequest,
   };
 };

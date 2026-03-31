@@ -214,13 +214,14 @@ The components are organized into the following directories:
   - Validation and error handling
   - Save confirmation
 
-### HomeSharing
+### GroupSharing
 
-- **Purpose**: Home sharing management component
+- **Purpose**: Group sharing management (home or subgroup)
 - **Features**:
   - User permissions display
-  - Share home functionality
+  - Share group functionality
   - Remove shared access controls
+  - Optional `containerStyle` for layout spacing
 
 ### HomeRemove
 

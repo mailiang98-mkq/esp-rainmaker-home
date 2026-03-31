@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useMemo } from "react";
 import { View, Text, KeyboardAvoidingView, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 
 import { useForgotPassword } from "@features/auth/hooks";
+import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 
 import {
   Input,
@@ -31,6 +33,20 @@ export function ForgotPasswordScreen() {
     handleEmailChange,
     sendVerificationCode,
   } = useForgotPassword();
+
+  const usernameFieldProps = useMemo(() => {
+    const allowsPhone = getAuthAllowedUsernameTypes().includes("phone");
+    return {
+      placeholder: allowsPhone
+        ? t("auth.shared.emailOrPhonePlaceholder")
+        : t("auth.shared.emailPlaceholder"),
+      inputMode: (allowsPhone ? "text" : "email") as "text" | "email",
+      keyboardType: allowsPhone ? ("default" as const) : ("email-address" as const),
+      subtitle: allowsPhone
+        ? t("auth.forgotPassword.subtitleEmailOrPhone")
+        : t("auth.forgotPassword.subtitle"),
+    };
+  }, [t]);
 
   return (
     <>
@@ -70,7 +86,7 @@ export function ForgotPasswordScreen() {
                 globalStyles.verificationSubtitle,
               ]}
             >
-              {t("auth.forgotPassword.subtitle")}
+              {usernameFieldProps.subtitle}
             </Text>
             <View
               {...testProps("view_input_forgot")}
@@ -78,12 +94,13 @@ export function ForgotPasswordScreen() {
             >
               <Input
                 icon="mail-open"
-                placeholder={t("auth.shared.emailPlaceholder")}
+                placeholder={usernameFieldProps.placeholder}
                 onFieldChange={handleEmailChange}
                 validator={emailValidator}
                 validateOnChange={true}
                 debounceDelay={500}
-                inputMode="email"
+                inputMode={usernameFieldProps.inputMode}
+                keyboardType={usernameFieldProps.keyboardType}
                 autoFocus
                 qaId="email_forgot"
               />

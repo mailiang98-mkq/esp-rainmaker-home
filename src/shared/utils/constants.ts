@@ -66,6 +66,7 @@ export const ESPRM_CCT_PARAM_TYPE = "esp.param.cct";
 export const ESPRM_HUE_PARAM_TYPE = "esp.param.hue";
 export const ESPRM_SATURATION_PARAM_TYPE = "esp.param.saturation";
 export const ESPRM_TEMPERATURE_PARAM_TYPE = "esp.param.temperature";
+export const ESPRM_LIGHT_MODE_PARAM_TYPE = "esp.param.light-mode";
 export const ESPRM_FACTORY_RESET_PARAM_TYPE = "esp.param.factory-reset";
 export const ESPRM_REBOOT_PARAM_TYPE = "esp.param.reboot";
 export const ESPRM_WIFI_RESET_PARAM_TYPE = "esp.param.wifi-reset";

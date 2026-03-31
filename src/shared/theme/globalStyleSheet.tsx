@@ -442,6 +442,22 @@ export const globalStyles = StyleSheet.create({
     alignItems: "center",
     gap: tokens.spacing._10,
   },
+  userClientCodeCardBody: {
+    paddingVertical: tokens.spacing._15,
+  },
+  userClientCodeValueRow: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: "flex-end",
+  },
+  userClientCodeText: {
+    flexShrink: 1,
+    fontSize: tokens.fontSize.sm,
+    fontFamily: tokens.fonts.medium,
+    color: tokens.colors.black,
+    letterSpacing: 0.5,
+    textAlign: "right",
+  },
   permissionBadge: {
     backgroundColor: tokens.colors.primary + "20",
     paddingHorizontal: tokens.spacing._10,
@@ -598,6 +614,90 @@ export const globalStyles = StyleSheet.create({
   deviceCardDisabled: {
     opacity: 0.5,
   },
+
+  /** Home list card for group-control subgroup; pair with `shadowElevationForLightTheme`. */
+  controlGroupCard: {
+    position: "relative",
+    marginTop: 12,
+    textAlign: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  controlGroupCardFlexWrap: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  controlGroupCardStack: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexShrink: 1,
+    justifyContent: "flex-start",
+    marginBottom: 5,
+  },
+  /** 46×46 ring; matches DeviceCard image footprint. */
+  controlGroupCardAvatarWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 3,
+    borderColor: tokens.colors.white,
+    backgroundColor: tokens.colors.bg1,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: tokens.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  controlGroupCardAvatar: {
+    width: 40,
+    height: 40,
+  },
+  controlGroupCardOverflowBubble: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: tokens.colors.bg1,
+  },
+  controlGroupCardOverflowText: {
+    fontSize: 9,
+    fontFamily: tokens.fonts.medium,
+    color: tokens.colors.black,
+  },
+  controlGroupCardSwitchPlaceholder: {
+    width: 44,
+    minHeight: 46,
+  },
+  controlGroupCardNameBlock: {
+    width: "100%",
+    paddingLeft: 5,
+  },
+  controlGroupCardName: {
+    marginTop: 4,
+    paddingRight: 0,
+    fontSize: tokens.fontSize.sm,
+    color: tokens.colors.gray,
+    fontFamily: tokens.fonts.medium,
+    width: "100%",
+  },
+  controlGroupCardStatusContainer: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+  },
+  controlGroupCardStatus: {
+    fontSize: tokens.fontSize.xs,
+    color: tokens.colors.gray,
+    fontFamily: tokens.fonts.regular,
+  },
+  controlGroupCardGroupBadge: {
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+  },
+
   deviceIconContainer: {
     width: 60,
     height: 60,

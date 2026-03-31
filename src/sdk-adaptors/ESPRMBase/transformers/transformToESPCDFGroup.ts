@@ -546,7 +546,7 @@ export function transformToESPCDFGroup(
         nodeIds: group.nodes || [],
         nodeDetails: group.nodeDetails?.map((node: ESPRMNode) => transformToESPCDFNode(node)) || [],
         subGroups: group.subGroups?.map((subGroup: ESPRMGroup) => transformToESPCDFGroup(subGroup, user, identifier)) || [],
-        parentGroupId: group.parentGroupId,
+        parentId: group.parentId,
         isPrimaryUser: group.isPrimaryUser || false,
         description: group.description || '',
         customData: group.customData || {},

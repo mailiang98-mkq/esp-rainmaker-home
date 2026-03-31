@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useMemo } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 
 import { useSignup } from "@features/auth/hooks";
@@ -45,6 +47,17 @@ export function SignupScreen() {
     signup,
   } = useSignup();
 
+  const usernameFieldProps = useMemo(() => {
+    const allowsPhone = getAuthAllowedUsernameTypes().includes("phone");
+    return {
+      placeholder: allowsPhone
+        ? t("auth.shared.emailOrPhonePlaceholder")
+        : t("auth.shared.emailPlaceholder"),
+      inputMode: (allowsPhone ? "text" : "email") as "text" | "email",
+      keyboardType: allowsPhone ? ("default" as const) : ("email-address" as const),
+    };
+  }, [t]);
+
   const isFormValid =
     isEmailValid &&
     isPasswordValid &&
@@ -74,12 +87,13 @@ export function SignupScreen() {
           >
             <Input
               icon="mail-open"
-              placeholder={t("auth.shared.emailPlaceholder")}
+              placeholder={usernameFieldProps.placeholder}
               onFieldChange={handleEmailChange}
               validator={emailValidator}
               validateOnChange={true}
               debounceDelay={500}
-              inputMode="email"
+              inputMode={usernameFieldProps.inputMode}
+              keyboardType={usernameFieldProps.keyboardType}
               qaId="email"
             />
 

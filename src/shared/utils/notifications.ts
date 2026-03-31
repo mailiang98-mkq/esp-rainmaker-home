@@ -56,7 +56,6 @@ export const fetchDeviceToken = async (): Promise<string | null> => {
     console.warn(ERROR_MESSAGES.MODULE_NOT_AVAILABLE);
     return null;
   }
-
   try {
     const deviceToken = await ESPNotificationModule.getDeviceToken();
     return deviceToken;

@@ -22,6 +22,7 @@ import {
   ESPRM_SCENES_SERVICE,
   ESPRM_SCHEDULES_SERVICE,
 } from "@sdk-adaptors/ESPRMBase/constants";
+import { ESPRMNGBaseAdaptorIdentifier } from "@config/sdk.identifiers";
 
 export type DeviceServiceType =
   | typeof ESPRM_SCENES_SERVICE
@@ -45,6 +46,10 @@ export const useDeviceSelection = (
   const scheduleContext = useSchedule();
 
   const context = identifier === "scene" ? sceneContext : scheduleContext;
+  const activeAdaptorIdentifier = store.getActiveAdaptorIdentifier();
+  const allowOfflineForSchedule =
+    identifier === "schedule" &&
+    activeAdaptorIdentifier === ESPRMNGBaseAdaptorIdentifier;
   const serviceType =
     identifier === "scene" ? ESPRM_SCENES_SERVICE : ESPRM_SCHEDULES_SERVICE;
   const paramsRoute =
@@ -153,7 +158,7 @@ export const useDeviceSelection = (
   const handleDeviceSelect = (
     device: DeviceSelectionData | ScheduleDeviceSelectionData,
   ) => {
-    if (!device.node.connectivityStatus?.isConnected) {
+    if (!allowOfflineForSchedule && !device.node.connectivityStatus?.isConnected) {
       return;
     }
 
@@ -233,7 +238,12 @@ export const useDeviceSelection = (
       identifier === "schedule"
         ? (device as ScheduleDeviceSelectionData).isMaxScheduleReached
         : (device as DeviceSelectionData).isMaxSceneReached;
-    return checkDeviceDisabled(device.node.id, null, isDeviceOnline, maxReached)
+    return checkDeviceDisabled(
+      device.node.id,
+      null,
+      allowOfflineForSchedule ? true : isDeviceOnline,
+      maxReached,
+    )
       .isDisabled;
   };
 

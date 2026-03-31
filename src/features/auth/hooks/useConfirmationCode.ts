@@ -10,13 +10,12 @@ import { useCDF } from "@shared/hooks/useCDF";
 import { useToast } from "@shared/hooks/useToast";
 import { useTranslation } from "react-i18next";
 import { createCodeValidator } from "@features/auth/utils/authHelper";
-import { executePostLoginPipeline } from "@features/auth/utils/postLoginPipeline";
+import { setPendingPostSignupLogin } from "@features/auth/hooks/useLogin";
 import { router } from "expo-router";
 
 export function useConfirmationCode() {
   const { t } = useTranslation();
-  const { store, initUserCustomData, setESPCDFUser, syncHomeWithNodes } =
-    useCDF();
+  const { store } = useCDF();
   const { email, password = "" } = useLocalSearchParams();
   const toast = useToast();
 
@@ -68,37 +67,6 @@ export function useConfirmationCode() {
     }
   };
 
-  const loginUser = async () => {
-    try {
-      const res = await store?.userStore.auth?.login({
-        username: email as string,
-        password: password as string,
-      });
-      if (res) {
-        router.dismissAll();
-        setESPCDFUser(store!.userStore.user ?? null);
-        await executePostLoginPipeline({
-          router,
-          syncHomeWithNodes,
-          initUserCustomData,
-          store: store!,
-        });
-      }
-    } catch (error: unknown) {
-      const err = error as { description?: string };
-      toast.showError(
-        t("auth.errors.autoSignInFailed"),
-        err.description || t("auth.errors.fallback")
-      );
-      setTimeout(() => {
-        router.dismissTo({
-          pathname: "/(auth)/Login",
-          params: { email },
-        });
-      }, 10000);
-    }
-  };
-
   const handleVerify = async () => {
     if (!isCodeValid || !code.trim()) return;
 
@@ -110,7 +78,11 @@ export function useConfirmationCode() {
       });
       if (res) {
         toast.showSuccess(t("auth.signup.registrationSuccess"));
-        await loginUser();
+        setPendingPostSignupLogin({
+          username: email as string,
+          password: password as string,
+        });
+        router.dismissTo("/(auth)/Login");
       }
     } catch (error: unknown) {
       const err = error as { description?: string };

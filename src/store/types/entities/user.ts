@@ -57,6 +57,7 @@ export interface ESPCDFUserInfo {
   email: string;
   nickname?: string;
   phone?: string;
+  [key: string]: any;
 }
 export interface ESPCDFUserOperation {
   getUserInfo(): Promise<ESPCDFAPIDataResponse<ESPCDFUserInfo>>;

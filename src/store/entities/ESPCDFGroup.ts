@@ -39,7 +39,7 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
   subGroups?: ESPCDFGroup[];
   isPrimaryUser?: boolean;
   totalNodes?: number;
-  parentGroupId?: string;
+  parentId?: string;
   type?: string;
   mutuallyExclusive?: boolean;
   description?: string;
@@ -67,7 +67,7 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
       groupData.subGroups?.map((subGroup) => new ESPCDFGroup(subGroup)) || [];
     this.isPrimaryUser = groupData.isPrimaryUser;
     this.totalNodes = groupData.totalNodes;
-    this.parentGroupId = groupData.parentGroupId;
+    this.parentId = groupData.parentId;
     this.type = groupData.type;
     this.mutuallyExclusive = groupData.mutuallyExclusive;
     this.description = groupData.description;

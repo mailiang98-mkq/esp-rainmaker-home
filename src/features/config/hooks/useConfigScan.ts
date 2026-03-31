@@ -5,6 +5,7 @@
  */
 
 import { useState, useContext, useRef, useCallback } from "react";
+import { InteractionManager } from "react-native";
 import { useRouter } from "expo-router";
 import { useCameraPermissions } from "expo-camera";
 import { runtimeConfigManager } from "@config/runtime.config";
@@ -52,11 +53,10 @@ export function useConfigScan(): UseConfigScanReturn {
     async (scannedValue: string) => {
       if (scannedRef.current) return;
       scannedRef.current = true;
+      setPhase("fetching");
 
       try {
-        const json = await resolveConfigFromScan(scannedValue, () =>
-          setPhase("fetching"),
-        );
+        const json = await resolveConfigFromScan(scannedValue);
 
         setPhase("applying");
         await runtimeConfigManager.applyAndPersist(

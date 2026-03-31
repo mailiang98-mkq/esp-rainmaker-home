@@ -190,7 +190,7 @@ export class ESPCDFUser implements ESPCDFUserInterface {
     platform: string,
     deviceToken: string
   ): Promise<ESPCDFAPIDataResponse> {
-    return this.operations.registerForNotification(platform, deviceToken);
+    return this.operations.registerForNotification.call(this, platform, deviceToken)
   }
 
   async unregisterForNotification(deviceToken: string): Promise<ESPCDFAPIResponse> {

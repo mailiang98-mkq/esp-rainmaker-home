@@ -13,5 +13,5 @@ export {
   useCreateRoom,
   useCreateRoomSuccess,
   useCustomizeRoomName,
-  useSettings,
+  useCustomizeControlGroupName,
 } from "./hooks";

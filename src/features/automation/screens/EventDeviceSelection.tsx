@@ -36,6 +36,7 @@ export const EventDeviceSelectionScreen = observer(() => {
     nonSelectedDevices,
     selectDevice,
     checkDeviceDisabled,
+    allowOfflineSelection,
   } = useEventDeviceSelection({ isEditingEvent });
 
   const handleDeviceSelect = useCallback(
@@ -51,7 +52,9 @@ export const EventDeviceSelectionScreen = observer(() => {
   const renderDeviceItem = useCallback(
     (device: DeviceSelectionData, index: number) => {
       const isOnline = device.node.connectivityStatus?.isConnected ?? false;
-      const isDisabled = checkDeviceDisabled(isOnline).isDisabled;
+      const isDisabled = checkDeviceDisabled(
+        allowOfflineSelection ? true : isOnline,
+      ).isDisabled;
       const isCurrentEventDevice =
         !!currentEventDevice &&
         currentEventDevice.device.name === device.device.name &&
@@ -65,6 +68,7 @@ export const EventDeviceSelectionScreen = observer(() => {
           isCurrentEventDevice={!!isCurrentEventDevice}
           isDisabled={isDisabled}
           offlineLabel={t("layout.shared.offline")}
+          treatOfflineAsOnline={allowOfflineSelection}
           onPress={() => handleDeviceSelect(device)}
         />
       );
@@ -73,6 +77,7 @@ export const EventDeviceSelectionScreen = observer(() => {
       currentEventInfo,
       currentEventDevice,
       checkDeviceDisabled,
+      allowOfflineSelection,
       handleDeviceSelect,
       t,
     ],

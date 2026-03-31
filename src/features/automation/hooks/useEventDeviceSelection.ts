@@ -12,6 +12,7 @@ import { sortByConnectivity } from "@shared/utils/eventDeviceSelection";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useAutomation } from "@context/automation.context";
 import type { DeviceSelectionData } from "@src/types/global";
+import { ESPRMNGBaseAdaptorIdentifier } from "@config/sdk.identifiers";
 
 // --- Result types (structured outcomes for UI to interpret) ---
 
@@ -38,6 +39,8 @@ export interface UseEventDeviceSelectionResult {
   selectDevice: (device: DeviceSelectionData) => SelectEventDeviceResult;
   /** Check if device should be disabled (e.g. offline) */
   checkDeviceDisabled: (isConnected: boolean) => { isDisabled: boolean; reason?: "offline" };
+  /** True when offline devices should be treated as selectable/normal in UI. */
+  allowOfflineSelection: boolean;
 }
 
 /**
@@ -51,6 +54,8 @@ export function useEventDeviceSelection(
   const { isEditingEvent } = params;
   const { store } = useCDF();
   const { state, setSelectedEventDevice, checkDeviceDisabled } = useAutomation();
+  const allowOfflineSelection =
+    store.getActiveAdaptorIdentifier() === ESPRMNGBaseAdaptorIdentifier;
 
   const currentEventInfo = useMemo(
     () => getEventInfoFromEvents(state.events),
@@ -112,7 +117,10 @@ export function useEventDeviceSelection(
 
   const selectDevice = useCallback(
     (device: DeviceSelectionData): SelectEventDeviceResult => {
-      if (!device.node.connectivityStatus?.isConnected) {
+      if (
+        !allowOfflineSelection &&
+        !device.node.connectivityStatus?.isConnected
+      ) {
         return { success: false };
       }
 
@@ -130,7 +138,7 @@ export function useEventDeviceSelection(
         },
       };
     },
-    [isEditingEvent, setSelectedEventDevice]
+    [allowOfflineSelection, isEditingEvent, setSelectedEventDevice]
   );
 
   return {
@@ -141,5 +149,6 @@ export function useEventDeviceSelection(
     nonSelectedDevices,
     selectDevice,
     checkDeviceDisabled,
+    allowOfflineSelection,
   };
 }

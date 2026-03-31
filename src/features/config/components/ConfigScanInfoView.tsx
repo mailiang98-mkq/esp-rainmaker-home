@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { QrCode } from "lucide-react-native";
-import { ActiveSDK } from "@config/sdk.config";
+import { getResolvedActiveSdk } from "@config/sdk.config";
 
 import { runtimeConfigManager } from "@config/runtime.config";
 import { ScreenWrapper, Header } from "@shared/components";
@@ -33,7 +33,7 @@ export function ConfigScanInfoView({
   onCancel,
 }: ConfigScanInfoViewProps) {
   const { t } = useTranslation();
-  const activeSdk = ActiveSDK;
+  const activeSdk = getResolvedActiveSdk();
   const runtimeConfig = runtimeConfigManager.config;
 
   return (

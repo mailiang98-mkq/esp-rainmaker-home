@@ -44,6 +44,8 @@
 		F1C602812E30C241003DA0C5 /* ESPMatterModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1C602792E30C241003DA0C5 /* ESPMatterModule.swift */; };
 		F1C602822E30C241003DA0C5 /* ESPMatterModule.m in Sources */ = {isa = PBXBuildFile; fileRef = F1C6027A2E30C241003DA0C5 /* ESPMatterModule.m */; };
 		F1C602832E30C242003DA0C6 /* MTRCSRKeys.m in Sources */ = {isa = PBXBuildFile; fileRef = F1C6027C2E30C242003DA0C6 /* MTRCSRKeys.m */; };
+		F865357F2F8302A4004B8717 /* ESPMQTTModule.m in Sources */ = {isa = PBXBuildFile; fileRef = F865357D2F8302A4004B8717 /* ESPMQTTModule.m */; };
+		F86535802F8302A4004B8717 /* ESPMQTTModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = F865357E2F8302A4004B8717 /* ESPMQTTModule.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -117,6 +119,8 @@
 		F1C6027A2E30C241003DA0C5 /* ESPMatterModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPMatterModule.m; sourceTree = "<group>"; };
 		F1C6027C2E30C242003DA0C6 /* MTRCSRKeys.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTRCSRKeys.m; sourceTree = "<group>"; };
 		F1C6027D2E30C242003DA0C6 /* MTRCSRKeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTRCSRKeys.h; sourceTree = "<group>"; };
+		F865357D2F8302A4004B8717 /* ESPMQTTModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPMQTTModule.m; sourceTree = "<group>"; };
+		F865357E2F8302A4004B8717 /* ESPMQTTModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPMQTTModule.swift; sourceTree = "<group>"; };
 		F938000A2C67D0270AB1FABD /* Pods-APP.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-APP.release.xcconfig"; path = "Target Support Files/Pods-APP/Pods-APP.release.xcconfig"; sourceTree = "<group>"; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-APP/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -148,6 +152,7 @@
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				F15D5FEC2E559899005F3B57 /* SoftAP */,
+				F2E0D5EC2E55A900005F3B74 /* MQTT */,
 				F18184B82E4B1C33002C7B0A /* Utils */,
 				5A1455712E45C0D10066A31F /* OAuth */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -332,6 +337,15 @@
 				F1C6027D2E30C242003DA0C6 /* MTRCSRKeys.h */,
 			);
 			path = Matter;
+			sourceTree = "<group>";
+		};
+		F2E0D5EC2E55A900005F3B74 /* MQTT */ = {
+			isa = PBXGroup;
+			children = (
+				F865357D2F8302A4004B8717 /* ESPMQTTModule.m */,
+				F865357E2F8302A4004B8717 /* ESPMQTTModule.swift */,
+			);
+			path = MQTT;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -549,6 +563,8 @@
 				F1B6027A2E30C23B003DA0C4 /* ESPLocalControlModule.swift in Sources */,
 				F10B4D132E66E4A9000C0687 /* ESPDiscoveryModule.swift in Sources */,
 				F10B4D142E66E4A9000C0687 /* ESPDiscoveryModule.m in Sources */,
+				F865357F2F8302A4004B8717 /* ESPMQTTModule.m in Sources */,
+				F86535802F8302A4004B8717 /* ESPMQTTModule.swift in Sources */,
 				F15D5FED2E559899005F3B57 /* ESPSoftAPModule.m in Sources */,
 				F15D5FEE2E559899005F3B57 /* ESPSoftAPModule.swift in Sources */,
 				F1B6027B2E30C23B003DA0C4 /* ESPLocalControlModule.m in Sources */,

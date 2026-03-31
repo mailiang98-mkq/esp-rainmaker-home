@@ -13,6 +13,7 @@ import {
   ESPCDFServiceParamType,
   ESPCDFUser,
 } from "@store";
+import { delay } from "./common";
 /**
  * List of all available timezones
  * @returns {string[]} List of all available timezones
@@ -539,3 +540,168 @@ export const setNodeTimeZone = async (
     return false;
   }
 };
+
+/**
+ * POSIX TZ string (setenv TZ style) for ESP RainMaker `Time.TZ-POSIX`, derived from an IANA zone.
+ * Devices often pair IANA `TZ` with `TZ-POSIX`; sending only `TZ` can leave stale `TZ-POSIX` (e.g. factory CST-8).
+ */
+export function ianaTzToEspPosixTz(iana: string): string {
+  const zone = typeof iana === "string" ? iana.trim() : "";
+  if (!zone) return "";
+  try {
+    const date = new Date();
+    const dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone: zone,
+      timeZoneName: "shortOffset",
+    });
+    const name =
+      dtf.formatToParts(date).find((p) => p.type === "timeZoneName")?.value ?? "";
+    const m =
+      name.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/i) ??
+      name.match(/UTC([+-])(\d{1,2})(?::(\d{2}))?/i);
+    if (!m) {
+      return "";
+    }
+    const sign = m[1];
+    const hours = m[2];
+    const minutes = m[3];
+    const posixSign = sign === "+" ? "-" : "+";
+    if (minutes) {
+      return `GMT${posixSign}${hours}:${minutes}`;
+    }
+    return `GMT${posixSign}${hours}`;
+  } catch {
+    return "";
+  }
+}
+
+function nodeReportedIanaTzEquals(
+  node: ESPCDFNode | null,
+  expected: string
+): boolean {
+  if (!node) return false;
+  const { timezoneParam } = getNodeTimezoneConfig(node);
+  const v =
+    typeof timezoneParam?.value === "string"
+      ? timezoneParam.value.trim()
+      : "";
+  return v === expected.trim();
+}
+
+/** Retries for post-provision node timezone: config (writable Time/TZ) then params API. */
+const PROVISION_TZ_MAX_ATTEMPTS = 8;
+const PROVISION_TZ_RETRY_DELAY_MS = 300;
+/** Let IoT named shadow / device first report settle before first TZ write (reduces 404 / ignored writes). */
+const PROVISION_TZ_SETTLE_MS = 2000;
+/** Brief pause so getNodeDetails reflects shadow after setParams. */
+const PROVISION_TZ_VERIFY_DELAY_MS = 750;
+
+/**
+ * Resolves an IANA timezone string for applying to a node right after provision.
+ * Prefers user custom data; falls back to device timezone (same idea as setUserTimeZone).
+ */
+async function resolveTimeZoneStringForProvision(
+  user: ESPCDFUser
+): Promise<string | undefined> {
+  const fromCustom = await getUserTimeZone(user);
+  const trimmed = typeof fromCustom === "string" ? fromCustom.trim() : "";
+  if (trimmed !== "") {
+    return trimmed;
+  }
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+/**
+ * After provisioning, refetches the node until Time/TZ has write permission (or attempts exhausted),
+ * then retries setNodeTimeZone. Ensures addDevice can await this before returning so UI can enable Continue.
+ */
+async function safeGetNodeDetails(
+  nodeId: string,
+  getNodeDetails: (id: string) => Promise<ESPCDFNode | null | undefined>
+): Promise<ESPCDFNode | null> {
+  try {
+    const n = await getNodeDetails(nodeId);
+    return n ?? null;
+  } catch (e) {
+    console.error(
+      "[applyProvisionNodeTimezoneWithRetries] getNodeDetails failed:",
+      e instanceof Error ? e.message : e
+    );
+    return null;
+  }
+}
+
+export async function applyProvisionNodeTimezoneWithRetries(
+  user: ESPCDFUser,
+  nodeId: string,
+  initialNode: ESPCDFNode,
+  getNodeDetails: (id: string) => Promise<ESPCDFNode | null | undefined>
+): Promise<ESPCDFNode> {
+  let node = initialNode;
+
+  const timeZoneStr = await resolveTimeZoneStringForProvision(user);
+  if (!timeZoneStr) {
+    console.warn(
+      "[applyProvisionNodeTimezoneWithRetries] No timezone string; skipping node TZ apply"
+    );
+    return node;
+  }
+
+  await delay(PROVISION_TZ_SETTLE_MS);
+
+  for (let attempt = 0; attempt < PROVISION_TZ_MAX_ATTEMPTS; attempt++) {
+    if (getNodeTimezoneConfig(node).hasWritePermission) {
+      break;
+    }
+    if (attempt < PROVISION_TZ_MAX_ATTEMPTS - 1) {
+      await delay(PROVISION_TZ_RETRY_DELAY_MS);
+      const next = await safeGetNodeDetails(nodeId, getNodeDetails);
+      if (next) {
+        node = next;
+      }
+    }
+  }
+
+  if (!getNodeTimezoneConfig(node).hasWritePermission) {
+    console.error(
+      "[applyProvisionNodeTimezoneWithRetries] No timezone write permission after config retries; nodeId=",
+      nodeId
+    );
+    return node;
+  }
+
+  for (let attempt = 0; attempt < PROVISION_TZ_MAX_ATTEMPTS; attempt++) {
+    const ok = await setNodeTimeZone(node, timeZoneStr);
+    if (ok) {
+      await delay(PROVISION_TZ_VERIFY_DELAY_MS);
+      const fresh = await safeGetNodeDetails(nodeId, getNodeDetails);
+      if (fresh) {
+        node = fresh;
+      }
+      if (nodeReportedIanaTzEquals(node, timeZoneStr)) {
+        return node;
+      }
+      console.warn(
+        "[applyProvisionNodeTimezoneWithRetries] TZ write did not match reported param; retrying. nodeId=",
+        nodeId,
+        "expected=",
+        timeZoneStr,
+        "reported=",
+        getNodeTimezoneConfig(node).timezoneParam?.value
+      );
+    }
+    if (attempt < PROVISION_TZ_MAX_ATTEMPTS - 1) {
+      await delay(PROVISION_TZ_RETRY_DELAY_MS);
+      const next = await safeGetNodeDetails(nodeId, getNodeDetails);
+      if (next) {
+        node = next;
+      }
+    }
+  }
+
+  console.error(
+    "[applyProvisionNodeTimezoneWithRetries] setNodeTimeZone did not succeed or reported TZ mismatch after param retries; nodeId=",
+    nodeId
+  );
+  return node;
+}

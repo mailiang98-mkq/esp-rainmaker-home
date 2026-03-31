@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import type { ReactNode } from "react";
 import { AgentConfig } from "@features/agent/utils";
-import { ESPCDFDevice, ESPCDFGroup, ESPCDFNode, ESPCDFDeviceParam, ESPCDFNodeConfig, ESPCDFAutomation } from "@store";
+import { ESPCDFDevice, ESPCDFGroup, ESPCDFNode, ESPCDFDeviceParam, ESPCDFNodeConfig, ESPCDFAutomation, ESPCDFGroupSharingRequest } from "@store";
 
 // ============================================================================
 // Common Types
@@ -229,17 +229,24 @@ export interface VoiceAssistantProps {
 // ============================================================================
 // Notification Types
 // ============================================================================
-export interface SharingItem {
-  id: number;
-  request_id: string;
-  type: "node" | "group";
+export type SharingItem = {
+  type: "group";
+  /** Matches `ESPCDFGroupSharingRequest.id` (stable across re-fetches) */
+  id: string;
+  /** Underlying CDF request entity */
+  request: ESPCDFGroupSharingRequest;
+  /** First group id is used by the notification flow to set current home */
+  groupIds: string[];
   primaryUsername: string;
   timestamp: number;
   status: "pending" | "accepted" | "declined";
+  accept: () => Promise<void>;
+  decline: () => Promise<void>;
+  // Loading fields are optional and used only by the UI.
   loading?: boolean;
   acceptLoading?: boolean;
   declineLoading?: boolean;
-}
+};
 
 // ============================================================================
 // UI Component Types
@@ -794,7 +801,7 @@ export interface HomeRemoveProps {
   isPrimary: boolean;
 }
 
-export interface HomeSharingProps {
+export interface GroupSharingProps {
   sharedUsers: GroupSharedUser[];
   pendingUsers?: GroupSharedUser[];
   sharedByUser: GroupSharedUser | null;
@@ -803,6 +810,8 @@ export interface HomeSharingProps {
   onAddUser: () => void;
   isPrimaryUser: boolean | undefined;
   isLoading: boolean;
+  /** Merged with the card wrapper (e.g. margins on create-room scroll) */
+  containerStyle?: ViewStyleProp;
 }
 
 // ============================================================================
@@ -814,15 +823,18 @@ export interface AddUserModalProps {
   onClose: () => void;
   onAdd: () => void;
   email: string;
-  handleEmailChange: (email: string) => void;
+  handleInviteChange: (value: string, isValid: boolean) => void;
   isLoading: boolean;
-  validateEmail: (email: string) => boolean;
+  inviteValidator: (value: string) => { isValid: boolean; error?: string };
+  isInviteValid: boolean;
   makePrimary?: boolean;
   onMakePrimaryChange?: (makePrimary: boolean) => void;
   transfer?: boolean;
   onTransferChange?: (transfer: boolean) => void;
   transferAndAssignRole?: boolean;
   onTransferAndAssignRoleChange?: (transferAndAssignRole: boolean) => void;
+  /** Merged with the modal card container (e.g. horizontal inset on small screens) */
+  contentContainerStyle?: ViewStyleProp;
 }
 
 export interface DeviceInfoProps {

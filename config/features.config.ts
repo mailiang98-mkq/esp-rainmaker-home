@@ -5,7 +5,7 @@
  */
 
 import Constants from 'expo-constants';
-import { ActiveSDK, SDK_FEATURE_MAP } from '@config/sdk.config';
+import { getResolvedActiveSdk, SDK_FEATURE_MAP } from '@config/sdk.config';
 
 /**
  * All controllable feature keys in the application.
@@ -14,10 +14,13 @@ import { ActiveSDK, SDK_FEATURE_MAP } from '@config/sdk.config';
  *   provisioning, deviceManagement, accountDeletion
  *
  * SDK-gated (RMNG = false):
- *   scenes, schedules, localControl, notifications, groupSharing, ota
+ *   scenes, schedules, localControl, notifications, groupSharing, subGroupSharing, transferGroupSharing, ota
  *
  * Both SDKs supported (env-only control):
  *   automations, aiAgent, thirdPartyAuth, voiceAssistants
+ *
+ * SDK-gated (RMNG / rmng-base-sdk only):
+ *   controlGroups — device control groups (homogeneous subgroups); not on rainmaker-base-sdk or rainmaker-matter-sdk
  */
 export type FeatureKey =
   | 'scenes'
@@ -26,10 +29,13 @@ export type FeatureKey =
   | 'localControl'
   | 'notifications'
   | 'groupSharing'
+  | 'subGroupSharing'
+  | 'transferGroupSharing'
   | 'ota'
   | 'aiAgent'
   | 'thirdPartyAuth'
-  | 'voiceAssistants';
+  | 'voiceAssistants'
+  | 'controlGroups';
 
 /**
  * Maps each FeatureKey to its corresponding key in the features block
@@ -42,10 +48,13 @@ const ENV_KEY_MAP: Record<FeatureKey, string> = {
   localControl:         'enableLocalControl',
   notifications:        'enableNotifications',
   groupSharing:         'enableGroupSharing',
+  subGroupSharing:      'enableSubGroupSharing',
+  transferGroupSharing: 'enableTransferGroupSharing',
   ota:                  'enableOta',
   aiAgent:              'enableAiAgent',
   thirdPartyAuth:       'enableThirdPartyAuth',
   voiceAssistants:      'enableVoiceAssistants',
+  controlGroups:        'enableControlGroups',
 };
 
 /**
@@ -61,7 +70,7 @@ const ENV_KEY_MAP: Record<FeatureKey, string> = {
  * making it safe for runtime SDK switching.
  */
 export function getFeatures(): Record<FeatureKey, boolean> {
-  const sdk = ActiveSDK;
+  const sdk = getResolvedActiveSdk();
   const env = (Constants.expoConfig?.extra?.features || {}) as Record<string, boolean>;
   const sdkCaps = SDK_FEATURE_MAP[sdk] ?? {};
   const resolve = (key: FeatureKey): boolean => {
@@ -79,10 +88,13 @@ export function getFeatures(): Record<FeatureKey, boolean> {
     localControl:         resolve('localControl'),
     notifications:        resolve('notifications'),
     groupSharing:         resolve('groupSharing'),
+    subGroupSharing:      resolve('subGroupSharing'),
+    transferGroupSharing: resolve('transferGroupSharing'),
     ota:                  resolve('ota'),
     aiAgent:              resolve('aiAgent'),
     thirdPartyAuth:       resolve('thirdPartyAuth'),
     voiceAssistants:      resolve('voiceAssistants'),
+    controlGroups:        resolve('controlGroups'),
   };
 }
 

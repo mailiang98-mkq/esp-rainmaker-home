@@ -130,6 +130,7 @@
   "auth": {
     "shared": {
       "emailPlaceholder": "Email",
+      "emailOrPhonePlaceholder": "Email or phone",
       "passwordPlaceholder": "Password",
       "newPasswordPlaceholder": "New Password",
       "confirmPasswordPlaceholder": "Confirm Password"
@@ -157,7 +158,7 @@
     "verification": {
       "title": "Verification Code",
       "heading": "A verification code is on the way",
-      "subtitle": "Please enter the 6-digit code sent to you at {{email}}",
+      "subtitle": "Please enter the 6-digit code sent to you at {{username}}",
       "verifyButton": "Verify",
       "resendCode": "I haven't received a code"
     },
@@ -165,6 +166,7 @@
       "title": "Forgot Password",
       "heading": "Reset Your Password",
       "subtitle": "Enter your email address and we'll send you a verification code",
+      "subtitleEmailOrPhone": "Enter your email or phone and we'll send you a verification code",
       "sendCodeButton": "Send Code",
       "resetTitle": "Reset Password",
       "resetHeading": "Create New Password",
@@ -179,6 +181,9 @@
     },
     "validation": {
       "invalidEmail": "Please enter a valid email address",
+      "invalidEmailOrPhone": "Enter a valid email or international phone number (+country code).",
+      "phoneMustStartWithCountryCode": "Phone numbers must start with + followed by the country code (e.g. +1 415 555 2671).",
+      "invalidPhoneE164": "Enter a valid international phone: +, country code, then number (up to 15 digits).",
       "passwordsDoNotMatch": "Passwords do not match",
       "invalidCode": "Please enter a valid 6-digit code",
       "newPasswordSameAsCurrent": "New password cannot be the same as the current password"
@@ -215,6 +220,7 @@
   "user": {
     "profile": {
       "title": "My Profile",
+      "userCode": "User Code",
       "thirdPartyIntegration": {
         "title": "Voice Assistants and Integrations"
       },
@@ -249,7 +255,10 @@
       "deviceSharingInvitation": "Device sharing invitation",
       "groupSharingInvitation": "Group sharing invitation",
       "invitationFrom": "You received an invitation from {{userName}}",
-      "noNotification": "No notifications"
+      "noNotification": "No notifications",
+      "invitationFromUnknown": "You received an invitation",
+      "sharingRequestAccepted": "Sharing request accepted",
+      "sharingRequestDeclined": "Sharing request declined"
     },
     "aboutUs": {
       "title": "About Us",
@@ -282,7 +291,7 @@
   "group": {
     "home": {
       "title": "My Devices",
-      "commonTab": "Common",
+      "commonTab": "All Devices",
       "meshTab": "Mesh",
       "rainmakerTab": "Rainmaker",
       "matterTab": "Matter",
@@ -316,6 +325,8 @@
       "homeName": "Home Name",
       "homeNamePlaceholder": "Enter home name",
       "myHomes": "My Homes",
+      "sharedHomes": "Shared with me",
+      "sharedHomeBadge": "Shared",
       "addNewHomeInputDialogTitle": "Add New Home",
       "addNewHomeInputDialogPlaceholder": "Enter home name",
       "addNewHomeInputDialogConfirmButton": "Confirm",
@@ -335,6 +346,7 @@
     },
     "settings": {
       "roomManagement": "Room Management",
+      "groupManagement": "Group Management",
       "homeNameUpdatedSuccessfully": "Home name updated successfully",
       "homeRemovedSuccessfully": "Home removed successfully",
       "homeLeftSuccessfully": "Left home successfully",
@@ -345,7 +357,10 @@
       "confirmRemoveHomeMessage": "Are you sure you want to remove this Home?",
       "addUserModalTitle": "Add User",
       "addUserModalDescription": "Enter the email address of the user you want to share the home with.",
+      "addUserModalDescriptionEmailOrUserCode": "Enter the user's email address or their 6-character user code (letters and numbers).",
       "addUserModalEmailPlaceholder": "Email",
+      "addUserModalUserCodePlaceholder": "User code",
+      "addUserModalEmailOrUserCodePlaceholder": "Email or user code",
       "grantOwnershipDescription": "Grant ownership/full access",
       "transferGroupDescription": "Transfer group ownership",
       "transferAndAssignRoleDescription": "Transfer group and assign new role to self",
@@ -364,6 +379,30 @@
       "expiresInDay": "1 day",
       "expiresToday": "Expires today",
       "sharing": "Sharing"
+    },
+    "deviceGroups": {
+      "addYourFirstGroup": "Add your first group",
+      "addGroupDescription": "Create a group of devices of the same type, then control them together. Tap + to start.",
+      "createGroup": "Create group",
+      "editGroup": "Edit group",
+      "groupName": "Group name",
+      "addCustomizedGroup": "Set group name",
+      "groupCreatedSuccessfully": "Group created successfully",
+      "groupUpdatedSuccessfully": "Group updated successfully",
+      "groupRemovedSuccessfully": "Group removed successfully",
+      "confirmRemoveGroup": "Remove group?",
+      "confirmRemoveGroupMessage": "This removes the group only. Devices stay in your home.",
+      "deviceTypeMismatch": "Only devices of the same type can be in this group.",
+      "ineligibleNode": "This node has mixed device types or no controllable devices.",
+      "needHomogeneousSelection": "Add at least one compatible device to form a same-type group.",
+      "noCompatibleDevices": "No more compatible devices to add",
+      "lockedTypeHint": "Same device type only: {{type}}",
+      "customizeGroupNameTitle": "Group name",
+      "groupNameField": "Name",
+      "groupNamePlaceholder": "Enter a name",
+      "groupControl": "Group control",
+      "controlUnavailable": "Controls are unavailable for this group. Check that nodes are synced and share the same device type.",
+      "updatingDevices": "Updating devices…"
     },
     "createRoom": {
       "roomManagement": "Room Management",
@@ -417,7 +456,9 @@
       "homeNameAlreadyExists": "A home with this name already exists",
       "homeNameMinLength": "Home name must be at least 3 characters long",
       "homeNameMaxLength": "Home name must be less than 20 characters",
-      "pleaseEnterValidEmail": "Please enter a valid email address"
+      "pleaseEnterValidEmail": "Please enter a valid email address",
+      "invalidUserCode": "Enter a valid 6-character user code (letters and numbers only).",
+      "invalidEmailOrUserCode": "Enter a valid email or a 6-character user code."
     },
     "errors": {
       "homeNameUpdateFailed": "Failed to update home name",
@@ -608,7 +649,9 @@
       "wifiResetConfirm": "Are you sure you want to reset Wi-Fi settings? This will disconnect the device from the current network.",
       "systemOperationSuccess": "{{operation}} initiated successfully",
       "systemOperationFailed": "Failed to initiate {{operation}}",
-      "systemOperationConfirm": "Are you sure you want to perform {{operation}}?"
+      "systemOperationConfirm": "Are you sure you want to perform {{operation}}?",
+      "addToControlGroup": "Add to control group",
+      "controlGroupNeedHome": "This device must belong to a home before you can add it to a control group."
     },
     "panels": {
       "light": {
@@ -1194,7 +1237,7 @@
       "cameraPermissionRequired": "Camera permission is required to scan QR codes.",
       "grantPermission": "Grant Permission",
       "back": "Back",
-      "fetching": "Fetching configuration…",
+      "fetching": "Processing configuration…",
       "applying": "Applying configuration…",
       "success": "Configuration applied. Restarting…",
       "retry": "Retry",

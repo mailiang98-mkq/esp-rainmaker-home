@@ -15,7 +15,7 @@
  */
 
 import "@/i18n";
-
+import "@src/polyfills/init";
 import { Platform } from "react-native";
 import { configure } from "mobx";
 import { registerHeadlessTasks } from "@src/tasks/registerHeadless";
@@ -27,3 +27,4 @@ configure({ enforceActions: "never" });
 if (Platform.OS === "android") {
   registerHeadlessTasks();
 }
+

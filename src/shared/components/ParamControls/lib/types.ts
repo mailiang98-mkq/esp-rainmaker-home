@@ -41,6 +41,24 @@ export const safeValueToString = (value: any): string => {
   return String(value);
 };
 
+/** Coerce JSON/string numeric param values for stable slider state and comparisons. */
+export const normalizeNumericParamValue = (value: any): any => {
+  if (value == null || value === "") return value;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const n = Number(value);
+    if (Number.isFinite(n)) return n;
+  }
+  return value;
+};
+
+/** Rounded comparable value for sliders, or null if not numeric. */
+export const comparableRoundedParamNumber = (value: any): number | null => {
+  const n = normalizeNumericParamValue(value);
+  if (typeof n !== "number" || !Number.isFinite(n)) return null;
+  return Math.round(n);
+};
+
 // Helper function to get bounds from param
 export const getParamBounds = (param: ESPCDFDeviceParam) => {
   return {

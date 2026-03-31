@@ -8,7 +8,7 @@ import type { TFunction } from "i18next";
 import type { RoomTab } from "@src/types/global";
 
 /**
- * Returns default home tabs (e.g. "Common" for all devices).
+ * Returns default home tabs (e.g. "All Devices").
  * Pure; no side effects.
  */
 export function getDefaultHomeTabs(t: TFunction): RoomTab[] {

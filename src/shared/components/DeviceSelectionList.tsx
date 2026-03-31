@@ -33,6 +33,7 @@ interface ScheduleDeviceSelectionListProps {
   getDeviceActionValues: (device: ScheduleDeviceSelectionData) => Record<string, any>;
   onDeviceSelect: (device: ScheduleDeviceSelectionData) => void;
   onDeviceDelete: (device: ScheduleDeviceSelectionData) => void;
+  treatOfflineAsOnline?: boolean;
 }
 
 type DeviceSelectionListProps = SceneDeviceSelectionListProps | ScheduleDeviceSelectionListProps;
@@ -115,6 +116,7 @@ export default function DeviceSelectionList(props: DeviceSelectionListProps) {
           getDeviceActionValues={scheduleProps.getDeviceActionValues}
           onDeviceSelect={scheduleProps.onDeviceSelect}
           onDeviceDelete={scheduleProps.onDeviceDelete}
+          treatOfflineAsOnline={scheduleProps.treatOfflineAsOnline}
           qaId="schedule_device_selection_item"
         />
       );

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -45,6 +45,8 @@ import {
   ESPRM_HUE_PARAM_TYPE,
   ESPRM_SATURATION_PARAM_TYPE,
   ESPRM_BRIGHTNESS_PARAM_TYPE,
+  ESPRM_CCT_PARAM_TYPE,
+  ESPRM_LIGHT_MODE_PARAM_TYPE,
   ESPRM_UI_TOGGLE_PARAM_TYPE,
   COLOR_TAB,
   WHITE_TAB,
@@ -57,7 +59,8 @@ import {
  * - Power toggle
  * - Brightness control
  * - Color control (hue and saturation)
- * - White temperature control
+ * - White: brightness + temperature (esp.param.temperature) and/or CCT (esp.param.cct)
+ * - Light mode (esp.param.light-mode) synced with White / Color tab when present
  * - Scene presets (coming soon)
  *
  * @param node - The ESPRMNode representing the light device
@@ -91,18 +94,105 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
     (param) => param.type === ESPRM_TEMPERATURE_PARAM_TYPE,
   );
 
+  const cctParam = device?.params?.find(
+    (param) => param.type === ESPRM_CCT_PARAM_TYPE,
+  );
+
+  const lightModeParam = device?.params?.find(
+    (param) => param.type === ESPRM_LIGHT_MODE_PARAM_TYPE,
+  );
+
   // Check if device supports color (has both hue and saturation)
   const supportsColor = !!(hueParam && saturationParam);
+
+  const lightModeBounds = lightModeParam?.bounds as {
+    min?: number;
+    max?: number;
+  } | undefined;
+  const lightModeMin =
+    typeof lightModeBounds?.min === "number" ? lightModeBounds.min : undefined;
+  const lightModeMax =
+    typeof lightModeBounds?.max === "number" ? lightModeBounds.max : undefined;
+
+  const lightModeValueForTab = (tab: Tab): number | null => {
+    if (lightModeMin === undefined || lightModeMax === undefined) return null;
+    return tab === WHITE_TAB ? lightModeMax : lightModeMin;
+  };
 
   // Computed Values
   const isConnected = node.connectivityStatus?.isConnected || false;
 
-  // State - Set default tab based on device capabilities
-  const [activeTab, setActiveTab] = useState<Tab>(
-    supportsColor ? COLOR_TAB : WHITE_TAB,
-  );
+  const defaultTab = (): Tab => {
+    if (!supportsColor) return WHITE_TAB;
+    if (
+      lightModeParam &&
+      lightModeParam.value !== undefined &&
+      lightModeParam.value !== null &&
+      lightModeMin !== undefined &&
+      lightModeMax !== undefined
+    ) {
+      const v = Number(lightModeParam.value);
+      if (v === lightModeMax) return WHITE_TAB;
+      if (v === lightModeMin) return COLOR_TAB;
+    }
+    return COLOR_TAB;
+  };
+
+  // State - default tab from light mode when available, else color if HSV exists
+  const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
   const [refreshing, setRefreshing] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(true);
+  const didSyncTabFromDevice = useRef(false);
+
+  /** One-time sync when params first expose light mode (e.g. after navigation). */
+  useEffect(() => {
+    if (
+      !supportsColor ||
+      !lightModeParam ||
+      lightModeMin === undefined ||
+      lightModeMax === undefined ||
+      didSyncTabFromDevice.current
+    ) {
+      return;
+    }
+    const v = lightModeParam.value;
+    if (v === undefined || v === null) return;
+    const n = Number(v);
+    if (n === lightModeMax) setActiveTab(WHITE_TAB);
+    else if (n === lightModeMin) setActiveTab(COLOR_TAB);
+    didSyncTabFromDevice.current = true;
+  }, [
+    supportsColor,
+    lightModeParam,
+    lightModeParam?.value,
+    lightModeMin,
+    lightModeMax,
+  ]);
+
+  const setLightModeForTab = async (tab: Tab) => {
+    const nextVal = lightModeValueForTab(tab);
+    if (
+      nextVal === null ||
+      !device ||
+      !lightModeParam ||
+      Number(lightModeParam.value) === nextVal
+    ) {
+      return;
+    }
+    try {
+      await node.setMultipleParams({
+        [device.name]: { [lightModeParam.name]: nextVal },
+      });
+      lightModeParam.value = nextVal;
+    } catch (e) {
+      console.error("[Light] setLightModeForTab failed:", e);
+    }
+  };
+
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab);
+    void setLightModeForTab(tab);
+  };
 
   // Handlers
   const handleRefresh = async () => {
@@ -127,7 +217,7 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
       key={tab}
       style={[styles.tab, activeTab === tab && styles.activeTab]}
       {...testProps("button_light")}
-      onPress={() => setActiveTab(tab)}
+      onPress={() => handleTabChange(tab)}
     >
       <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
         {tab === WHITE_TAB
@@ -207,6 +297,19 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
               <ParamControlWrap
                 key={temperatureParam.name}
                 param={temperatureParam}
+                disabled={!isConnected || !powerParam?.value}
+                setUpdating={(s) => {
+                  setScrollEnabled(!s);
+                }}
+                style={styles.paramControlWrap}
+              >
+                <ColorTemperatureSlider />
+              </ParamControlWrap>
+            )}
+            {cctParam && (
+              <ParamControlWrap
+                key={cctParam.name}
+                param={cctParam}
                 disabled={!isConnected || !powerParam?.value}
                 setUpdating={(s) => {
                   setScrollEnabled(!s);

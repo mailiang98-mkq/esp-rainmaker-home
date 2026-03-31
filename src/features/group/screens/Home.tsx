@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { Plus } from "lucide-react-native";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
@@ -21,6 +21,7 @@ import {
   Banner,
   FloatingChatButton,
   HomeDeviceList,
+  HomeGroupControlList,
   HomeEmptyState,
   HomeTooltip,
   MigrationPromptModal,
@@ -43,6 +44,7 @@ const HomeScreen = () => {
     setSelectedRoom,
     roomTabs,
     roomDevices,
+    controlGroups,
     homeList,
     selectedHome,
     tooltipVisible,
@@ -55,6 +57,14 @@ const HomeScreen = () => {
     showMigrationPrompt,
     handleMigrationPromptUnderstood,
   } = useHomeScreen();
+
+  const { controlGroups: controlGroupsEnabled, aiAgent: aiAgentEnabled } =
+    getFeatures();
+
+  const showGroupControlOnHome =
+    controlGroupsEnabled &&
+    controlGroups.length > 0 &&
+    selectedRoom.id === "common";
 
   return (
     <>
@@ -93,12 +103,25 @@ const HomeScreen = () => {
             size="large"
             color={tokens.colors.primary}
           />
-        ) : roomDevices?.length > 0 ? (
-          <HomeDeviceList
-            roomDevices={roomDevices}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
+        ) : roomDevices?.length > 0 || showGroupControlOnHome ? (
+          <View
+            {...testProps("view_home_devices_and_groups")}
+            style={globalStyles.flex1}
+          >
+            {showGroupControlOnHome && (
+              <HomeGroupControlList
+                groups={controlGroups}
+                homeId={selectedHome?.id ?? ""}
+              />
+            )}
+            <View style={globalStyles.flex1}>
+              <HomeDeviceList
+                roomDevices={roomDevices}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+              />
+            </View>
+          </View>
         ) : (
           <HomeEmptyState
             onRedirect={redirectOperations}
@@ -108,7 +131,7 @@ const HomeScreen = () => {
         )}
       </ScreenWrapper>
 
-      {getFeatures().aiAgent && <FloatingChatButton />}
+      {aiAgentEnabled && <FloatingChatButton />}
 
       <HomeTooltip
         visible={tooltipVisible}

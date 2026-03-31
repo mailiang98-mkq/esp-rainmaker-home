@@ -47,15 +47,21 @@ const TemperatureSlider = observer(
      * @param newValue - The new value
      * @returns void
      */
-    const handleValueChange = async (
-      event: GestureResponderEvent,
-      newValue: number
+    const commitValue = (
+      event: GestureResponderEvent | null,
+      newValue: number,
     ) => {
       if (disabled) return;
       if (newValue === value) return;
       if (newValue < min) return;
       if (newValue > max) return;
       onValueChange(event, newValue);
+    };
+
+    const handleTamaguiValueChange = (values: number[]) => {
+      const raw = values[0];
+      if (typeof raw !== "number" || !Number.isFinite(raw)) return;
+      commitValue(null, raw);
     };
 
     // 3. Render
@@ -97,7 +103,8 @@ const TemperatureSlider = observer(
             min={min}
             max={max}
             step={step}
-            onSlideMove={handleValueChange}
+            onSlideMove={commitValue}
+            onValueChange={handleTamaguiValueChange}
             disabled={disabled}
             style={styles.slider}
           >

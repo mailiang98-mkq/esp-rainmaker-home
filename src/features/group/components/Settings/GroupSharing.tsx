@@ -21,25 +21,25 @@ import { CollapsibleCard, ActionButton } from "@shared/components";
 // Styles
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
-import { HomeSharingProps } from "@src/types/global";
+import type { GroupSharedUser, GroupSharingProps } from "@src/types/global";
 
 /**
- * HomeSharing Component
+ * GroupSharing Component
  *
- * Manages home sharing with other users following the "Sharing Only" card design.
+ * Manages group (home or subgroup) sharing with other users using the sharing card design.
  * Displays pending and accepted users in separate sections.
  *
  * Features:
- * - "Sharing Only" card layout
+ * - Sharing card layout
  * - Pending for Acceptance section (conditional)
  * - Shared With section (conditional)
  * - Add User functionality
  * - Remove user functionality
  * - Excludes primary user from lists
  *
- * @param props - Component properties for home sharing functionality
+ * @param props - Component properties for group sharing functionality
  */
-const HomeSharing: React.FC<HomeSharingProps> = ({
+const GroupSharing: React.FC<GroupSharingProps> = ({
   sharedUsers,
   pendingUsers,
   sharedByUser,
@@ -48,8 +48,11 @@ const HomeSharing: React.FC<HomeSharingProps> = ({
   onAddUser,
   isPrimaryUser,
   isLoading,
+  containerStyle,
 }) => {
   const { t } = useTranslation();
+
+  const cardStyle = [styles.contentWrapper, containerStyle];
 
   if (!isPrimaryUser) {
     return (
@@ -58,7 +61,7 @@ const HomeSharing: React.FC<HomeSharingProps> = ({
         defaultExpanded={false}
         showItemCount={false}
         description={sharedByUser?.username || ""}
-        style={styles.contentWrapper}
+        style={cardStyle}
         isExpandable={false}
       />
     );
@@ -71,7 +74,7 @@ const HomeSharing: React.FC<HomeSharingProps> = ({
       showItemCount={true}
       itemCount={(sharedUsers?.length || 0) + (pendingUsers?.length || 0)}
       itemLabel="user"
-      style={styles.contentWrapper}
+      style={cardStyle}
       isExpandable={true}
       qaId="section_sharing"
     >
@@ -106,7 +109,7 @@ const HomeSharing: React.FC<HomeSharingProps> = ({
           >
             {t("group.settings.homeSharingPendingForAcceptance")}
           </Text>
-          {pendingUsers.map((user, index) => (
+          {pendingUsers.map((user: GroupSharedUser, index: number) => (
             <View key={user.id || index} style={globalStyles.userItem}>
               <View style={globalStyles.userInfo}>
                 <Text style={globalStyles.userEmail}>{user.username}</Text>
@@ -148,7 +151,7 @@ const HomeSharing: React.FC<HomeSharingProps> = ({
           >
             {t("group.settings.homeSharingSharedWith")}
           </Text>
-          {sharedUsers.map((user, index) => (
+          {sharedUsers.map((user: GroupSharedUser, index: number) => (
             <View key={user.id || index} style={globalStyles.userItem}>
               <View style={globalStyles.userInfo}>
                 <Text style={globalStyles.userEmail}>{user.username}</Text>
@@ -167,7 +170,7 @@ const HomeSharing: React.FC<HomeSharingProps> = ({
   );
 };
 
-export default HomeSharing;
+export default GroupSharing;
 
 const styles = StyleSheet.create({
   contentWrapper: {

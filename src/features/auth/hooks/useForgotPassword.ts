@@ -4,12 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@shared/hooks/useToast";
-import { createEmailValidator } from "@features/auth/utils/authHelper";
+import {
+  createAuthUsernameValidator,
+  isUsernameAllowedForAuth,
+} from "@features/auth/utils/authHelper";
+import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 
 export function useForgotPassword() {
   const { t } = useTranslation();
@@ -21,7 +25,10 @@ export function useForgotPassword() {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const emailValidator = createEmailValidator(t);
+  const emailValidator = useMemo(
+    () => createAuthUsernameValidator(getAuthAllowedUsernameTypes(), t),
+    [t]
+  );
 
   const handleEmailChange = (value: string, isValid: boolean) => {
     setEmail(value.trim());
@@ -30,6 +37,11 @@ export function useForgotPassword() {
 
   const sendVerificationCode = async () => {
     if (!isEmailValid || !email) return;
+
+    const allowed = getAuthAllowedUsernameTypes();
+    if (!isUsernameAllowedForAuth(email, allowed)) {
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -40,7 +52,7 @@ export function useForgotPassword() {
         toast.showSuccess(t("auth.verification.heading"));
         router.push({
           pathname: "/(auth)/ResetPassword",
-          params: { email },
+          params: { username: email },
         });
       }
     } catch (error: unknown) {
