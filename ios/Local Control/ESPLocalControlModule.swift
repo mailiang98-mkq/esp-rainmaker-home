@@ -13,6 +13,22 @@ class ESPLocalControlModule: NSObject {
   
   var espLocalDevice = ESPDevice(name: "espDevice", security: .unsecure, transport: .softap)
   private let sessionPath = "esp_local_ctrl/session"
+
+  /// Normalizes `baseUrl` for ESPProvision `ESPSoftAPTransport`, which prepends `http://` when building URLs.
+
+  private func baseUrlForSoftApTransport(_ baseUrl: String) -> String {
+    var s = baseUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+    let lower = s.lowercased()
+    if lower.hasPrefix("https://") {
+      s.removeFirst(8)
+    } else if lower.hasPrefix("http://") {
+      s.removeFirst(7)
+    }
+    while s.last == "/" {
+      s.removeLast()
+    }
+    return s
+  }
   
   /// Checks if the ESP device is connected and has an established session.
   ///
@@ -38,7 +54,7 @@ class ESPLocalControlModule: NSObject {
   ///
   /// - Parameters:
   ///   - nodeId: The identifier of the ESP device to connect to.
-  ///   - baseUrl: The base URL of the ESP device.
+  ///   - baseUrl: LAN base URL, e.g. `http://192.168.1.1:8080` or `192.168.1.1:8080`. A leading `http://` / `https://` is stripped for ESPProvision (see `baseUrlForSoftApTransport`).
   ///   - securityType: The security type to use for the connection.
   ///     - `1`: Secure connection with proof of possession.
   ///     - `2`: Secure connection with proof of possession and username.
@@ -73,7 +89,7 @@ class ESPLocalControlModule: NSObject {
     }
     
     // Configure the transport layer for the ESPDevice.
-    espLocalDevice.espSoftApTransport = ESPSoftAPTransport(baseUrl: baseUrl)
+    espLocalDevice.espSoftApTransport = ESPSoftAPTransport(baseUrl: baseUrlForSoftApTransport(baseUrl))
     
     // Initialize the session with the ESP device.
     espLocalDevice.initialiseSession(sessionPath: sessionPath) { status in

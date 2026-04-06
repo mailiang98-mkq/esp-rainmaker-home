@@ -1,0 +1,237 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useEffect, useMemo, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
+import { useSchedule } from "@context/schedules.context";
+import { useCDF } from "@shared/hooks/useCDF";
+import { useToast } from "@shared/hooks/useToast";
+import { LoadingState } from "@src/types/global";
+import {
+  convertDaysBitmapToArray,
+  convertDaysArrayToBitmap,
+  convertTimeToMinutes,
+  convertMinutesToTime,
+  getCurrentTimeInMinutes,
+  validateScheduleData,
+} from "@features/schedule/utils/scheduleHelper";
+
+/**
+ * Hook for CreateSchedule screen
+ * Manages schedule creation and editing logic
+ */
+export const useCreateSchedule = () => {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const toast = useToast();
+  const {
+    store: { scheduleStore },
+  } = useCDF();
+  const { scheduleName: paramScheduleName, scheduleId: paramScheduleId } =
+    useLocalSearchParams();
+  const {
+    state,
+    initializeSchedule,
+    handleSaveSchedule,
+    handleDeleteSchedule,
+    checkOfflineNodes,
+    setScheduleName,
+    setTriggers,
+    resetState,
+    getScheduleActions,
+    setScheduleInfo,
+  } = useSchedule();
+
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [loading, setLoading] = useState<LoadingState>({
+    save: false,
+    delete: false,
+  });
+
+  // Convert days bitmap to array for UI
+  const selectedDays = useMemo(() => {
+    return state.triggers[0]?.d
+      ? convertDaysBitmapToArray(state.triggers[0].d)
+      : [];
+  }, [state.triggers]);
+
+  // Initialize schedule on mount
+  useEffect(() => {
+    const initSchedule = async () => {
+      if (paramScheduleId) {
+        // Edit mode - fetch schedule data
+        const schedule =
+          scheduleStore.schedulesByID?.[paramScheduleId as string];
+        if (schedule) {
+          setScheduleInfo({
+            id: schedule.id,
+            name: schedule.name,
+            actions: schedule.action,
+            nodes: schedule.nodes,
+            enabled: schedule.enabled,
+            triggers: schedule.triggers,
+            validity: schedule.validity,
+            info: schedule.info,
+            flags: schedule.flags,
+            outOfSyncMeta: schedule.outOfSyncMeta,
+          });
+        }
+      } else {
+        // Create mode - initialize new schedule
+        initializeSchedule();
+        // Initialize with current time
+        const minutes = getCurrentTimeInMinutes();
+        setTriggers([{ m: minutes, d: 0 }]);
+      }
+    };
+
+    initSchedule();
+  }, [paramScheduleId]);
+
+  // Set schedule name from params
+  useEffect(() => {
+    if (paramScheduleName) {
+      setScheduleName(paramScheduleName as string);
+    }
+  }, [paramScheduleName]);
+
+  // Handle save schedule
+  const handleSave = async () => {
+    setLoading((prev) => ({ ...prev, save: true }));
+    try {
+      const validation = validateScheduleData(
+        state.scheduleName,
+        state.triggers,
+        state.actions,
+      );
+      if (!validation.isValid && validation.error) {
+        toast.showError(t(validation.error));
+        return;
+      }
+
+      const success = await handleSaveSchedule();
+      if (success) {
+        resetState();
+        router.dismissTo("/(schedule)/Schedules");
+      }
+    } finally {
+      setLoading((prev) => ({ ...prev, save: false }));
+    }
+  };
+
+  // Handle delete schedule
+  const handleDelete = async () => {
+    setLoading((prev) => ({ ...prev, delete: true }));
+    try {
+      const success = await handleDeleteSchedule();
+      if (success) {
+        resetState();
+        router.dismissTo("/(schedule)/Schedules");
+      }
+    } finally {
+      setLoading((prev) => ({ ...prev, delete: false }));
+    }
+  };
+
+  // Handle add device action navigation
+  const handleAddDeviceAction = () => {
+    router.push({
+      pathname: "/(schedule)/ScheduleDeviceSelection",
+    } as any);
+  };
+
+  // Handle back press
+  const handleBackPress = () => {
+    resetState();
+    router.dismissTo("/(schedule)/Schedules");
+  };
+
+  // Handle day toggle
+  const handleDayToggle = (index: number) => {
+    const newDays = selectedDays.includes(index)
+      ? selectedDays.filter((d) => d !== index)
+      : [...selectedDays, index];
+    const daysBitmap = convertDaysArrayToBitmap(newDays);
+    setTriggers([
+      {
+        ...state.triggers[0],
+        d: daysBitmap,
+      },
+    ]);
+  };
+
+  // Handle time selection from picker
+  const handleTimeSelected = (
+    hours: number,
+    minutes: number,
+    period: "AM" | "PM",
+  ) => {
+    const totalMinutes = convertTimeToMinutes(hours, minutes, period);
+    setTriggers([
+      {
+        ...state.triggers[0],
+        m: totalMinutes,
+      },
+    ]);
+    setShowTimePicker(false);
+  };
+
+  // Get initial time picker values
+  const getInitialTimePickerValues = () => {
+    if (state.triggers[0]?.m) {
+      const { hour, minute, period } = convertMinutesToTime(
+        state.triggers[0].m,
+      );
+      return {
+        initialHour: hour,
+        initialMinute: minute,
+        initialPeriod: period,
+      };
+    }
+    return {
+      initialHour: 12,
+      initialMinute: 0,
+      initialPeriod: "AM" as const,
+    };
+  };
+
+  // Check if save button should be disabled
+  const disableActionButton = useMemo(() => {
+    return (
+      loading.save || !state.scheduleName || getScheduleActions().length === 0
+    );
+  }, [loading.save, state.scheduleName, getScheduleActions().length]);
+
+  // Get warning message for offline nodes
+  const warning = useMemo(() => {
+    if (checkOfflineNodes()) {
+      return t("schedule.schedules.someDevicesNotConnected");
+    }
+    return "";
+  }, [state.nodes, checkOfflineNodes]);
+
+  return {
+    // State
+    state,
+    selectedDays,
+    showTimePicker,
+    loading,
+    warning,
+    disableActionButton,
+    scheduleActions: getScheduleActions(),
+    // Handlers
+    handleSave,
+    handleDelete,
+    handleAddDeviceAction,
+    handleBackPress,
+    handleDayToggle,
+    handleTimeSelected,
+    setShowTimePicker,
+    // Time picker
+    ...getInitialTimePickerValues(),
+  };
+};

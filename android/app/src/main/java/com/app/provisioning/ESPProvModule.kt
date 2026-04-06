@@ -272,6 +272,8 @@ import com.app.utils.ESPAppUtilityModule
          softAPDevices.clear()
  
          if (transportEnum == ESPConstants.TransportType.TRANSPORT_BLE) {
+             deviceList.clear()
+             bluetoothDevices.clear()
              searchBLEDevices(devicePrefix, promise)
          } else if (transportEnum == ESPConstants.TransportType.TRANSPORT_SOFTAP) {
              searchWiFiDevices(devicePrefix, promise)
@@ -1148,6 +1150,9 @@ import com.app.utils.ESPAppUtilityModule
              if (transportEnum == ESPConstants.TransportType.TRANSPORT_BLE) {
  
                  Log.d(TAG, "Entering BLE Transport Logic")
+ 
+                 deviceList.clear()
+                 bluetoothDevices.clear()
  
                  espProvisionManager?.searchBleEspDevices("PROV_", object : BleScanListener {
                      override fun scanStartFailed() {

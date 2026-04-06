@@ -1,0 +1,47 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { DeviceAction } from "@shared/components";
+import { observer } from "mobx-react-lite";
+import { AutomationDeviceCardProps } from "@src/types/global";
+
+/**
+ * AutomationDeviceCard Component
+ *
+ * Unified component that renders both automation events and actions
+ * Uses type prop to determine behavior and display
+ *
+ * @param {Record<string, any>} device - Device object with type and name
+ * @param {string} displayDeviceName - Display device name
+ * @param {"event" | "action"} type - Type of automation component (event or action)
+ * @param {Record<string, any>} actions - Action object (for action type)
+ * @param {Record<string, { condition: string; value: any }>} eventConditions - Event conditions (for event type)
+ * @param {Function} onPress - Handler for press events
+ * @param {string} qaId - QA identifier
+ */
+const AutomationDeviceCard = ({
+  device,
+  displayDeviceName,
+  type,
+  actions = {},
+  eventConditions,
+  onPress,
+  qaId,
+}: AutomationDeviceCardProps & { qaId?: string }) => {
+  return (
+    <DeviceAction
+      qaId={qaId}
+      displayDeviceName={displayDeviceName}
+      device={device.type}
+      actions={type === "action" ? actions : {}}
+      eventConditions={type === "event" ? eventConditions : undefined}
+      isEventMode={type === "event"}
+      onPress={onPress}
+    />
+  );
+};
+
+export default observer(AutomationDeviceCard);

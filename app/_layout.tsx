@@ -4,8 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
-import { Platform } from "react-native";
+// Bootstrap
+import "@src/bootstrap";
+
+import { useState, useEffect, useCallback } from "react";
+import { View, ActivityIndicator } from "react-native";
 
 import { Stack, usePathname, RelativePathString } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -14,84 +17,79 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-// styles
-import "@/i18n";
-// config
+
 import { defaultConfig } from "@tamagui/config/v4";
-const config = createTamagui(defaultConfig);
-import { configure } from "mobx";
+import { createTamagui, TamaguiProvider } from "tamagui";
 
 // providers
-import { StoreProvider } from "@/context/CDF";
+import { StoreProvider } from "@context/store.context";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
-import { createTamagui, TamaguiProvider } from "tamagui";
 import { Provider as PaperProvider } from "react-native-paper";
+import { SceneProvider } from "@context/scenes.context";
+import { ScheduleProvider } from "@context/schedules.context";
+import { AppRestartContext } from "@context/appRestart.context";
+
 // hooks
 import { useTranslation } from "react-i18next";
+
 // components
-import { FooterTabs } from "@/components";
-import { ToastContainer } from "@/components";
+import { FooterTabs, ToastContainer } from "@shared/components";
+
 // icons
 import { Home, Calendar, User, History, Zap } from "lucide-react-native";
-// SDK configuration
-import { ESPRMMatterBase } from "@espressif/rainmaker-matter-sdk";
-import { matterSDKConfig } from "@/rainmaker.config";
 
-import { AppRegistry } from "react-native";
-import {
-  MatterIssueNocTask,
-  MatterConfirmCommissionTask,
-} from "@/tasks/matterCommissioningTask";
+// feature flags
+import { getFeatures } from "@/config/features.config";
 
-AppRegistry.registerHeadlessTask(
-  "MatterIssueNocTask",
-  () => async (taskData: any) => {
-    try {
-      await MatterIssueNocTask(taskData);
-    } catch (error) {
-      console.error("[HeadlessJS] MatterIssueNocTask failed:", error);
-      throw error;
-    }
-  }
-);
-AppRegistry.registerHeadlessTask(
-  "MatterConfirmCommissionTask",
-  () => async (taskData: any) => {
-    try {
-      await MatterConfirmCommissionTask(taskData);
-    } catch (error) {
-      console.error("[HeadlessJS] MatterConfirmCommissionTask failed:", error);
-      throw error;
-    }
-  }
-);
+// theme
+import { tokens } from "@shared/theme/tokens";
+import { globalStyles } from "@shared/theme/globalStyleSheet";
 
+// async SDK + runtime config init
+import { initializeApp } from "@src/integrations";
+
+const config = createTamagui(defaultConfig);
+
+const stackScreenOptions = {
+  headerShown: false,
+  animation: "slide_from_right" as const,
+  gestureEnabled: true,
+  gestureDirection: "horizontal" as const,
+};
+
+/**
+ * Renders the full provider tree (store, theme, toast, scenes, schedules)
+ * and the Expo Router `<Stack>`. Also conditionally shows the bottom
+ * `<FooterTabs>` when the active route is one of the top-level tab routes.
+ *
+ * This component owns zero async side-effects; all heavy lifting is done
+ * in `AppInitGate` before this tree is ever mounted.
+ */
 const InnerLayout = () => {
   const { t } = useTranslation();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const features = getFeatures();
 
-  // Calculate statusBarHeight for toast positioning using safe area insets
   const statusBarHeight = insets.top;
 
-  // Define tabs for FooterTabs
   const tabs = [
     {
       route: "/(group)/Home" as RelativePathString,
       label: t("layout.navigation.footer.home"),
       Icon: Home,
     },
-    {
+    features.schedules && {
       route: "/(schedule)/Schedules" as RelativePathString,
       label: t("layout.navigation.footer.schedules"),
       Icon: History,
     },
-    {
+    features.scenes && {
       route: "/(scene)/Scenes" as RelativePathString,
       label: t("layout.navigation.footer.scenes"),
       Icon: Calendar,
     },
-    {
+    features.automations && {
       route: "/(automation)/Automations" as RelativePathString,
       label: t("layout.navigation.footer.automations"),
       Icon: Zap,
@@ -101,47 +99,47 @@ const InnerLayout = () => {
       label: t("layout.navigation.footer.user"),
       Icon: User,
     },
-  ];
+  ].filter(Boolean) as Array<{
+    route: RelativePathString;
+    label: string;
+    Icon: any;
+  }>;
 
   const isUserRoute = [
     "/Home",
     "/User",
-    "/Scenes",
-    "/Automations",
-    "/Schedules",
-  ].some((route) => pathname === route);
+    features.scenes && "/Scenes",
+    features.automations && "/Automations",
+    features.schedules && "/Schedules",
+  ]
+    .filter(Boolean)
+    .some((route) => pathname === route);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StoreProvider>
         <TamaguiProvider config={config}>
           <PaperProvider>
-            <ToastProvider>
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  animation: Platform.select({
-                    ios: "slide_from_right",
-                    android: "slide_from_right",
-                    default: "slide_from_right",
-                  }),
-                  gestureEnabled: true,
-                  gestureDirection: "horizontal",
-                }}
-              >
-                {/* Other components */}
-              </Stack>
-              {isUserRoute && <FooterTabs tabs={tabs} />}
-              <ToastContainer />
-              <ToastViewport
-                multipleToasts
-                flexDirection="column-reverse"
-                top={statusBarHeight}
-                alignItems="center"
-                width="100%"
-                padding={16}
-              />
-            </ToastProvider>
+            <SceneProvider>
+              {/* ToastProvider must wrap ScheduleProvider: ScheduleProvider uses useToast (Tamagui controller). */}
+              <ToastProvider>
+                <ScheduleProvider>
+                  <Stack screenOptions={stackScreenOptions}>
+                    {/* Other components */}
+                  </Stack>
+                  {isUserRoute && <FooterTabs tabs={tabs} />}
+                  <ToastContainer />
+                  <ToastViewport
+                    multipleToasts
+                    flexDirection="column-reverse"
+                    top={statusBarHeight}
+                    alignItems="center"
+                    width="100%"
+                    padding={16}
+                  />
+                </ScheduleProvider>
+              </ToastProvider>
+            </SceneProvider>
           </PaperProvider>
         </TamaguiProvider>
       </StoreProvider>
@@ -149,25 +147,61 @@ const InnerLayout = () => {
   );
 };
 
-const _layout = () => {
-  // MobX strict mode
-  configure({
-    enforceActions: "never", // disables strict mode
-  });
+/**
+ * Blocks the UI tree until `initializeApp()` resolves. While the promise
+ * is pending a full-screen `<ActivityIndicator>` is shown; once settled
+ * `<InnerLayout>` (and the whole provider tree) is mounted for the first
+ * time, guaranteeing the SDK and runtime config are ready before any
+ * feature screen can render.
+ *
+ * Receives a fresh `key` from `RootLayout` on every programmatic restart,
+ * which unmounts and re-mounts this component — re-running the init gate
+ * from scratch.
+ */
+const AppInitGate = () => {
+  const [ready, setReady] = useState(false);
 
-  // Configure SDKs at app startup (before any login attempts)
-  React.useEffect(() => {
-    // Configure Matter SDK with complete config + Matter-specific settings
-    // This will internally call super.configure() to configure ESPRMBase
-    ESPRMMatterBase.configure(matterSDKConfig);
+  useEffect(() => {
+    initializeApp().then(() => setReady(true));
   }, []);
+
+  if (!ready) {
+    return (
+      <View style={globalStyles.appLoadingContainer}>
+        <ActivityIndicator size="large" color={tokens.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" backgroundColor="#ffffff" translucent={false} />
+      <StatusBar style="dark" backgroundColor={tokens.colors.white} translucent={false} />
       <InnerLayout />
     </SafeAreaProvider>
   );
 };
 
-export default _layout;
+/**
+ * Top-level component exported as the default Expo Router root layout.
+ *
+ * Owns a single `appKey` counter that acts as a "remount key" for the
+ * entire app tree. Incrementing it (via `restartApp`) fully unmounts and
+ * re-mounts `<AppInitGate>`, which re-runs the SDK init sequence — the
+ * React-native equivalent of a soft app restart without leaving the process.
+ *
+ * `AppRestartContext` propagates `restartApp` down to any consumer that
+ * needs to trigger a programmatic restart (e.g. after sign-out or a
+ * critical config change).
+ */
+const RootLayout = () => {
+  const [appKey, setAppKey] = useState(0);
+  const restartApp = useCallback(() => setAppKey((k) => k + 1), []);
+
+  return (
+    <AppRestartContext.Provider value={{ restartApp }}>
+      <AppInitGate key={appKey} />
+    </AppRestartContext.Provider>
+  );
+};
+
+export default RootLayout;

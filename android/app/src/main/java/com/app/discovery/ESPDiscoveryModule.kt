@@ -33,6 +33,9 @@ class ESPDiscoveryModule(reactContext: ReactApplicationContext) :
 
     companion object {
         private const val TAG = "ESPDiscoveryModule"
+        /** Same as RainMaker Android `AppConstants.MDNS_SERVICE_TYPE` / base-sdk default. */
+        private const val DEFAULT_MDNS_SERVICE_TYPE = "_esp_local_ctrl._tcp."
+        private const val DEFAULT_MDNS_DOMAIN_LOCAL = "local."
     }
 
     private var mdnsManager: mDNSManager? = null
@@ -52,6 +55,11 @@ class ESPDiscoveryModule(reactContext: ReactApplicationContext) :
                         nodeBaseUrlMap[nodeId] = url
                         sendDeviceEvent(nodeId, url)
                     }
+                }
+
+                override fun deviceLost(nodeId: String) {
+                    nodeBaseUrlMap.remove(nodeId)
+                    sendDiscoveryLostEvent(nodeId)
                 }
             }
         )
@@ -80,12 +88,16 @@ class ESPDiscoveryModule(reactContext: ReactApplicationContext) :
      */
     @ReactMethod
     fun startDiscovery(config: ReadableMap) {
-        val serviceType = config.getString("serviceType")
-        val domain = config.getString("domain")
+        var serviceType = config.getString("serviceType")?.trim()
+        var domain = config.getString("domain")?.trim()
 
         if (serviceType.isNullOrEmpty()) {
-            Log.e(TAG, "Service type is required for discovery")
-            return
+            serviceType = DEFAULT_MDNS_SERVICE_TYPE
+        }
+        if (domain.isNullOrEmpty()) {
+            domain = DEFAULT_MDNS_DOMAIN_LOCAL
+        } else if (domain == "local") {
+            domain = DEFAULT_MDNS_DOMAIN_LOCAL
         }
 
         mdnsManager?.discoverServices(serviceType, domain)
@@ -116,6 +128,19 @@ class ESPDiscoveryModule(reactContext: ReactApplicationContext) :
                 .emit("DiscoveryUpdate", eventData)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to emit discovery event: ${e.message}")
+        }
+    }
+
+    private fun sendDiscoveryLostEvent(nodeId: String) {
+        val eventData = WritableNativeMap().apply {
+            putString("nodeId", nodeId)
+        }
+        try {
+            reactApplicationContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                .emit("DiscoveryLost", eventData)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to emit discovery lost: ${e.message}")
         }
     }
 

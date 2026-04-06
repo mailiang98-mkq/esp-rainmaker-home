@@ -1,0 +1,153 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useTranslation } from "react-i18next";
+import { ScrollView, StyleSheet } from "react-native";
+import { tokens } from "@shared/theme/tokens";
+import { globalStyles } from "@shared/theme/globalStyleSheet";
+import { Header, ScreenWrapper, ConfirmationDialog } from "@shared/components";
+import {
+  CreateRoomNameSection,
+  CreateRoomDeviceSection,
+  CreateRoomFooter,
+} from "@features/group/components";
+import { testProps } from "@shared/utils/testProps";
+import { useToast } from "@shared/hooks/useToast";
+import {
+  useCreateRoom,
+  type UseCreateRoomOptions,
+} from "@features/group/hooks";
+
+/**
+ * Create Room screen – UI / presentation layer.
+ * Composes Group components; business logic in useCreateRoom and utils/group.
+ */
+const CreateRoom = () => {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const router = useRouter();
+  const {
+    roomName: paramRoomName,
+    id,
+    roomId,
+  } = useLocalSearchParams<{
+    roomName?: string;
+    id?: string;
+    roomId?: string;
+  }>();
+
+  const {
+    roomName,
+    room,
+    selectedNodes,
+    availableNodes,
+    isLoading,
+    showDeleteDialog,
+    setShowDeleteDialog,
+    handleCustomRoomName,
+    handleAddDevice,
+    handleRemoveDevice,
+    handleSave,
+    handleUpdate,
+    handleDelete,
+    confirmDelete,
+  } = useCreateRoom({
+    homeId: id,
+    roomId,
+    paramRoomName,
+    toast,
+    t,
+    router: router as UseCreateRoomOptions["router"],
+  });
+
+  return (
+    <>
+      <Header
+        label={
+          room
+            ? t("group.createRoom.editRoom")
+            : t("group.createRoom.createRoom")
+        }
+        showBack={true}
+        qaId="header_create_room"
+      />
+      <ScreenWrapper
+        style={StyleSheet.flatten([
+          globalStyles.container,
+          globalStyles.createRoomScreenContainer,
+        ])}
+        qaId="screen_wrapper_create_room"
+      >
+        <ScrollView
+          style={globalStyles.createRoomScrollContainer}
+          contentContainerStyle={globalStyles.createRoomScrollContent}
+          showsVerticalScrollIndicator={false}
+          {...testProps("scroll_create_room")}
+        >
+          <CreateRoomNameSection
+            title={t("group.createRoom.roomName")}
+            value={roomName}
+            placeholder={t("group.createRoom.addCustomizedRoom")}
+            onPress={handleCustomRoomName}
+          />
+
+          <CreateRoomDeviceSection
+            title={t("group.createRoom.existingDevice")}
+            devices={selectedNodes}
+            emptyLabel={t("group.createRoom.pleaseSelectDevices")}
+            showPlus={false}
+            showMinus={true}
+            onDevicePress={handleRemoveDevice}
+            qaId="existing_devices_create_room"
+            viewTestId="view_existing_devices_create_room"
+            placeholderTestId="text_select_devices_create_room"
+          />
+
+          <CreateRoomDeviceSection
+            title={t("group.createRoom.addDevice")}
+            devices={availableNodes}
+            emptyLabel={t("group.createRoom.noMoreDevicesAvailable")}
+            showPlus={true}
+            showMinus={false}
+            onDevicePress={handleAddDevice}
+            qaId="add_devices_create_room"
+            viewTestId="view_add_devices_create_room"
+            listTestId="view_create_room"
+            placeholderTestId="text_create_room"
+          />
+
+          <CreateRoomFooter
+            saveLabel={t("layout.shared.save")}
+            deleteLabel={t("layout.shared.delete")}
+            saveDisabled={isLoading.save || !roomName}
+            deleteDisabled={isLoading.delete}
+            saveLoading={isLoading.save}
+            deleteLoading={isLoading.delete}
+            showDelete={!!room}
+            onSave={room ? handleUpdate : handleSave}
+            onDelete={handleDelete}
+          />
+        </ScrollView>
+      </ScreenWrapper>
+
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        title={t("group.createRoom.confirmRemoveRoom")}
+        description={t("group.createRoom.confirmRemoveRoomMessage")}
+        confirmText={t("layout.shared.remove")}
+        cancelText={t("layout.shared.cancel")}
+        onConfirm={confirmDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+        confirmColor={tokens.colors.red}
+        isLoading={isLoading.delete}
+        qaId="remove_room"
+      />
+    </>
+  );
+};
+
+export default CreateRoom;

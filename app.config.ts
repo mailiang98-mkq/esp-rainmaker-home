@@ -2,9 +2,10 @@ export default {
   expo: {
     name: process.env.APP_NAME || "ESP RainMaker Home",
     slug: process.env.APP_SLUG || "esp-rainmaker-home",
+    scheme: process.env.APP_SCHEME || "esp-rainmaker-home",
     version: process.env.APP_VERSION || "3.5.0",
     orientation: "portrait",
-    icon: "./assets/images/logo.png",
+    icon: "./src/assets/images/logo.png",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
@@ -13,21 +14,21 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/logo.png",
+        foregroundImage: "./src/assets/images/logo.png",
         backgroundColor: "#ffffff"
       }
     },
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/logo.png"
+      favicon: "./src/assets/images/logo.png"
     },
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo.png",
+          "image": "./src/assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -59,25 +60,49 @@ export default {
       eas: {
         projectId: "b020040e-1c36-426a-9528-042d4730d69e"
       },
-      // Environment variables
-      baseUrl: process.env.BASE_URL,
-      authUrl: process.env.THIRD_PARTY_AUTH_AUTH_URL,
-      redirectUrl: process.env.THIRD_PARTY_AUTH_REDIRECT_URL,
-      version: process.env.API_VERSION,
-      clientId: process.env.THIRD_PARTY_AUTH_CLIENT_ID,
-      loginOptions: process.env.THIRD_PARTY_AUTH_ENABLED_THIRD_PARTY_PROVIDERS,
-      enableCdfAutoSync: process.env.ENABLE_CDF_AUTOSYNC === 'true',
-      oauthEnabled: process.env.ENABLE_THIRD_PARTY_AUTH === 'true',
-      enabledThirdPartyProviders: process.env.ENABLE_THIRD_PARTY_AUTH === 'true'
-        ? (process.env.THIRD_PARTY_AUTH_ENABLED_THIRD_PARTY_PROVIDERS?.split(',') || [])
-        : [],
-      matterVendorId: process.env.MATTER_VENDOR_ID,
+      // Scan configuration
+      enableScanConfiguration: process.env.ENABLE_SCAN_CONFIGURATION !== 'false',
+      // RM SDK (namespaced)
+      rmSdk: {
+        baseUrl: process.env.BASE_URL,
+        authUrl: process.env.THIRD_PARTY_AUTH_AUTH_URL,
+        version: process.env.API_VERSION,
+        clientId: process.env.THIRD_PARTY_AUTH_CLIENT_ID,
+        redirectUrl: process.env.THIRD_PARTY_AUTH_REDIRECT_URL,
+      },
+      // Matter SDK (namespaced)
+      matterSdk: {
+        vendorId: process.env.MATTER_VENDOR_ID,
+      },
+
+      // Active SDK identifier
+      activeSdk: process.env.ACTIVE_SDK || 'rainmaker-base-sdk',
+
+      // Public website & legal URLs (overridable by CLI / env for white-label builds)
+      websiteLinks: {
+        website: process.env.WEBSITE_LINK,
+        termsOfUse: process.env.TERMS_OF_USE_LINK,
+        privacyPolicy: process.env.PRIVACY_POLICY_LINK,
+      },
+
+      // Unified feature flags block (Level 1)
+      features: {
+        enableScenes: process.env.ENABLE_SCENES !== 'false',
+        enableSchedules: process.env.ENABLE_SCHEDULES !== 'false',
+        enableAutomations: process.env.ENABLE_AUTOMATIONS !== 'false',
+        enableLocalControl: process.env.ENABLE_LOCAL_CONTROL !== 'false',
+        enableNotifications: process.env.ENABLE_NOTIFICATIONS !== 'false',
+        enableGroupSharing: process.env.ENABLE_GROUP_SHARING !== 'false',
+        enableOta: process.env.ENABLE_OTA !== 'false',
+        enableAiAgent: process.env.ENABLE_AI_AGENT !== 'false',
+        enableThirdPartyAuth: process.env.ENABLE_THIRD_PARTY_AUTH !== 'false',
+        thirdPartyAuthProviders: process.env.ENABLE_THIRD_PARTY_AUTH !== 'false'
+          ? (process.env.THIRD_PARTY_AUTH_ENABLED_PROVIDERS?.split(',') || process.env.THIRD_PARTY_AUTH_ENABLED_THIRD_PARTY_PROVIDERS?.split(',') || [])
+          : [],
+        enableVoiceAssistants: process.env.ENABLE_VOICE_ASSISTANTS !== 'false',
+        enableCdfAutoSync: process.env.ENABLE_CDF_AUTOSYNC !== 'false',
+      }
+
     }
-  },
-  // Additional features configuration
-  features: {
-    enabledOauth: process.env.ENABLE_THIRD_PARTY_AUTH === 'true'
-      ? (process.env.THIRD_PARTY_AUTH_ENABLED_THIRD_PARTY_PROVIDERS?.split(',') || [])
-      : []
   }
 };

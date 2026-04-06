@@ -290,7 +290,10 @@
       "addDeviceDescription": "Tap the button below or on the top right.",
       "homeBannerTitle": "Welcome to",
       "addYourFirstDeviceBannerTitle": "Add Your First Device!",
-      "addYourFirstDeviceBannerDescription": "Tap the button below or on the top right."
+      "addYourFirstDeviceBannerDescription": "Tap the button below or on the top right.",
+      "migrationPromptTitle": "Migration update",
+      "migrationPromptMessage": "If some devices aren’t visible, please re-add them under your preferred home.",
+      "migrationPromptUnderstood": "Got it"
     },
     "rooms": {
       "title": "Rooms",
@@ -807,7 +810,6 @@
       "noEventSelectedDescription": "Add event to create your automation. Tap the + button to get started.",
       "noActionsSelected": "No Actions Selected",
       "noActionsSelectedDescription": "Add device actions to {{action}} your automation. Tap the + button to get started.",
-      "nameAlreadyExists": "An automation with this name already exists",
       "automationUpdated": "Automation Updated",
       "automationUpdatedMessage": "Automation has been updated successfully",
       "automationDeleted": "Automation Deleted",
@@ -1178,5 +1180,33 @@
     "continue": "Continue",
     "confirm": "Confirm",
     "clear": "Clear"
+  },
+  "config": {
+    "scan": {
+      "title": "SDK Configurations",
+      "activeSdk": "Active SDK",
+      "configSource": "Config Source",
+      "config": "Config",
+      "tableKey": "Key",
+      "tableValue": "Value",
+      "noRuntimeConfig": "No runtime config (using .env defaults)",
+      "updateConfig": "Update config",
+      "cameraPermissionRequired": "Camera permission is required to scan QR codes.",
+      "grantPermission": "Grant Permission",
+      "back": "Back",
+      "fetching": "Fetching configuration…",
+      "applying": "Applying configuration…",
+      "success": "Configuration applied. Restarting…",
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "scanOverlay": "Scan QR code with config URL or JSON",
+      "configSourceRuntime": "Runtime (scanned)",
+      "configSourceBuildTime": "Build-time (.env)"
+    },
+    "reset": {
+      "title": "Reset runtime config?",
+      "message": "This will revert to build-time defaults and clear all session data.",
+      "confirmButton": "Reset"
+    }
   }
 }

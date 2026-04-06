@@ -50,7 +50,7 @@ public class mDNSManager {
      * Gets the singleton instance of `mDNSManager`.
      *
      * @param context     Application context.
-     * @param serviceType The type of service to discover (e.g., "_http._tcp.").
+     * @param serviceType The type of service to discover (RainMaker local control: {@code _esp_local_ctrl._tcp.}).
      * @param listener    Callback listener for discovery events.
      * @return The singleton instance of `mDNSManager`.
      */
@@ -90,6 +90,9 @@ public class mDNSManager {
      */
     public void discoverServices(String serviceType, String domain) {
         stopDiscovery();
+        if (serviceType != null) {
+            serviceType = serviceType.trim();
+        }
         initializeDiscoveryListener(serviceType);
         mNsdManager.discoverServices(serviceType, NsdManager.PROTOCOL_DNS_SD, discoveryListener);
     }
@@ -125,7 +128,7 @@ public class mDNSManager {
             public void onServiceFound(NsdServiceInfo serviceInfo) {
                 String discoveredServiceType = serviceInfo.getServiceType().trim();
 
-                if (discoveredServiceType.equals(serviceType)) {
+                if (serviceType != null && discoveredServiceType.equals(serviceType.trim())) {
                     if (resolveListenerBusy.compareAndSet(false, true)) {
                         if (resolveListener != null) {
                             mNsdManager.resolveService(serviceInfo, resolveListener);
@@ -154,6 +157,7 @@ public class mDNSManager {
 
             @Override
             public void onServiceLost(NsdServiceInfo serviceInfo) {
+                Log.e(TAG, "Service lost: " + serviceInfo);
                 removeLostService(serviceInfo);
             }
 
@@ -191,29 +195,28 @@ public class mDNSManager {
 
             @Override
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                resolvedNsdServices.add(serviceInfo);
-
                 InetAddress hostAddress = serviceInfo.getHost();
-                int hostPort = serviceInfo.getPort();
-                String nodeId = "";
-                HashMap<String, String> baseUrls = new HashMap<>();
-
-                Map<String, byte[]> attr = serviceInfo.getAttributes();
-                for (Map.Entry<String, byte[]> entry : attr.entrySet()) {
-                    String key = entry.getKey();
-                    byte[] value = entry.getValue();
-
-                    if (key.equals(KEY_NODE_ID)) {
-                        nodeId = new String(value);
-                    }
+                if (hostAddress == null) {
+                    Log.e(TAG, "Resolve succeeded but host is null");
+                    resolveNextInQueue();
+                    return;
                 }
 
+                resolvedNsdServices.add(serviceInfo);
+
+                int hostPort = serviceInfo.getPort();
+                String nodeId = nodeIdFromTxt(serviceInfo);
+                if (nodeId.isEmpty()) {
+                    nodeId = serviceInfo.getServiceName();
+                }
+
+                HashMap<String, String> baseUrls = new HashMap<>();
                 if (!nodeId.isEmpty()) {
                     String baseUrl = "http://" + hostAddress.getHostAddress() + ":" + hostPort;
                     baseUrls.put(nodeId, baseUrl);
                     listener.deviceFound(baseUrls);
                 } else {
-                    Log.e(TAG, "NodeId is missing, skipping service");
+                    Log.e(TAG, "Could not determine node id for resolved service");
                 }
 
                 resolveNextInQueue();
@@ -254,8 +257,50 @@ public class mDNSManager {
      */
     private void removeLostService(NsdServiceInfo serviceInfo) {
         String serviceName = serviceInfo.getServiceName();
-        resolvedNsdServices.removeIf(s -> s.getServiceName().equals(serviceName));
+        String nodeId = null;
+        synchronized (resolvedNsdServices) {
+            for (NsdServiceInfo s : resolvedNsdServices) {
+                if (s.getServiceName().equals(serviceName)) {
+                    nodeId = nodeIdForLostService(s);
+                    break;
+                }
+            }
+            resolvedNsdServices.removeIf(s -> s.getServiceName().equals(serviceName));
+        }
         pendingNsdServices.removeIf(s -> s.getServiceName().equals(serviceName));
+        if (nodeId == null || nodeId.isEmpty()) {
+            nodeId = serviceName;
+        }
+        if (!nodeId.isEmpty()) {
+            listener.deviceLost(nodeId);
+        }
+    }
+
+    /**
+     * Prefer TXT {@code node_id}; otherwise use the service instance name (RainMaker-style fallback).
+     */
+    private static String nodeIdForLostService(NsdServiceInfo s) {
+        String fromTxt = nodeIdFromTxt(s);
+        if (!fromTxt.isEmpty()) {
+            return fromTxt;
+        }
+        return s.getServiceName();
+    }
+
+    /** TXT {@code node_id} (case-insensitive key), same field as RainMaker Android. */
+    private static String nodeIdFromTxt(NsdServiceInfo s) {
+        Map<String, byte[]> attr = s.getAttributes();
+        if (attr == null) {
+            return "";
+        }
+        for (Map.Entry<String, byte[]> e : attr.entrySet()) {
+            String key = e.getKey();
+            byte[] value = e.getValue();
+            if (key != null && key.equalsIgnoreCase(KEY_NODE_ID) && value != null && value.length > 0) {
+                return new String(value);
+            }
+        }
+        return "";
     }
 
     /**
@@ -263,5 +308,7 @@ public class mDNSManager {
      */
     public interface mDNSEvenListener {
         void deviceFound(HashMap<String, String> baseUrls);
+
+        void deviceLost(String nodeId);
     }
 }

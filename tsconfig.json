@@ -4,12 +4,22 @@
     "strict": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@src/*": ["./src/*"],
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@store": ["./src/store"],
+      "@native-adaptors/*": ["./src/native-adaptors/*"],
+      "@sdk-adaptors/*": ["./src/sdk-adaptors/*"],
+      "@context/*": ["./src/context/*"],
+      "@config/*": ["./config/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@integrations": ["./src/integrations"]
     },
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "module": "ESNext",
     "moduleResolution": "bundler"
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "types/**/*.d.ts"]
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "src/types/**/*.d.ts"]
 }
