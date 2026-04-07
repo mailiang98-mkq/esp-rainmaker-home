@@ -169,25 +169,16 @@ export function transformToESPCDFUser(
 
         },
         async updateName(name: string): Promise<ESPCDFAPIResponse<any>> {
-            return {
-                status: "error",
-                description: "Method not supported",
-                data: null,
-            };
+            console.warn("[transformToESPCDFUser] updateName is not supported by RMNGBase SDK");
+            throw new Error("RMNGBase SDK does not support updateName")
         },
         async requestAccountDeletion(): Promise<ESPCDFAPIResponse<any>> {
-            return {
-                status: "error",
-                description: "Method not supported",
-                data: null,
-            };
+            console.warn("[transformToESPCDFUser] requestAccountDeletion is not supported by RMNGBase SDK");
+            throw new Error("RMNGBase SDK does not support requestAccountDeletion")
         },
         async confirmAccountDeletion(code: string): Promise<ESPCDFAPIResponse<any>> {
-            return {
-                status: "error",
-                description: "Method not supported",
-                data: null,
-            };
+            console.warn("[transformToESPCDFUser] confirmAccountDeletion is not supported by RMNGBase SDK");
+            throw new Error("RMNGBase SDK does not support confirmAccountDeletion")
         },
         async getIssuedGroupSharingRequests(): Promise<ESPCDFPaginatedAPIResponse<ESPCDFGroupSharingRequest[]>> {
             return {
@@ -340,13 +331,7 @@ export function transformToESPCDFUser(
 
             if (selectedHome) {
                 await syncNodesForGroup(selectedHome);
-            }
-            // await Promise.all(
-            //     cdfGroups
-            //         .filter((group) => group.id !== selectedHome?.id)
-            //         .map((group) => syncNodesForGroup(group))
-            // );
-
+            }  
             return selectedHome;
         },
         async setCurrentHome(user, callbacks, home) {

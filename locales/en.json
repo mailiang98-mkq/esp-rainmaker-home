@@ -605,6 +605,7 @@
       "title": "Connect to Wi-Fi",
       "selectNetwork": "Select Wi-Fi",
       "availableNetworks": "Available Wi-Fi",
+      "lastUsed": "Last used",
       "password": "Password",
       "connect": "Connect",
       "saveNetwork": "Save Wi-Fi",

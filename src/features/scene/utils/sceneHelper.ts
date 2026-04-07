@@ -13,7 +13,7 @@ import {
   ESPCDFDeviceParam
 } from "@store";
 import { sortByConnectivity } from "@shared/utils/eventDeviceSelection";
-import { defaultValueBasedOnParamDataType } from "@shared/utils/paramUtils";
+import { defaultWritableParamValue } from "@shared/utils/paramUtils";
 import type { DeviceSelectionData } from "@src/types/global";
 
 /**
@@ -301,8 +301,8 @@ export const getSelectedDeviceWithParams = (
   const params: Array<ESPCDFDeviceParam & { value: any }> | undefined = device.params?.map((param) => ({
     ...param,
     value:
-      getActionValue(nodeId, device.name, param.name) ||
-      defaultValueBasedOnParamDataType(param.dataType ?? ""),
+      getActionValue(nodeId, device.name, param.name) ??
+      defaultWritableParamValue(param),
   })) as Array<ESPCDFDeviceParam & { value: any }>;
 
   return { selectedDevice: device, nodeId, params };

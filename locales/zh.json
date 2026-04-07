@@ -605,6 +605,7 @@
       "title": "连接到 Wi-Fi",
       "selectNetwork": "选择 Wi-Fi",
       "availableNetworks": "可用 Wi-Fi",
+      "lastUsed": "上次使用",
       "password": "密码",
       "connect": "连接",
       "saveNetwork": "保存 Wi-Fi",

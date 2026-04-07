@@ -14,6 +14,7 @@ import {
   ESPCDFUser,
 } from "@store";
 import { delay } from "./common";
+import { ESPCDF } from "@store";
 /**
  * List of all available timezones
  * @returns {string[]} List of all available timezones
@@ -575,17 +576,36 @@ export function ianaTzToEspPosixTz(iana: string): string {
   }
 }
 
-function nodeReportedIanaTzEquals(
-  node: ESPCDFNode | null,
-  expected: string
-): boolean {
-  if (!node) return false;
+type RMNGRawNodeWithGetParams = {
+  getParams?: (options?: {
+    forceRefresh?: boolean;
+    timeout?: number;
+  }) => Promise<Record<string, any>>;
+};
+
+async function getReportedIanaTzFromNodeParams(
+  node: ESPCDFNode | null
+): Promise<string> {
+  if (!node) return "";
+
   const { timezoneParam } = getNodeTimezoneConfig(node);
-  const v =
-    typeof timezoneParam?.value === "string"
-      ? timezoneParam.value.trim()
-      : "";
-  return v === expected.trim();
+  const fromNodeSnapshot =
+    typeof timezoneParam?.value === "string" ? timezoneParam.value.trim() : "";
+  if (fromNodeSnapshot) return fromNodeSnapshot;
+
+  const rawNode = node._raw as RMNGRawNodeWithGetParams | undefined;
+  if (typeof rawNode?.getParams !== "function") return "";
+
+  try {
+    const params = await rawNode.getParams({
+      forceRefresh: true,
+      timeout: 5000,
+    });
+    const fromMqttParams = params?.Time?.TZ;
+    return typeof fromMqttParams === "string" ? fromMqttParams.trim() : "";
+  } catch {
+    return "";
+  }
 }
 
 /** Retries for post-provision node timezone: config (writable Time/TZ) then params API. */
@@ -612,15 +632,17 @@ async function resolveTimeZoneStringForProvision(
 }
 
 /**
- * After provisioning, refetches the node until Time/TZ has write permission (or attempts exhausted),
- * then retries setNodeTimeZone. Ensures addDevice can await this before returning so UI can enable Continue.
- */
+* After provisioning, refetches the node until Time/TZ has write permission (or attempts exhausted),
+* then retries setNodeTimeZone. Ensures addDevice can await this before returning so UI can enable Continue.
+*/
 async function safeGetNodeDetails(
   nodeId: string,
   getNodeDetails: (id: string) => Promise<ESPCDFNode | null | undefined>
 ): Promise<ESPCDFNode | null> {
   try {
-    const n = await getNodeDetails(nodeId);
+    // Prefer a fresh cloud fetch; nodeStore cache can lag and report stale TZ="".
+    const fresh = await getNodeDetails(nodeId);
+    const n = fresh ?? ESPCDF.instance?.nodeStore.getNodeById(nodeId);
     return n ?? null;
   } catch (e) {
     console.error(
@@ -678,7 +700,8 @@ export async function applyProvisionNodeTimezoneWithRetries(
       if (fresh) {
         node = fresh;
       }
-      if (nodeReportedIanaTzEquals(node, timeZoneStr)) {
+      const reportedTimeZone = await getReportedIanaTzFromNodeParams(node);
+      if (reportedTimeZone === timeZoneStr.trim()) {
         return node;
       }
       console.warn(
@@ -687,7 +710,7 @@ export async function applyProvisionNodeTimezoneWithRetries(
         "expected=",
         timeZoneStr,
         "reported=",
-        getNodeTimezoneConfig(node).timezoneParam?.value
+        reportedTimeZone
       );
     }
     if (attempt < PROVISION_TZ_MAX_ATTEMPTS - 1) {

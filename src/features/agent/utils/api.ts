@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import StorageAdapter from '@native-adaptors/implementations/ESPAsyncStorage';
 
 import { ESPCDFUser } from '@store';
 import { getAgentConfig as fetchAgentConfig } from './apiHelper';
@@ -32,7 +32,7 @@ export const getAgentConfigFromCache = async (
       return null;
     }
 
-    const cachedConfigs = await AsyncStorage.getItem(AGENT_CONFIGS_MAP_KEY);
+    const cachedConfigs = await StorageAdapter.getItem(AGENT_CONFIGS_MAP_KEY);
     if (!cachedConfigs) {
       return null;
     }
@@ -58,14 +58,14 @@ export const saveAgentConfigToCache = async (
     throw new Error('Agent ID cannot be empty');
   }
 
-  const cachedConfigs = await AsyncStorage.getItem(AGENT_CONFIGS_MAP_KEY);
+  const cachedConfigs = await StorageAdapter.getItem(AGENT_CONFIGS_MAP_KEY);
   const configMap: Record<string, AgentConfigResponse> = cachedConfigs
     ? JSON.parse(cachedConfigs)
     : {};
 
   configMap[trimmedAgentId] = config;
 
-  await AsyncStorage.setItem(AGENT_CONFIGS_MAP_KEY, JSON.stringify(configMap));
+  await StorageAdapter.setItem(AGENT_CONFIGS_MAP_KEY, JSON.stringify(configMap));
 };
 
 export const getAgentNameFromCache = async (
@@ -121,7 +121,7 @@ export const getWebSocketUrl = async (user: ESPCDFUser): Promise<string | null> 
     try {
       token = await user.getAccessToken();
     } catch (error) {
-      token = await AsyncStorage.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
+      token = await StorageAdapter.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
     }
 
     return `${AGENTS_WEBSOCKET_BASE_URL}/user/agents/${agentId}/ws?token=${token || ''}`;
