@@ -25,9 +25,13 @@ export default function GroupLayout() {
       <Stack.Screen name="Rooms" />
       <Stack.Screen name="Setting" />
       <Stack.Screen name="CustomizeRoomName" />
+      <Stack.Screen name="CustomizeControlGroupName" />
       <Stack.Screen name="CreateRoom" />
       <Stack.Screen name="CreateRoomSuccess" />
       <Stack.Screen name="HomeManagement" />
+      <Stack.Screen name="ControlGroups" />
+      <Stack.Screen name="CreateControlGroup" />
+      <Stack.Screen name="ControlGroupPanel" />
     </Stack>
   );
 }

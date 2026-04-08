@@ -84,4 +84,4 @@ count_lines.py
 android/app/google-services.json
 
 # Cursor
-.cursor/
+.cursor/expo-env.d.ts

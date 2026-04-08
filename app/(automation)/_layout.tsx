@@ -5,7 +5,7 @@
  */
 
 import { Stack } from "expo-router";
-import { AutomationProvider } from "@/context/automation.context";
+import { AutomationProvider } from "@context/automation.context";
 import { Platform } from "react-native";
 
 /**

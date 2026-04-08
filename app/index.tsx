@@ -8,32 +8,34 @@ import "../i18n";
 import { StyleSheet, View } from "react-native";
 import { useCallback, useEffect } from "react";
 // Initialize Matter adapter early
-import "@/adaptors/implementations/ESPMatterAdapter";
+import "@native-adaptors/implementations/ESPMatterAdapter";
 // hooks
-import { useCDF } from "@/hooks/useCDF";
+import { useCDF } from "@shared/hooks/useCDF";
 import { useRouter, usePathname, useFocusEffect } from "expo-router";
 // components
-import { Logo } from "@/components";
-import { createPlatformEndpoint } from "@/utils/notifications";
-import { executePostLoginPipeline } from "@/utils/postLoginPipeline";
+import { Logo } from "@shared/components";
+import { registerForNotification } from "@shared/utils/notifications";
+import { executePostLoginPipeline } from "@features/auth/utils/postLoginPipeline";
 // theme
-import { tokens } from "@/theme/tokens";
+import { tokens } from "@shared/theme/tokens";
+import asyncStorageAdapter from "@native-adaptors/implementations/ESPAsyncStorage";
+import { RUNTIME_CONFIG_STORAGE_KEYS } from "@config/runtime.config";
 
 const index = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { store, isInitialized, fetchNodesAndGroups, initUserCustomData, refreshESPRMUser } =
+  const { store, isInitialized, syncHomeWithNodes, initUserCustomData } =
     useCDF();
+
+  const user = store?.userStore.user;
 
   const authCheck = async () => {
     try {
-      const userInfo = store.userStore.userInfo;
-      if (userInfo) {
+      if (user) {
         await executePostLoginPipeline({
           store,
           router,
-          refreshESPRMUser,
-          fetchNodesAndGroups,
+          syncHomeWithNodes,
           initUserCustomData,
         });
         return;
@@ -45,7 +47,7 @@ const index = () => {
         router.replace("/(auth)/Login");
       }
     } catch (error) {
-      await store.userStore?.logout();
+      await user?.logout();
       router.replace("/(auth)/Login");
     }
   };
@@ -57,19 +59,19 @@ const index = () => {
           authCheck();
         }, 2000);
       }
-    }, [store, isInitialized])
+    }, [store, isInitialized]),
   );
 
   // Initialize notification when user is logged in
   useEffect(() => {
-    if (store && isInitialized && store?.userStore.user) {
+    if (user && isInitialized) {
       initNotification();
     }
-  }, [store, isInitialized, store?.userStore.user]);
+  }, [user, isInitialized]);
 
   const initNotification = async () => {
     try {
-      await createPlatformEndpoint(store);
+      await registerForNotification(store);
     } catch (err) {
       console.error(err);
       console.error("Failed to initialize notification");

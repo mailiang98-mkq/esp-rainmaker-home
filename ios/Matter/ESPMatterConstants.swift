@@ -74,6 +74,7 @@ struct ESPMatterConstants {
     
     // MARK: - Event Types
     static let commissioningComplete = "COMMISSIONING_COMPLETE"
+    static let commissioningError = "COMMISSIONING_ERROR"
     static let nodeNocRequest = "NODE_NOC_REQUEST"
     static let commissioningConfirmationRequest = "COMMISSIONING_CONFIRMATION_REQUEST"
     
@@ -112,6 +113,7 @@ struct ESPMatterConstants {
     static let status = "status"
     static let success = "success"
     static let error = "error"
+    static let errorMessage = "errorMessage"
     static let challenge = "challenge"
     static let challengeResponse = "challengeResponse"
     static let metadata = "metadata"

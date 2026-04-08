@@ -9,23 +9,23 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { View, ActivityIndicator, Text, StyleSheet } from "react-native";
 
 // Styles
-import { tokens } from "@/theme/tokens";
-import { globalStyles } from "@/theme/globalStyleSheet";
+import { tokens } from "@shared/theme/tokens";
+import { globalStyles } from "@shared/theme/globalStyleSheet";
 // Hooks
-import { useCDF } from "@/hooks/useCDF";
+import { useCDF } from "@shared/hooks/useCDF";
 import { useTranslation } from "react-i18next";
-import { useAgent } from "@/hooks/useAgent";
+import { useAgent } from "@features/agent/hooks";
 // Utils
 import { RAINMAKER_MCP_CONNECTOR_URL } from "@/config/agent.config";
-import { getAgentTermsAccepted } from "@/utils/agent/storage";
-import { ConnectedConnector } from "@/utils/apiHelper";
+import { getAgentTermsAccepted } from "@features/agent/utils/storage";
+import { ConnectedConnector } from "@features/agent/utils/apiHelper";
 // Components
 import {
   Header,
   ScreenWrapper,
   ConfirmationDialog,
   AgentTermsBottomSheet,
-} from "@/components";
+} from "@shared/components";
 
 /* ------------------------------ Constants ------------------------------- */
 
@@ -39,7 +39,6 @@ const ROUTES = {
 interface LoadingScreenProps {
   message?: string;
 }
-
 
 /* ------------------------------ Components ------------------------------- */
 
@@ -80,11 +79,7 @@ const TryAgentsId = () => {
   // Hooks
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const {
-    isInitialized,
-    store,
-    initUserCustomData,
-  } = useCDF();
+  const { isInitialized, store, initUserCustomData } = useCDF();
   const { t } = useTranslation();
   const {
     agentConfig,
@@ -113,13 +108,15 @@ const TryAgentsId = () => {
   const hasNavigatedRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const user = store?.userStore.user;
+
   useEffect(() => {
     if (!isInitialized || !router || !store) {
       return;
     }
 
     setIsAppReady(true);
-  }, [isInitialized, router, store?.userStore?.isHydrated]);
+  }, [isInitialized, router, store]);
 
   /**
    * Runs post-login pipeline once the app is ready.
@@ -132,7 +129,7 @@ const TryAgentsId = () => {
       }
       try {
         await initUserCustomData();
-        const userInfo = store?.userStore?.userInfo;
+        const userInfo = user?.userInfo;
         if (!userInfo) {
           router.replace("/(auth)/Login");
           hasNavigatedRef.current = true;
@@ -143,7 +140,7 @@ const TryAgentsId = () => {
         console.error(
           "\x1b[31m%s\x1b[0m",
           `[ERROR] Post-login pipeline failed:`,
-          error
+          error,
         );
         router.replace("/(auth)/Login");
         hasNavigatedRef.current = true;
@@ -157,11 +154,11 @@ const TryAgentsId = () => {
    * Ensures agent terms are accepted before proceeding to agent setup
    */
   useEffect(() => {
-    if (!isPipelineReady || !store?.userStore || hasCheckedTerms) {
+    if (!isPipelineReady || !user || hasCheckedTerms) {
       return;
     }
 
-    const termsAccepted = getAgentTermsAccepted(store.userStore);
+    const termsAccepted = getAgentTermsAccepted(user);
     setHasCheckedTerms(true);
 
     if (termsAccepted) {
@@ -215,7 +212,7 @@ const TryAgentsId = () => {
 
       // Find Rainmaker MCP tool in tools array
       const rainmakerTool = config?.tools?.find(
-        (tool: any) => tool.url === RAINMAKER_MCP_CONNECTOR_URL
+        (tool: any) => tool.url === RAINMAKER_MCP_CONNECTOR_URL,
       );
 
       if (rainmakerTool?.oauthMetadata) {
@@ -228,9 +225,9 @@ const TryAgentsId = () => {
 
       // Check if connector with matching connectorId already exists
       await loadConnectors();
-      const expectedConnectorId = `${RAINMAKER_MCP_CONNECTOR_URL}::${oauthMetadata?.clientId || ''}`;
+      const expectedConnectorId = `${RAINMAKER_MCP_CONNECTOR_URL}::${oauthMetadata?.clientId || ""}`;
       const existingConnector = connectors.find(
-        (c: any) => (c as any).connectorId === expectedConnectorId
+        (c: any) => (c as any).connectorId === expectedConnectorId,
       );
 
       // If connector exists in array, it's already connected
@@ -242,7 +239,7 @@ const TryAgentsId = () => {
       // Use hook's connectToolWithTokensDirect
       await connectToolWithTokensDirect(
         RAINMAKER_MCP_CONNECTOR_URL,
-        oauthMetadata
+        oauthMetadata,
       );
 
       // Reload connectors after successful connection
@@ -253,7 +250,7 @@ const TryAgentsId = () => {
       console.error(
         "\x1b[31m%s\x1b[0m",
         `[ERROR] Failed to auto-connect Rainmaker MCP:`,
-        error
+        error,
       );
       setIsConnectingConnector(false);
       return false;
@@ -315,18 +312,18 @@ const TryAgentsId = () => {
    */
   const checkRainmakerMCPConnector = async (
     config: any,
-    connectedConnectors: ConnectedConnector[]
+    connectedConnectors: ConnectedConnector[],
   ): Promise<boolean> => {
     // Check tools array (new API structure)
     const tools = config?.tools || [];
-    
+
     if (tools.length === 0) {
       return true; // No tools, proceed
     }
 
     // Check if Rainmaker MCP is required in tools array
     const rainmakerToolRequired = tools.some(
-      (tool: any) => tool.url === RAINMAKER_MCP_CONNECTOR_URL
+      (tool: any) => tool.url === RAINMAKER_MCP_CONNECTOR_URL,
     );
 
     if (!rainmakerToolRequired) {
@@ -335,7 +332,7 @@ const TryAgentsId = () => {
 
     // Find the Rainmaker MCP tool to get clientId
     const rainmakerTool = tools.find(
-      (tool: any) => tool.url === RAINMAKER_MCP_CONNECTOR_URL
+      (tool: any) => tool.url === RAINMAKER_MCP_CONNECTOR_URL,
     );
 
     // Check if Rainmaker MCP is connected by connectorId
@@ -343,7 +340,7 @@ const TryAgentsId = () => {
     if (rainmakerTool?.oauthMetadata?.clientId) {
       const expectedConnectorId = `${RAINMAKER_MCP_CONNECTOR_URL}::${rainmakerTool.oauthMetadata.clientId}`;
       connector = connectedConnectors.find(
-        (c: any) => c.connectorId === expectedConnectorId
+        (c: any) => c.connectorId === expectedConnectorId,
       );
     }
 
@@ -374,7 +371,7 @@ const TryAgentsId = () => {
       // Check if Rainmaker MCP is required and connected
       const isRainmakerMCPConnected = await checkRainmakerMCPConnector(
         config,
-        connectors
+        connectors,
       );
 
       if (isRainmakerMCPConnected) {
@@ -402,7 +399,7 @@ const TryAgentsId = () => {
       console.error(
         "\x1b[31m%s\x1b[0m",
         `[ERROR] Failed to load agent data:`,
-        err
+        err,
       );
       const errorMessage =
         err?.message ||
@@ -428,7 +425,7 @@ const TryAgentsId = () => {
     }
 
     // Check if user is logged in - if not, redirect to login and do not proceed
-    const userInfo = store?.userStore?.userInfo;
+    const userInfo = user?.userInfo;
     if (!userInfo) {
       router.replace("/(auth)/Login");
       hasNavigatedRef.current = true;
@@ -446,7 +443,7 @@ const TryAgentsId = () => {
       console.error(
         "\x1b[31m%s\x1b[0m",
         `[ERROR] Deep link navigation error:`,
-        error
+        error,
       );
       handleFallbackNavigation();
     }
@@ -465,7 +462,7 @@ const TryAgentsId = () => {
       console.error(
         "\x1b[31m%s\x1b[0m",
         `[ERROR] Failed to navigate to home as fallback:`,
-        fallbackError
+        fallbackError,
       );
     }
   };

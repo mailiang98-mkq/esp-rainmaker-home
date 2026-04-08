@@ -17,6 +17,8 @@ import com.app.matter.FabricSessionManager
 import com.app.notification.ESPNotificationModule
 import com.app.oauth.ESPOauthModule
 import com.app.provisioning.ESPProvModule
+import com.app.mqtt.ESPMQTTModule
+import com.app.softap.ESPSoftAPModule
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -109,6 +111,24 @@ class MainApplication : Application(), ReactApplication {
                     }
 
                     override fun createViewManagers(p0: ReactApplicationContext): List<ViewManager<*, *>?> {
+                        return emptyList()
+                    }
+                })
+                packages.add(object : ReactPackage {
+                    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
+                        return listOf(ESPMQTTModule(reactContext))
+                    }
+
+                    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
+                        return emptyList()
+                    }
+                })
+                packages.add(object : ReactPackage {
+                    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
+                        return listOf(ESPSoftAPModule(reactContext))
+                    }
+
+                    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
                         return emptyList()
                     }
                 })

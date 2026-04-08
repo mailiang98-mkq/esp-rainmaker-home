@@ -5,6 +5,64 @@ All notable changes to the ESP RainMaker Home app will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0]
+
+### Added
+
+**Project Restructure & Architecture**
+
+- Restructured the app into a **modular, feature-based architecture** for better organization and scalability.
+- Introduced a **unified CDF store** for consistent and centralized state management across multiple SDKs.
+
+**Architecture Layer (Adapter Pattern)**
+
+- Implemented an **adapter-based architecture** to standardize SDK integrations.
+- Added support for **runtime SDK switching via QR code scan**, allowing dynamic selection between **RMNG and RainMaker SDKs** using a predefined configuration payload.
+
+**ESP RainMaker Base SDK Integration**
+
+- Integrated RainMaker via adapter layer for:
+  - User, devices, groups
+  - Scenes, schedules, automations, provisioning
+
+**Matter Support (Commissioning Only)**
+
+- Added support for **Matter device commissioning**.
+
+**RMNG Integration**
+
+- Integrated RMNG SDK with support for:
+  - Device and group management
+  - Schedules and automations
+  - Provisioning flows
+  - Group control
+  - Group sharing
+
+**Provisioning Enhancements**
+
+- Added support for **parsing newer provisioning QR code payload formats**:
+  - `NP:PROV_xxx|yyy|b` → BLE provisioning
+  - `NP:PROV_xxx|yyy|s` → SoftAP provisioning
+
+**BLE Scan Experience**
+
+- Added support for **displaying device icons during BLE scan** using advertisement data.
+
+---
+
+### Enhanced
+
+- Enhanced flexibility for adding new features and SDKs.
+- Improved provisioning flow by **leveraging SDK flag-based APIs**, simplifying internal handling.
+
+---
+
+### Security
+
+- Disabled Android `allowBackup` flag to improve application data security.
+
+---
+
 ## [3.5.0]
 
 ### Added

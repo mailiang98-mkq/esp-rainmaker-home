@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrightnessSlider } from "@/components";
-import { ColorTemperatureSlider } from "@/components";
-import { HueSlider } from "@/components";
-import { SaturationSlider } from "@/components";
-import { ToggleSwitch } from "@/components";
-import { Slider } from "@/components";
-import { HueCircle } from "@/components";
-import { PushButton } from "@/components";
-import { DropdownSelector } from "@/components";
-import { TriggerButton } from "@/components";
-import { TextInput, Temperature } from "@/components";
+import { BrightnessSlider } from "@shared/components";
+import { ColorTemperatureSlider } from "@shared/components";
+import { HueSlider } from "@shared/components";
+import { SaturationSlider } from "@shared/components";
+import { ToggleSwitch } from "@shared/components";
+import { Slider } from "@shared/components";
+import { HueCircle } from "@shared/components";
+import { PushButton } from "@shared/components";
+import { DropdownSelector } from "@shared/components";
+import { TriggerButton } from "@shared/components";
+import { TextInput, Temperature } from "@shared/components";
 
 import {
   // DATA TYPES
@@ -31,6 +31,7 @@ import {
   ESPRM_POWER_PARAM_TYPE,
   ESPRM_SATURATION_PARAM_TYPE,
   ESPRM_TEMPERATURE_PARAM_TYPE,
+  ESPRM_LIGHT_MODE_PARAM_TYPE,
 
   // SUPPORTED PARAM UI TYPES
   ESPRM_UI_DROPDOWN_PARAM_TYPE,
@@ -42,7 +43,7 @@ import {
   ESPRM_UI_TEXT_PARAM_TYPE,
   ESPRM_UI_TOGGLE_PARAM_TYPE,
   ESPRM_UI_TRIGGER_PARAM_TYPE,
-} from "@/utils/constants";
+} from "@shared/utils/constants";
 
 export const PARAM_CONTROLS = [
   {
@@ -63,7 +64,6 @@ export const PARAM_CONTROLS = [
     control: ToggleSwitch,
     dataTypes: DATA_TYPE_BOOL,
     hide: true,
-    roomLabel: "Power",
   },
   {
     name: "Slider",
@@ -71,7 +71,6 @@ export const PARAM_CONTROLS = [
     control: Slider,
     dataTypes: [DATA_TYPE_INT, DATA_TYPE_FLOAT],
     requirements: "bounds (min, max)",
-    roomLabel: "Slider",
   },
   {
     name: "Brightness",
@@ -79,7 +78,6 @@ export const PARAM_CONTROLS = [
     control: BrightnessSlider,
     dataTypes: DATA_TYPE_INT,
     paramType: ESPRM_BRIGHTNESS_PARAM_TYPE,
-    roomLabel: "Brightness",
   },
   {
     name: "CCT",
@@ -122,10 +120,14 @@ export const PARAM_CONTROLS = [
   },
   {
     name: "Dropdown",
-    types: [ESPRM_UI_DROPDOWN_PARAM_TYPE],
+    types: [
+      ESPRM_UI_DROPDOWN_PARAM_TYPE,
+      ESPRM_LIGHT_MODE_PARAM_TYPE,
+    ],
     control: DropdownSelector,
     dataTypes: [DATA_TYPE_INT, DATA_TYPE_STRING],
-    requirements: "bounds (min/max) for Int, valid strings for String",
+    requirements:
+      "bounds (min/max) for Int, valid strings for String; string + bounds = discrete string values",
   },
   {
     name: "Trigger",

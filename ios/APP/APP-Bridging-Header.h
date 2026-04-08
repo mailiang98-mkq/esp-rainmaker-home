@@ -4,4 +4,6 @@
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
+#import <AWSCore/AWSCore.h>
+#import <AWSIoT/AWSIoT.h>
 #import "MTRCSRKeys.h"
