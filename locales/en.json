@@ -720,7 +720,8 @@
       "checkOTAUpdateError": "Failed to check for updates",
       "otaUpdateStartError": "Failed to start update",
       "failedToUpdateTimezone": "Failed to update timezone",
-      "noReadmeURLProvided": "No README URL provided"
+      "noReadmeURLProvided": "No README URL provided",
+      "deviceNotConnected": "Device is not connected"
     },
     "chart": {
       "title": "Chart",
@@ -751,6 +752,45 @@
         "max": "Max",
         "count": "Count",
         "latest": "Latest"
+      }
+    },
+    "camera": {
+      "errors": {
+        "channelNameRequired": "Channel name is required for video streaming",
+        "failedToGetCredentials": "Failed to get AWS credentials",
+        "signalingError": "Signaling error occurred",
+        "failedToStartStreaming": "Failed to start streaming",
+        "connectionFailed": "Connection failed"
+      },
+      "loading": "Connecting video ...",
+      "connectionState": {
+        "connected": "CONNECTED",
+        "disconnected": "DISCONNECTED",
+        "live": "LIVE",
+        "error": "ERROR",
+        "unknown": "UNKNOWN"
+      },
+      "stats": {
+        "loading": "Loading stats...",
+        "title": "Video Statistics",
+        "sections": {
+          "video": "VIDEO",
+          "network": "NETWORK"
+        },
+        "labels": {
+          "resolution": "Resolution",
+          "currentFps": "Current FPS",
+          "receivedFps": "Received FPS",
+          "droppedFps": "Dropped FPS",
+          "framesDropped": "Frames Dropped",
+          "codec": "Codec",
+          "bitrate": "Bitrate",
+          "totalData": "Total Data",
+          "packetsRx": "Packets RX",
+          "packetsLost": "Packets Lost",
+          "lossPercent": "Loss %",
+          "jitter": "Jitter"
+        }
       }
     }
   },

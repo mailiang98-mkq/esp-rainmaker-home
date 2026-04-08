@@ -24,6 +24,7 @@ import Fallback from "./device_panels/Fallback";
 import LightControl from "./device_panels/Light";
 import SwitchControl from "./device_panels/Switch";
 import AiAgentControl from "./device_panels/AiAgent";
+import CameraControl from "./device_panels/Camera";
 
 // Utils
 import { testProps } from "@shared/utils/testProps";
@@ -32,6 +33,7 @@ const CONTROL_PANELS: Record<string, React.FC<any>> = {
   light: LightControl,
   switch: SwitchControl,
   "ai-agent": AiAgentControl,
+  camera: CameraControl,
 };
 
 /**

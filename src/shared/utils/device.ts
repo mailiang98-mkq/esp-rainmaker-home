@@ -31,8 +31,10 @@ const deviceImages: Record<string, any> = {
   "fan-online": require("@assets/images/devices/fan-online.png"),
   temperature: require("@assets/images/devices/sensor.png"),
   "temperature-online": require("@assets/images/devices/sensor-online.png"),
-  'ai-assistant': require("@assets/images/devices/ai-assistant.png"),
-  'ai-assistant-online': require("@assets/images/devices/ai-assistant-online.png"),
+  "ai-assistant": require("@assets/images/devices/ai-assistant.png"),
+  "ai-assistant-online": require("@assets/images/devices/ai-assistant-online.png"),
+  camera: require("@assets/images/devices/camera.png"),
+  "camera-online": require("@assets/images/devices/camera.png"),
   // Add more mappings as needed
 };
 

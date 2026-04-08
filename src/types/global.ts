@@ -13,6 +13,7 @@ import {
   ImageSourcePropType,
   ScrollView,
 } from "react-native";
+import { MediaStream } from "react-native-webrtc";
 import type { ReactNode } from "react";
 import { AgentConfig } from "@features/agent/utils";
 import { ESPCDFDevice, ESPCDFGroup, ESPCDFNode, ESPCDFDeviceParam, ESPCDFNodeConfig, ESPCDFAutomation, ESPCDFGroupSharingRequest } from "@store";
@@ -87,6 +88,21 @@ export interface ParamControlChildProps {
   disabled?: boolean;
   meta?: any;
   onOpenChart?: (() => void) | null;
+}
+
+export interface DeviceParamsRendererProps {
+  /** Array of parameters to render */
+  params: ESPCDFDeviceParam[];
+  /** All device parameters (for derived meta processing) */
+  allParams: ESPCDFDeviceParam[];
+  /** Whether the device is connected */
+  isConnected: boolean;
+  /** Callback when updating state changes */
+  onSetUpdating: (updating: boolean) => void;
+  /** Optional custom params map (if not provided, will be built) */
+  paramsMap?: Record<string, any>;
+  /** Optional custom style for each parameter wrapper */
+  paramWrapperStyle?: ViewStyle;
 }
 
 export interface FooterButtonProps {
@@ -1338,4 +1354,122 @@ export interface ChartValueDisplayToolTipProps {
   chartRight: number;
   chartTop: number;
   chartBottom: number;
+}
+
+// ============================================================================
+// Video Player Types
+// ============================================================================
+
+/**
+ * Connection state types for video player
+ */
+export enum ConnectionState {
+  CONNECTED = "connected",
+  DISCONNECTED = "disconnected",
+  LIVE = "live",
+  ERROR = "error",
+}
+
+/**
+ * Props for VideoPlayer component
+ */
+export interface VideoPlayerProps {
+  /** Whether the video is currently playing */
+  isPlaying: boolean;
+  /** Callback when play button is pressed */
+  onPlayPress: () => void;
+  /** Callback when fullscreen button is pressed */
+  onFullscreenPress: () => void;
+  /** Whether the player is in fullscreen mode */
+  isFullscreen: boolean;
+  /** The video stream source (will be used when WebRTC is connected) */
+  videoStream?: MediaStream | null;
+  /** Loading state */
+  isLoading?: boolean;
+  /** Error state */
+  error?: string | null;
+  /** Connection state from useCameraWebRTC hook */
+  connectionState?: "connected" | "disconnected" | "live" | "error";
+  /** Video statistics from useCameraWebRTC hook */
+  stats?: VideoStats | null;
+  /** Function to enable/disable stats updates from useCameraWebRTC hook */
+  setStatsUpdatesEnabled?: (enabled: boolean, isPlaying: boolean) => void;
+  /** Whether controls are disabled */
+  disabled?: boolean;
+}
+
+/**
+ * Props for ConnectionStateBadge component
+ */
+export interface ConnectionStateBadgeProps {
+  /** Current connection state */
+  state: ConnectionState;
+  /** Optional custom test ID */
+  testId?: string;
+}
+
+/**
+ * Props for Controls component
+ */
+export interface ControlsProps {
+  /** Whether the video is currently playing */
+  isPlaying: boolean;
+  /** Whether the player is in fullscreen mode */
+  isFullscreen: boolean;
+  /** Whether video stream exists */
+  hasVideoStream: boolean;
+  /** Loading state */
+  isLoading: boolean;
+  /** Error state */
+  error: string | null;
+  /** Connection state from useCameraWebRTC hook */
+  connectionState: "connected" | "disconnected" | "live" | "error";
+  /** Whether controls are disabled */
+  disabled?: boolean;
+  /** Callback when play button is pressed */
+  onPlayPress: () => void;
+  /** Callback when fullscreen button is pressed */
+  onFullscreenPress: () => void;
+  /** Callback when long press is detected (for showing stats) */
+  onLongPress?: () => void;
+  /** Callback when stats info button is pressed */
+  onStatsPress?: () => void;
+}
+
+/**
+ * Video statistics data structure
+ */
+export interface VideoStats {
+  resolution: string;
+  currentFps: string;
+  receivedFps: string;
+  droppedFps: string;
+  framesDropped: string;
+  codec: string;
+  bitrate: string;
+  totalData: string;
+  packetsRx: string;
+  packetsLost: string;
+  lossPercent: string;
+  jitter: string;
+}
+
+/**
+ * Props for Stats component
+ */
+export interface StatsProps {
+  /** Whether stats overlay should be visible */
+  isVisible: boolean;
+  /** Whether the player is in fullscreen mode */
+  isFullscreen: boolean;
+  /** Whether the video is currently playing */
+  isPlaying: boolean;
+  /** Video statistics from useCameraWebRTC hook */
+  stats: VideoStats | null;
+  /** Function to enable/disable stats updates from useCameraWebRTC hook */
+  setStatsUpdatesEnabled?: (enabled: boolean, isPlaying: boolean) => void;
+  /** Callback when stats overlay should be dismissed */
+  onDismiss: () => void;
+  /** Whether fullscreen is in landscape mode (rotated) */
+  isLandscape?: boolean;
 }

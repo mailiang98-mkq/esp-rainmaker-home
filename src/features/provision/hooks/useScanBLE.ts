@@ -295,6 +295,7 @@ export const useScanBLE = (): UseScanBLEReturn => {
           pathname: "/(provision)/POP",
           params: {
             hasClaimCap: rmakerCaps.hasClaim ? "true" : "false",
+            hasCameraClaim: rmakerCaps.hasCameraClaim ? "true" : "false",
           },
         });
         return;
@@ -305,6 +306,9 @@ export const useScanBLE = (): UseScanBLEReturn => {
       if (rmakerCaps.hasClaim) {
         router.push({
           pathname: "/(provision)/Claiming",
+          params: {
+            isCameraDevice: rmakerCaps.hasCameraClaim ? "true" : "false",
+          },
         });
         return;
       }

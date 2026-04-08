@@ -27,12 +27,14 @@ export const usePOP = (): UsePOPReturn => {
   const { store } = useCDF();
   const params = useLocalSearchParams<{
     hasClaimCap?: string;
+    hasCameraClaim?: string;
   }>();
   const toast = useToast();
 
   const device: ESPCDFProvisioningDevice = store?.nodeStore?.connectedDevice as ESPCDFProvisioningDevice;
   const softAPDeviceInfo = store.nodeStore.softAPDeviceInfo;
   const hasClaimCap = params.hasClaimCap === "true";
+  const hasCameraClaim = params.hasCameraClaim === "true";
 
   const [popCode, setPopCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +46,9 @@ export const usePOP = (): UsePOPReturn => {
     if (hasClaimCap) {
       router.push({
         pathname: "/(provision)/Claiming",
+        params: {
+          isCameraDevice: hasCameraClaim ? "true" : "false",
+        },
       });
     } else {
       router.push({
@@ -94,6 +99,9 @@ export const usePOP = (): UsePOPReturn => {
             if (rmakerCaps.hasClaim) {
               router.push({
                 pathname: "/(provision)/Claiming",
+                params: {
+                  isCameraDevice: hasCameraClaim ? "true" : "false",
+                },
               });
             } else {
               router.push({

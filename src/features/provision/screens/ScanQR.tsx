@@ -483,6 +483,7 @@ const ScanQR = () => {
         pathname: "/(provision)/POP",
         params: {
           hasClaimCap: rmakerCaps.hasClaim ? "true" : "false",
+          hasCameraClaim: rmakerCaps.hasCameraClaim ? "true" : "false",
         },
       });
       return;
@@ -500,12 +501,15 @@ const ScanQR = () => {
     }
 
     // If device supports claiming, navigate to Claiming screen
-    // This is determined by rmaker.cap array containing "claim"
+    // This is determined by rmaker.cap array containing "claim" or "camera_claim"
     if (rmakerCaps.hasClaim) {
       // Close camera with preview before navigation
       await closeCamera();
       router.push({
         pathname: "/(provision)/Claiming",
+        params: {
+          isCameraDevice: rmakerCaps.hasCameraClaim ? "true" : "false",
+        },
       });
       return;
     }

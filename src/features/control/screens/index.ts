@@ -12,4 +12,5 @@ export { default as Fallback } from "./device_panels/Fallback";
 export { default as Light } from "./device_panels/Light";
 export { default as Switch } from "./device_panels/Switch";
 export { default as AiAgent } from "./device_panels/AiAgent";
+export { default as Camera } from "./device_panels/Camera";
 export { default as Temperature } from "./device_panels/Temperature";
