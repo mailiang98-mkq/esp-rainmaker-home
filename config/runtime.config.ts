@@ -6,9 +6,10 @@
 
 import { ESPCDFStorageAdapterInterface } from "@store";
 import asyncStorageAdapter from "@native-adaptors/implementations/ESPAsyncStorage";
+import type { SDKIdentifier } from "./sdk.identifiers";
 import { RUNTIME_CONFIG_STORAGE_KEYS } from "./runtime.keys.config";
 
-export type SDKIdentifier = "rainmaker-base-sdk";
+export type { SDKIdentifier } from "./sdk.identifiers";
 
 export interface ESPRMRuntimeConfig {
   baseUrl?: string;
@@ -19,7 +20,20 @@ export interface ESPRMRuntimeConfig {
   authProviders?: string[];
 }
 
-export type SDKConfig = ESPRMRuntimeConfig;
+export interface ESPRMNGRuntimeConfig {
+  baseUrl?: string;
+  apiPath?: string;
+  userApiBase?: string;
+  userApiBaseUrl?: string;
+  userApiPath?: string;
+  identityId?: string;
+  awsRegion?: string;
+  userPoolId?: string;
+  clientId?: string;
+  iotEndpoint?: string;
+}
+
+export type SDKConfig = ESPRMRuntimeConfig | ESPRMNGRuntimeConfig;
 
 export interface ScannedConfigPayload {
   version?: number;

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import {
   View,
   Text,
@@ -19,9 +19,10 @@ import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { tokens } from "@shared/theme/tokens";
 
 import { useLogin } from "@features/auth/hooks";
+import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 import { getEnabledOAuthProviders } from "@/config/features.config";
 import { runtimeConfigManager } from "@config/runtime.config";
-import { cdfBootstrap } from "@integrations";
+import { cdfBootstrap } from "@integrations/";
 import asyncStorageAdapter from "@native-adaptors/implementations/ESPAsyncStorage";
 import { AppRestartContext } from "@context/appRestart.context";
 
@@ -50,7 +51,10 @@ export function LoginScreen() {
   const { restartApp } = useContext(AppRestartContext);
 
   const {
-    emailParam,
+    email,
+    password,
+    usernameParam,
+    authFieldsKey,
     isEmailValid,
     isPasswordValid,
     isLoading,
@@ -70,6 +74,17 @@ export function LoginScreen() {
     handleConfigReset,
     getCurrentFriendlyMessage,
   } = useLogin();
+
+  const usernameFieldProps = useMemo(() => {
+    const allowsPhone = getAuthAllowedUsernameTypes().includes("phone");
+    return {
+      placeholder: allowsPhone
+        ? t("auth.shared.emailOrPhonePlaceholder")
+        : t("auth.shared.emailPlaceholder"),
+      inputMode: (allowsPhone ? "text" : "email") as "text" | "email",
+      keyboardType: allowsPhone ? ("default" as const) : ("email-address" as const),
+    };
+  }, [t]);
 
   const handleConfigResetConfirm = async () => {
     setIsConfigResetting(true);
@@ -106,22 +121,25 @@ export function LoginScreen() {
             {...testProps("view_input_login")}
           >
             <Input
-              key={emailParam || "email-input"}
+              key={`login-email-${authFieldsKey}-${usernameParam || "n"}`}
               icon="mail-open"
-              placeholder={t("auth.shared.emailPlaceholder")}
-              initialValue={emailParam}
+              placeholder={usernameFieldProps.placeholder}
+              initialValue={email}
               onFieldChange={handleEmailChange}
               validator={emailValidator}
               validateOnChange={true}
               debounceDelay={500}
-              inputMode="email"
+              inputMode={usernameFieldProps.inputMode}
+              keyboardType={usernameFieldProps.keyboardType}
               qaId="email"
             />
 
             <Input
+              key={`login-pw-${authFieldsKey}`}
               icon="lock-closed"
               placeholder={t("auth.shared.passwordPlaceholder")}
               isPassword={true}
+              initialValue={password}
               onFieldChange={handlePasswordChange}
               validator={passwordValidator}
               validateOnChange={true}

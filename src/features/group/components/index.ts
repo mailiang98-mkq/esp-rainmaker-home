@@ -14,6 +14,10 @@ export {
   type HomeDeviceListProps,
 } from "./Home/HomeDeviceList";
 export {
+  HomeGroupControlList,
+  type HomeGroupControlListProps,
+} from "./Home/HomeGroupControlList";
+export {
   HomeEmptyState,
   type HomeEmptyStateProps,
 } from "./Home/HomeEmptyState";
@@ -23,7 +27,11 @@ export {
 } from "./Home/MigrationPromptModal";
 
 // HomeManagement screen
-export { HomeItem, type HomeItemProps } from "./HomeManagement/HomeItem";
+export {
+  HomeItem,
+  type HomeItemProps,
+  type HomeItemOwnershipType,
+} from "./HomeManagement/HomeItem";
 export {
   HomeManagementHeader,
   type HomeManagementHeaderProps,
@@ -34,7 +42,10 @@ export {
 } from "./HomeManagement/HomeManagementListHeader";
 export {
   HomeManagementList,
+  HomeManagementSectionList,
   type HomeManagementListProps,
+  type HomeManagementSectionListProps,
+  type HomeManagementHomeListSection,
 } from "./HomeManagement/HomeManagementList";
 export {
   HomeManagementAddDialog,
@@ -48,6 +59,10 @@ export {
 } from "./Rooms/RoomsEmptyState";
 export { RoomsList, type RoomsListProps } from "./Rooms/RoomsList";
 export { default as RoomCard } from "./Rooms/RoomCard";
+export {
+  default as ControlGroupCard,
+  type ControlGroupCardProps,
+} from "./Rooms/ControlGroupCard";
 
 // CreateRoom / CreateRoomSuccess screens
 export { CreateRoomDeviceItem } from "./CreateRoom/CreateRoomDeviceItem";
@@ -84,7 +99,7 @@ export {
   type SettingsRoomSectionProps,
 } from "./Settings/SettingsRoomSection";
 export { default as HomeName } from "./Settings/HomeName";
-export { default as HomeSharing } from "./Settings/HomeSharing";
+export { default as GroupSharing } from "./Settings/GroupSharing";
 export { default as HomeRemove } from "./Settings/HomeRemove";
 export { default as AddUserModal } from "./Settings/AddUserModal";
 

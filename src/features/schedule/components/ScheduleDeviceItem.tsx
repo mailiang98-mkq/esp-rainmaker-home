@@ -22,6 +22,7 @@ interface ScheduleDeviceItemProps {
   ) => Record<string, any>;
   onDeviceSelect: (device: ScheduleDeviceSelectionData) => void;
   onDeviceDelete: (device: ScheduleDeviceSelectionData) => void;
+  treatOfflineAsOnline?: boolean;
   qaId?: string;
 }
 
@@ -37,10 +38,12 @@ export const ScheduleDeviceItem = ({
   getDeviceActionValues,
   onDeviceSelect,
   onDeviceDelete,
+  treatOfflineAsOnline = false,
   qaId,
 }: ScheduleDeviceItemProps) => {
   const { t } = useTranslation();
   const isDeviceOnline = device.node.connectivityStatus?.isConnected || false;
+  const showAsOnline = treatOfflineAsOnline || isDeviceOnline;
   const disabled = isDeviceDisabled(device);
 
   return (
@@ -49,7 +52,7 @@ export const ScheduleDeviceItem = ({
       key={`${device.node.id}-${deviceIndex}`}
       style={[
         globalStyles.sceneDeviceSection,
-        !isDeviceOnline && globalStyles.deviceCardDisabled,
+        !showAsOnline && globalStyles.deviceCardDisabled,
         disabled && globalStyles.deviceCardDisabled,
       ]}
     >
@@ -71,12 +74,12 @@ export const ScheduleDeviceItem = ({
         }
         badgeLable={
           disabled &&
-          (isDeviceOnline ? (
+          (showAsOnline ? (
             <Text style={[globalStyles.fontXs, globalStyles.textWarning]}>
               {t("schedule.deviceSelection.maxScheduleReached")}
             </Text>
           ) : (
-            !isDeviceOnline && (
+            !showAsOnline && (
               <Text style={[globalStyles.fontXs, globalStyles.textGray]}>
                 {t("layout.shared.offline")}
               </Text>

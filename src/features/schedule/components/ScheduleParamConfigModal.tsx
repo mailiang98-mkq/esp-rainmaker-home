@@ -10,29 +10,10 @@ import { useTranslation } from "react-i18next";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { ActionButton, ParamWrap } from "@shared/components";
 import { testProps } from "@shared/utils/testProps";
-import { PARAM_CONTROLS } from "@/config/params.config";
-import { DeviceParamGroup } from "@src/types/global";
 import type { ESPCDFDeviceParam } from "@store";
+import ParameterControl from "@features/scene/components/ParameterControl";
 
 type ParamWithValue = ESPCDFDeviceParam & { value: any };
-
-/**
- * UI Control Map for parameter types
- * Maps parameter types to their corresponding UI controls
- */
-const PARAMS_UI = PARAM_CONTROLS.reduce(
-  (acc, control) => {
-    if (control.types.includes("esp.ui.hidden")) return acc;
-    control.types.forEach((type) => {
-      acc[type] = {
-        types: control.types,
-        control: control.control,
-      };
-    });
-    return acc;
-  },
-  {} as Record<string, DeviceParamGroup["control"]>,
-);
 
 interface ScheduleParamConfigModalProps {
   visible: boolean;
@@ -59,20 +40,6 @@ export const ScheduleParamConfigModal = ({
   onDelete,
 }: ScheduleParamConfigModalProps) => {
   const { t } = useTranslation();
-
-  const renderParamControl = (param: ParamWithValue): React.ReactNode => {
-    const Control = param.uiType && PARAMS_UI[param.uiType]?.control;
-    if (!Control) return null;
-    return (
-      <Control
-        label={param.name}
-        value={param.value}
-        onValueChange={() => {}}
-        disabled={false}
-        meta={param as any}
-      />
-    );
-  };
 
   return (
     <Modal
@@ -111,7 +78,7 @@ export const ScheduleParamConfigModal = ({
                 onValueChange={(value) => onValueChange(value)}
                 qaId={`schedule_param_${selectedParam.name}_selection`}
               >
-                {renderParamControl(selectedParam)}
+                <ParameterControl param={selectedParam as ESPCDFDeviceParam} />
               </ParamWrap>
             )}
           </View>

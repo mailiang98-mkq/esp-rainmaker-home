@@ -6,7 +6,7 @@
 
 import { useState, useCallback, useMemo, useRef } from "react";
 import type { ESPCDFGroup } from "@store";
-import { getUniqueRooms } from "@features/group/utils/roomsHelpers";
+import { getRoomSubGroups } from "@features/group/utils/roomsHelpers";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useFocusEffect } from "expo-router";
 
@@ -38,7 +38,7 @@ export function useRooms(options: UseRoomsOptions): UseRoomsResult {
 
   const rooms = useMemo(() => {
     const subGroups = (home?.subGroups as ESPCDFGroup[]) || [];
-    return getUniqueRooms(subGroups);
+    return getRoomSubGroups(subGroups);
   }, [home?.subGroups, home?.id]);
 
   const loadRooms = useCallback(async () => {

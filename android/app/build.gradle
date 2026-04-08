@@ -234,6 +234,7 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
 
     implementation 'commons-codec:commons-codec:1.19.0'
+    implementation 'commons-logging:commons-logging:1.2'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
     implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
     implementation 'org.bouncycastle:bcutil-jdk15on:1.70'
@@ -249,6 +250,9 @@ dependencies {
     
     // Chrome Custom Tabs for in-app OAuth browser
     implementation 'androidx.browser:browser:1.8.0'
+
+    // AWS IoT MQTT (ESPMQTTModule — mobileconnectors.iot)
+    implementation 'com.amazonaws:aws-android-sdk-iot:2.81.0'
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";

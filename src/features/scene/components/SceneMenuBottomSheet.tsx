@@ -18,10 +18,10 @@ import {
 import { useTranslation } from "react-i18next";
 // Styles
 import { tokens } from "@shared/theme/tokens";
-import { globalStyles } from "@shared/theme/globalStyleSheet";
 
 // Icons
-import { ShieldAlert, X } from "lucide-react-native";
+import { X } from "lucide-react-native";
+import { WarningBanner } from "@shared/components";
 import { ESPCDFScene } from "@store";
 
 import { testProps } from "@shared/utils/testProps";
@@ -156,17 +156,13 @@ const SceneMenuBottomSheet: React.FC<SceneMenuBottomSheetProps> = ({
               <X size={20} color={tokens.colors.text_secondary} />
             </TouchableOpacity>
           </View>
-          {warning && (
-            <View
-              style={[globalStyles.warningContainer, styles.warningContainer]}
-            >
-              <ShieldAlert
-                size={tokens.fontSize.xs}
-                color={tokens.colors.warn}
-              />
-              <Text {...testProps("text_warning_scene_menu")} style={globalStyles.warningText}>{warning}</Text>
-            </View>
-          )}
+          {warning ? (
+            <WarningBanner
+              message={warning}
+              containerStyle={styles.warningContainer}
+              textTestId="text_warning_scene_menu"
+            />
+          ) : null}
 
           {/* Options */}
           <View style={styles.optionsContainer}>

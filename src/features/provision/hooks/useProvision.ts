@@ -5,14 +5,16 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, unstable_batchedUpdates } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useCDF } from "@shared/hooks/useCDF";
+import { startNodeLocalDiscovery } from "@features/group/utils/localDiscovery";
 import { useToast } from "@shared/hooks/useToast";
 import {
+  ESPCDF,
   ESPCDFProvisionResponse,
   ESPCDFProvisionResponseStatus,
   ESPCDFProvProgressMessages,
@@ -43,6 +45,23 @@ interface UseProvisionReturn {
   handleContinue: () => void;
 }
 
+/** Same as Home pull-to-refresh: fresh node list + connectivity from cloud, then local discovery. */
+async function syncHomeAfterProvision(
+  store: ESPCDF | undefined,
+  syncHomeWithNodes: (shouldFetchFirstPage?: boolean) => Promise<void>
+): Promise<void> {
+  if (!store) return;
+  try {
+    await syncHomeWithNodes();
+    startNodeLocalDiscovery(store);
+  } catch (e) {
+    console.error(
+      "[Provision] Post-provision syncHomeWithNodes failed (non-blocking):",
+      e
+    );
+  }
+}
+
 /**
  * Custom hook for Provision component business logic
  */
@@ -50,7 +69,7 @@ export const useProvision = (): UseProvisionReturn => {
   const router = useRouter();
   const toast = useToast();
   const { t } = useTranslation();
-  const { store } = useCDF();
+  const { store, syncHomeWithNodes } = useCDF();
   const { ssid, password } = useLocalSearchParams();
 
   // State
@@ -212,6 +231,29 @@ export const useProvision = (): UseProvisionReturn => {
     }
   }, []);
 
+  /** Last step ("Setting up node") ticks only when Continue is enabled — same moment as setIsComplete. */
+  const markFinalProvisionStageComplete = useCallback(() => {
+    setStages((prevStages) => {
+      const newStages = [...prevStages];
+      if (isChallengeResponseFlowRef.current) {
+        const stage3 = newStages[2];
+        if (stage3) {
+          stage3.status = "success";
+          stage3.error = undefined;
+        }
+      } else {
+        const stage5 = newStages[4];
+        if (stage5) {
+          stage5.status = "success";
+          stage5.error = undefined;
+        }
+      }
+      stagesRef.current = newStages;
+      return newStages;
+    });
+    scrollToBottom();
+  }, [scrollToBottom]);
+
   // Handle add device success
   const handleAddDeviceSuccess = useCallback(async (provisionedNode: ESPCDFNode) => {
     try {
@@ -235,14 +277,29 @@ export const useProvision = (): UseProvisionReturn => {
           console.error("Error setting user auth (non-blocking):", userAuthError);
         }
       }
-      setIsComplete(true);
+      await syncHomeAfterProvision(store, syncHomeWithNodes);
+      unstable_batchedUpdates(() => {
+        markFinalProvisionStageComplete();
+        setIsComplete(true);
+      });
       toast.showSuccess(t("device.provision.success"));
     } catch (error) {
       console.error("Error in post-provision agent setup:", error);
-      setIsComplete(true);
+      await syncHomeAfterProvision(store, syncHomeWithNodes);
+      unstable_batchedUpdates(() => {
+        markFinalProvisionStageComplete();
+        setIsComplete(true);
+      });
       toast.showSuccess(t("device.provision.success"));
     }
-  }, [setRefreshTokenForNode, toast, t]);
+  }, [
+    markFinalProvisionStageComplete,
+    setRefreshTokenForNode,
+    store,
+    syncHomeWithNodes,
+    toast,
+    t,
+  ]);
 
   // Handle provision update
   const handleProvisionUpdate = useCallback((response: ESPCDFProvisionResponse) => {
@@ -250,37 +307,25 @@ export const useProvision = (): UseProvisionReturn => {
 
     switch (response.status) {
       case ESPCDFProvisionResponseStatus.SUCCEED:
-        if (isChallengeResponseFlowRef.current) {
-          updateChallengeResponseStage(3, false);
-        } else if (message === ESPCDFProvProgressMessages.DEVICE_PROVISIONED) {
-          updateStageStatus(message);
-          markStage3AsComplete();
-        } else if (message === ESPCDFProvProgressMessages.USER_NODE_MAPPING_SUCCEED) {
-          updateStageStatus(message);
-        } else if (message === ESPCDFProvProgressMessages.NODE_TIMEZONE_SETUP_SUCCEED) {
-          updateStageStatus(message);
+        // Challenge flow: stage 3 completes in handleAddDeviceSuccess with Continue.
+        if (!isChallengeResponseFlowRef.current) {
+          if (message === ESPCDFProvProgressMessages.DEVICE_PROVISIONED) {
+            updateStageStatus(message);
+            markStage3AsComplete();
+          } else if (message === ESPCDFProvProgressMessages.USER_NODE_MAPPING_SUCCEED) {
+            updateStageStatus(message);
+          }
         }
         break;
 
       case ESPCDFProvisionResponseStatus.ON_PROGRESS:
         if (message === ESPCDFProvProgressMessages.DECODED_NODE_ID) {
           updateStageStatus(message);
-        } else if (isChallengeResponseFlowRef.current && CHAL_RESP_MESSAGE_STAGE_MAP[message] !== undefined) {
+        } else if (
+          isChallengeResponseFlowRef.current &&
+          CHAL_RESP_MESSAGE_STAGE_MAP[message] !== undefined
+        ) {
           updateChallengeResponseStage(CHAL_RESP_MESSAGE_STAGE_MAP[message], false);
-        } else if (message === ESPCDFProvProgressMessages.SETTING_NODE_TIMEZONE) {
-          setTimeout(() => {
-            setStages((prevStages) => {
-              const newStages = [...prevStages];
-              const stage5 = newStages[4];
-              if (stage5) {
-                stage5.status = "success";
-                stage5.error = undefined;
-              }
-              stagesRef.current = newStages;
-              return newStages;
-            });
-            scrollToBottom();
-          }, 2000);
         }
         break;
 

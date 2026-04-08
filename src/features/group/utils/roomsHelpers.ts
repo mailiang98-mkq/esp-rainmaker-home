@@ -5,6 +5,10 @@
  */
 
 import type { ESPCDFGroup } from "@store";
+import {
+  isDeviceTypeSubgroup,
+  isRoomSubgroup,
+} from "@features/group/utils/controlGroupHelpers";
 
 /**
  * Returns rooms deduplicated by id (first occurrence kept).
@@ -17,4 +21,18 @@ export function getUniqueRooms(rooms: ESPCDFGroup[]): ESPCDFGroup[] {
     }
     return acc;
   }, [] as ESPCDFGroup[]);
+}
+
+/**
+ * Room-style subgroups only (excludes device-type groups).
+ */
+export function getRoomSubGroups(subGroups: ESPCDFGroup[]): ESPCDFGroup[] {
+  return getUniqueRooms(subGroups.filter(isRoomSubgroup));
+}
+
+/**
+ * Device-type subgroups only.
+ */
+export function getDeviceGroupSubGroups(subGroups: ESPCDFGroup[]): ESPCDFGroup[] {
+  return getUniqueRooms(subGroups.filter(isDeviceTypeSubgroup));
 }

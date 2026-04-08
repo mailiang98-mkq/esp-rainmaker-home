@@ -13,6 +13,10 @@ import {
   createRoomTabs,
   getFilteredDevices,
 } from "@features/group/utils/home";
+import {
+  getDeviceGroupSubGroups,
+  getRoomSubGroups,
+} from "@features/group/utils/roomsHelpers";
 
 export interface UseHomeViewModelParams {
   selectedHome: ESPCDFGroup | null;
@@ -24,6 +28,8 @@ export interface UseHomeViewModelParams {
 export interface UseHomeViewModelResult {
   roomTabs: RoomTab[];
   rooms: ESPCDFGroup[];
+  /** `gc_*` subgroups for the current home (group control). */
+  groupControlGroups: ESPCDFGroup[];
   devices: ReturnType<typeof transformNodesToDevices>;
   roomDevices: ReturnType<typeof getFilteredDevices>;
   processedHome: ESPCDFGroup | null;
@@ -55,7 +61,15 @@ export function useHomeViewModel({
   );
 
   const rooms = useMemo(
-    () => selectedHome?.subGroups ?? [],
+    () => getRoomSubGroups((selectedHome?.subGroups as ESPCDFGroup[]) ?? []),
+    [selectedHome?.subGroups]
+  );
+
+  const groupControlGroups = useMemo(
+    () =>
+      getDeviceGroupSubGroups(
+        (selectedHome?.subGroups as ESPCDFGroup[]) ?? []
+      ),
     [selectedHome?.subGroups]
   );
 
@@ -67,6 +81,7 @@ export function useHomeViewModel({
   return {
     roomTabs,
     rooms,
+    groupControlGroups,
     devices,
     roomDevices,
     processedHome,

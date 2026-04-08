@@ -46,6 +46,7 @@ export const ActionDeviceSelectionScreen = observer(() => {
     deleteDevice,
     getDeviceActions,
     checkDeviceDisabled,
+    allowOfflineSelection,
   } = useActionDeviceSelection({ isEditingAction });
 
   const conditionLabel = eventInfo
@@ -66,7 +67,9 @@ export const ActionDeviceSelectionScreen = observer(() => {
   const renderDeviceItem = useCallback(
     (device: DeviceSelectionData, index: number) => {
       const isOnline = device.node.connectivityStatus?.isConnected ?? false;
-      const isDisabled = checkDeviceDisabled(isOnline).isDisabled;
+      const isDisabled = checkDeviceDisabled(
+        allowOfflineSelection ? true : isOnline,
+      ).isDisabled;
       const actions = getDeviceActions(device);
 
       return (
@@ -76,6 +79,7 @@ export const ActionDeviceSelectionScreen = observer(() => {
           actions={actions}
           isDisabled={isDisabled}
           offlineLabel={t("layout.shared.offline")}
+          treatOfflineAsOnline={allowOfflineSelection}
           onPress={() => handleDeviceSelect(device)}
           onDelete={() => deleteDevice(device)}
           showDelete={device.isSelected}
@@ -84,6 +88,7 @@ export const ActionDeviceSelectionScreen = observer(() => {
     },
     [
       checkDeviceDisabled,
+      allowOfflineSelection,
       getDeviceActions,
       handleDeviceSelect,
       deleteDevice,

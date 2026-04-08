@@ -19,6 +19,8 @@ import {
   ParamControlProps,
   getParamBounds,
   ParamControlChildProps,
+  comparableRoundedParamNumber,
+  normalizeNumericParamValue,
 } from "./lib/types";
 import {
   ESPRM_PARAM_TIME_SERIES_PROPERTY,
@@ -45,11 +47,16 @@ const ParamControlWrap = observer(
   }: ParamControlProps) => {
     // 1. Computed Values
     const { min, max, step = 1, ...rest } = getParamBounds(param);
+    const hasFiniteBounds =
+      typeof min === "number" &&
+      Number.isFinite(min) &&
+      typeof max === "number" &&
+      Number.isFinite(max);
     const toast = useToast();
     const state = useLocalObservable(() => ({
-      value: param.value,
-      setValue: (value: number) => {
-        state.value = value;
+      value: normalizeNumericParamValue(param.value),
+      setValue: (next: any) => {
+        state.value = next;
       },
     }));
 
@@ -63,7 +70,7 @@ const ParamControlWrap = observer(
     );
 
     useEffect(() => {
-      state.value = param.value;
+      state.value = normalizeNumericParamValue(param.value);
     }, [param.value]);
 
     // 2. Handlers
@@ -72,21 +79,24 @@ const ParamControlWrap = observer(
       newValue: any,
       validate: boolean = true,
     ) => {
-      setUpdating(true);
       if (disabled) return;
       if (typeof newValue == "number" && validate) {
         const roundedValue = Math.round(newValue);
-        if (roundedValue === state.value) return;
-        if (roundedValue < min) {
-          toast.showError("Value is below minimum");
-          return;
-        }
-        if (roundedValue > max) {
-          toast.showError("Value is above maximum");
-          return;
+        const cur = comparableRoundedParamNumber(state.value);
+        if (cur !== null && roundedValue === cur) return;
+        if (hasFiniteBounds) {
+          if (roundedValue < min!) {
+            toast.showError("Value is below minimum");
+            return;
+          }
+          if (roundedValue > max!) {
+            toast.showError("Value is above maximum");
+            return;
+          }
         }
         newValue = roundedValue;
       }
+      setUpdating(true);
       state.setValue(newValue);
       throttledValueChange();
     };
@@ -108,7 +118,10 @@ const ParamControlWrap = observer(
               value: state.value,
               onValueChange: handleValueChange,
               disabled: !isTimeSeriesParam && disabled,
-              meta: getParamBounds(param),
+              meta: {
+                ...getParamBounds(param),
+                dataType: param.dataType,
+              },
               onOpenChart: onOpenChart ? () => onOpenChart(param) : null,
             },
           );

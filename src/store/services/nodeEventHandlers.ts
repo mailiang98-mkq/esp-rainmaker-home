@@ -5,6 +5,7 @@
  */
 
 import { action, observable as mobxObservable } from "mobx";
+import { ESPCDFNode } from "../entities/ESPCDFNode";
 import { ESPCDF } from "../store/index";
 import { ESPCDFTransportConfig } from "../types";
 import {
@@ -30,11 +31,51 @@ export function safelyParsePayload(payload: any): any {
   return payload;
 }
 
+type ParamHolder = { params?: Array<{ name: string; value?: unknown }> };
+
+function applyNamedEntityParamUpdates(
+  node: ESPCDFNode,
+  entityName: string,
+  params: Record<string, unknown>,
+  kind: "device" | "service",
+  holder: ParamHolder | undefined
+) {
+  if (!holder?.params?.length) return;
+
+  for (const [paramName, value] of Object.entries(params)) {
+    const param = holder.params.find((p) => p.name === paramName);
+    if (!param) continue;
+
+    const oldValue = (param as { value?: unknown }).value;
+    (param as { value?: unknown }).value = value;
+
+    if (kind === "device") {
+      node.emitPropertyChange({
+        type: "deviceParamChanged",
+        deviceName: entityName,
+        paramName,
+        value,
+        oldValue,
+        entity: node,
+      });
+    } else {
+      node.emitPropertyChange({
+        type: "serviceParamChanged",
+        serviceName: entityName,
+        paramName,
+        value,
+        oldValue,
+        entity: node,
+      });
+    }
+  }
+}
+
 /**
  * Handles the `EVENT_NODE_PARAMS_CHANGED` event.
- * Updates node device parameters when they change.
- * The payload contains the updated device/param structure that needs to be merged into the node.
- * Emits individual property change events for each param that changes to sync to _raw.
+ * Merges shadow-style param updates into the node. Top-level keys are device or service names;
+ * each maps to `{ paramName: value, ... }`. Emits `deviceParamChanged` / `serviceParamChanged`
+ * per param so `_raw` stays in sync (see adaptor property-change handlers).
  */
 export function handleNodeParamsChanged(
   rootStore: ESPCDF | null,
@@ -46,33 +87,22 @@ export function handleNodeParamsChanged(
   const node = rootStore.nodeStore.getNodeById(node_id);
   if (!node) return;
 
-  // Payload structure: { "DeviceName": { "ParamName1": value1, "ParamName2": value2, ... } }
-  // Handle multiple devices if payload contains multiple device entries
-  Object.entries(payload as Record<string, Record<string, unknown>>).forEach(
-    ([deviceName, params]) => {
-      const device = node.devices?.find((d: any) => d.name === deviceName);
-      if (device) {
-        // Update each param value and emit property change event for each
-        Object.entries(params).forEach(([paramName, value]) => {
-          const param = device?.params?.find((p: any) => p.name === paramName);
-          if (param) {
-            const oldValue = (param as any).value;
-            (param as any).value = value;
+  for (const [entityName, params] of Object.entries(
+    payload as Record<string, Record<string, unknown>>
+  )) {
+    if (!params || typeof params !== "object" || Array.isArray(params)) continue;
 
-            // Emit typed property change event for each param to sync to _raw
-            node.emitPropertyChange({
-              type: "deviceParamChanged",
-              deviceName,
-              paramName,
-              value,
-              oldValue,
-              entity: node,
-            });
-          }
-        });
-      }
+    const device = node.devices?.find((d: { name: string }) => d.name === entityName);
+    if (device) {
+      applyNamedEntityParamUpdates(node, entityName, params, "device", device);
+      continue;
     }
-  );
+
+    const service = node.services?.find((s: { name: string }) => s.name === entityName);
+    if (service) {
+      applyNamedEntityParamUpdates(node, entityName, params, "service", service);
+    }
+  }
 }
 
 /**

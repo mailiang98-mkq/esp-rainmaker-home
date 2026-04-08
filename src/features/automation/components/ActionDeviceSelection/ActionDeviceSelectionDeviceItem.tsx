@@ -18,6 +18,7 @@ export interface ActionDeviceSelectionDeviceItemProps {
   actions: Record<string, unknown>;
   isDisabled: boolean;
   offlineLabel: string;
+  treatOfflineAsOnline?: boolean;
   onPress: () => void;
   onDelete: () => void;
   showDelete: boolean;
@@ -30,18 +31,20 @@ export const ActionDeviceSelectionDeviceItem: React.FC<
   actions,
   isDisabled,
   offlineLabel,
+  treatOfflineAsOnline = false,
   onPress,
   onDelete,
   showDelete,
 }) => {
   const isOnline = device.node.connectivityStatus?.isConnected ?? false;
+  const showAsOnline = treatOfflineAsOnline || isOnline;
 
   return (
     <View
       {...testProps("view_action_device_item")}
       style={[
         globalStyles.sceneDeviceSection,
-        !isOnline && globalStyles.deviceCardDisabled,
+        !showAsOnline && globalStyles.deviceCardDisabled,
         isDisabled && globalStyles.deviceCardDisabled,
       ]}
     >
@@ -67,7 +70,7 @@ export const ActionDeviceSelectionDeviceItem: React.FC<
           ) : undefined
         }
         badgeLable={
-          !isOnline ? (
+          !showAsOnline ? (
             <Text
               {...testProps("text_offline_action")}
               style={[globalStyles.fontXs, globalStyles.textGray]}

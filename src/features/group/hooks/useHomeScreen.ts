@@ -15,6 +15,7 @@ import { useToast } from "@shared/hooks/useToast";
 import { getDefaultHomeTabs } from "@features/group/utils/homeScreenHelpers";
 import { startNodeLocalDiscovery } from "@features/group/utils/localDiscovery";
 import type { RoomTab } from "@src/types/global";
+import { getFeatures } from "@/config/features.config";
 
 export interface UseHomeScreenResult {
   isLoading: boolean;
@@ -23,6 +24,7 @@ export interface UseHomeScreenResult {
   setSelectedRoom: (tab: RoomTab) => void;
   roomTabs: RoomTab[];
   roomDevices: UseHomeViewModelResult["roomDevices"];
+  controlGroups: UseHomeViewModelResult["groupControlGroups"];
   homeList: ESPCDFGroup[];
   selectedHome: ESPCDFGroup | null;
   tooltipVisible: boolean;
@@ -60,12 +62,14 @@ export function useHomeScreen(): UseHomeScreenResult {
   const selectedHome = store.getCurrentHome() ?? null;
   const activeHomeNodes = store.getNodesForCurrentHome();
 
-  const { roomTabs, roomDevices } = useHomeViewModel({
+  const { roomTabs, roomDevices, groupControlGroups: raw } = useHomeViewModel({
     selectedHome,
     selectedRoom,
     activeHomeNodes,
     defaultTabs,
   });
+
+  const controlGroups = getFeatures().controlGroups ? raw : [];
 
   const { showMigrationPrompt, handleMigrationPromptUnderstood } =
     useMigrationPromptViewModel({ store, unifiedUser });
@@ -116,6 +120,7 @@ export function useHomeScreen(): UseHomeScreenResult {
     async (home: ESPCDFGroup) => {
       if (home?.id) {
         await unifiedUser?.setCurrentHome?.(home);
+        await unifiedUser?.syncHomeWithNodes?.();
         setTooltipVisible(false);
       }
     },
@@ -156,6 +161,7 @@ export function useHomeScreen(): UseHomeScreenResult {
     setSelectedRoom,
     roomTabs,
     roomDevices,
+    controlGroups,
     homeList,
     selectedHome,
     tooltipVisible,

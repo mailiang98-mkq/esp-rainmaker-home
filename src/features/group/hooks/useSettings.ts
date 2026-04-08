@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { TFunction } from "i18next";
 import type { ESPCDFGroup } from "@store";
 import { ESPCDFGroupSharingRequest } from "@store";
@@ -17,8 +17,14 @@ import {
   sortByExpirationDate,
 } from "@features/group/utils/dateUtils";
 import { generateRandomId } from "@shared/utils/common";
-import { validateEmail as validateEmailUtil } from "@features/group/utils/settingsHelpers";
+import {
+  createGroupSharingInviteValidator,
+  getGroupSharingAllowedTypes,
+  isGroupSharingInviteAllowed,
+  normalizeGroupSharingInviteForApi,
+} from "@features/group/utils/settingsHelpers";
 import { useCDF } from "@shared/hooks/useCDF";
+import { getFeatures } from "@config/features.config";
 
 export interface UseSettingsOptions {
   homeId: string | undefined;
@@ -56,11 +62,14 @@ export interface UseSettingsResult {
   handleHomeNameUpdate: () => Promise<void>;
   handleRemoveHome: () => void;
   handleRoom: () => void;
+  handleControlGroups: () => void;
   handleAddUser: () => Promise<void>;
   handleRemoveUser: (username: string) => Promise<void>;
   handleRemovePendingUser: (username: string) => Promise<void>;
   handleCloseAddUserModal: () => void;
-  validateEmail: (email?: string) => boolean;
+  handleInviteChange: (value: string, isValid: boolean) => void;
+  inviteValidator: (value: string) => { isValid: boolean; error?: string };
+  isInviteValid: boolean;
 }
 
 const norm = (s?: string) => (s || "").trim().toLowerCase();
@@ -91,9 +100,23 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
   const [makePrimary, setMakePrimary] = useState(false);
   const [transfer, setTransfer] = useState(false);
   const [transferAndAssignRole, setTransferAndAssignRole] = useState(false);
+  const [isInviteValid, setIsInviteValid] = useState(false);
+
+  const inviteValidator = useMemo(
+    () =>
+      createGroupSharingInviteValidator(getGroupSharingAllowedTypes(), t),
+    [t]
+  );
 
   const getSharedUsers = useCallback(async () => {
     if (!home) return;
+    if (!getFeatures().groupSharing) {
+      setIsPrimary(true);
+      setSharedUsers([]);
+      setPendingUsers([]);
+      setSharedByUser(null);
+      return;
+    }
     try {
       const res = await home.getSharingInfo({
         metadata: false,
@@ -171,7 +194,7 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
         setSharedUsers(acceptedUsers);
         setSharedByUser(null);
       }
-    } catch {
+    } catch (err: any) {
       toast.showError(t("group.errors.errorGettingSharedUsers"));
     }
   }, [home, user, t, toast]);
@@ -242,22 +265,25 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
 
   const handleAddUser = useCallback(async () => {
     if (!home) return;
+    const allowed = getGroupSharingAllowedTypes();
+    if (!isGroupSharingInviteAllowed(newUserEmail, allowed)) return;
+    const toUserName = normalizeGroupSharingInviteForApi(newUserEmail, allowed);
     setIsAddingUserLoading(true);
     try {
       if (transferAndAssignRole) {
         await home.transfer({
-          toUserName: newUserEmail,
+          toUserName,
           assignRoleToSelf: "secondary",
           metadata: {},
         });
       } else if (transfer) {
         await home.transfer({
-          toUserName: newUserEmail,
+          toUserName,
           metadata: {},
         });
       } else {
         await home.share({
-          toUserName: newUserEmail,
+          toUserName,
           makePrimary: makePrimary,
         });
       }
@@ -271,7 +297,7 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
       setMakePrimary(false);
       setTransfer(false);
       setTransferAndAssignRole(false);
-      getSharedUsersRef.current();
+
     } catch (err: any) {
       switch (err.errorCode) {
         case ERROR_CODES_MAP.USER_NOT_FOUND:
@@ -281,11 +307,12 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
           toast.showError(t("group.errors.addingSelfNotAllowed"));
           break;
         default:
-          toast.showError(err.description);
+          toast.showError(t("group.errors.fallback"), err.description);
           break;
       }
     } finally {
       setIsAddingUserLoading(false);
+      getSharedUsersRef.current();
     }
   }, [
     home,
@@ -352,18 +379,27 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
   const handleCloseAddUserModal = useCallback(() => {
     setIsAddingUser(false);
     setNewUserEmail("");
+    setIsInviteValid(false);
     setMakePrimary(false);
     setTransfer(false);
     setTransferAndAssignRole(false);
   }, []);
 
-  const validateEmail = useCallback((email?: string) => {
-    return validateEmailUtil(email ?? newUserEmail);
-  }, [newUserEmail]);
+  const handleInviteChange = useCallback((value: string, isValid: boolean) => {
+    setNewUserEmail(value);
+    setIsInviteValid(isValid);
+  }, []);
 
   const handleRoom = useCallback(() => {
     router.push({
       pathname: "/(group)/Rooms",
+      params: { id: homeId },
+    } as any);
+  }, [router, homeId]);
+
+  const handleControlGroups = useCallback(() => {
+    router.push({
+      pathname: "/(group)/ControlGroups",
       params: { id: homeId },
     } as any);
   }, [router, homeId]);
@@ -394,10 +430,13 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
     handleHomeNameUpdate,
     handleRemoveHome,
     handleRoom,
+    handleControlGroups,
     handleAddUser,
     handleRemoveUser,
     handleRemovePendingUser,
     handleCloseAddUserModal,
-    validateEmail,
+    handleInviteChange,
+    inviteValidator,
+    isInviteValid,
   };
 }

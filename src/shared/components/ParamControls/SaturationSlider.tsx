@@ -14,7 +14,10 @@ import { observer } from "mobx-react-lite";
 import { tokens } from "@shared/theme/tokens";
 
 // Types & Styles
-import { ParamControlChildProps } from "./lib/types";
+import {
+  ParamControlChildProps,
+  comparableRoundedParamNumber,
+} from "./lib/types";
 import { paramControlStyles as styles } from "./lib/styles";
 
 
@@ -57,16 +60,23 @@ const SaturationSlider = observer(
      * @param newValue - The new value
      * @returns void
      */
-    const handleValueChange = async (
-      event: GestureResponderEvent,
-      newValue: number
+    const commitValue = (
+      event: GestureResponderEvent | null,
+      newValue: number,
     ) => {
       if (disabled) return;
       const roundedValue = Math.round(newValue);
-      if (roundedValue === value) return;
+      const cur = comparableRoundedParamNumber(value);
+      if (cur !== null && roundedValue === cur) return;
       if (roundedValue < min) return;
       if (roundedValue > max) return;
       onValueChange(event, roundedValue);
+    };
+
+    const handleTamaguiValueChange = (values: number[]) => {
+      const raw = values[0];
+      if (typeof raw !== "number" || !Number.isFinite(raw)) return;
+      commitValue(null, raw);
     };
 
     // 3. Render
@@ -83,7 +93,8 @@ const SaturationSlider = observer(
             min={min}
             max={max}
             step={step}
-            onSlideMove={handleValueChange}
+            onSlideMove={commitValue}
+            onValueChange={handleTamaguiValueChange}
             disabled={disabled}
             style={[styles.slider, { zIndex: 10 }]}
           >

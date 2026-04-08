@@ -61,6 +61,10 @@ import {
 import { OTAInfo } from "@src/types/global";
 import { testProps } from "@shared/utils/testProps";
 import { getFeatures } from "@/config/features.config";
+import {
+  getPrimaryHomogeneousDeviceType,
+  resolveHomeIdContainingNode,
+} from "@features/group/utils/controlGroupHelpers";
 
 /**
  * Settings Component
@@ -282,8 +286,11 @@ const Settings = observer(() => {
       }
 
       const result = await node?.delete();
-      if (result?.status === SUCESS) {
-        router.dismiss(2);
+      const deleteOk =
+        result?.status === SUCESS ||
+        String(result?.status ?? "").toLowerCase() === "success";
+      if (deleteOk) {
+        router.dismissTo("/(group)/Home");
       }
     } catch (error) {
       console.error(error);
@@ -318,6 +325,32 @@ const Settings = observer(() => {
     () => (node?.nodeConfig?.info as any)?.readme || null,
     [node],
   );
+
+  const homeIdForControlGroup = useMemo(() => {
+    if (!id) return undefined;
+    return resolveHomeIdContainingNode(
+      id,
+      store?.groupStore?.groupsList ?? [],
+      store?.groupStore?.currentHomeId ?? null,
+    );
+  }, [id, store?.groupStore?.groupsList, store?.groupStore?.currentHomeId]);
+
+  const showAddToControlGroup =
+    getFeatures().controlGroups &&
+    isPrimary &&
+    node &&
+    getPrimaryHomogeneousDeviceType(node) !== null;
+
+  const handleAddToControlGroup = () => {
+    if (!homeIdForControlGroup || !id) {
+      toast.showError(t("device.settings.controlGroupNeedHome"));
+      return;
+    }
+    routerNav.push({
+      pathname: "/(group)/CreateControlGroup" as any,
+      params: { id: homeIdForControlGroup, preselectedNodeId: id },
+    });
+  };
 
   /**
    * Renders error state when device is not found
@@ -393,6 +426,50 @@ const Settings = observer(() => {
     </>
   );
 
+  const renderControlGroupSection = () => (
+    <ContentWrapper
+      style={{
+        marginBottom: tokens.spacing._15,
+        ...globalStyles.shadowElevationForLightTheme,
+        backgroundColor: tokens.colors.white,
+      }}
+    >
+      <View
+        style={[globalStyles.settingsSection, { gap: tokens.spacing._10 }]}
+      >
+        <Pressable
+          style={globalStyles.settingsItem}
+          onPress={handleAddToControlGroup}
+          disabled={!isConnected}
+          {...testProps("button_add_to_control_group")}
+        >
+          <View style={globalStyles.settingsItemLeft}>
+            <Text
+              style={[
+                {
+                  flex: 1,
+                  fontWeight: 500,
+                  fontFamily: tokens.fonts.medium,
+                  opacity: isConnected ? 1 : 0.45,
+                },
+              ]}
+            >
+              {t("device.settings.addToControlGroup")}
+            </Text>
+          </View>
+          <View style={[globalStyles.flex, globalStyles.alignCenter]}>
+            <ChevronRight
+              size={20}
+              color={
+                isConnected ? tokens.colors.primary : tokens.colors.bg3
+              }
+            />
+          </View>
+        </Pressable>
+      </View>
+    </ContentWrapper>
+  );
+
   if (!node) {
     return renderError();
   }
@@ -437,6 +514,7 @@ const Settings = observer(() => {
 
           {/* Guide Section - Show only if readme URL exists */}
           {readmeUrl && renderGuideSection()}
+          {showAddToControlGroup && renderControlGroupSection()}
           <DeviceOperations node={node} disabled={!isPrimary || !isConnected} />
 
           {getFeatures().ota && (

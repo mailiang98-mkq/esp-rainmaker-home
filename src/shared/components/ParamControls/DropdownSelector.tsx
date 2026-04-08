@@ -18,6 +18,7 @@ import { ChevronDown, Check } from "lucide-react-native";
 import { ParamControlChildProps } from "./lib/types";
 import { observer } from "mobx-react-lite";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
+import { DATA_TYPE_STRING } from "@shared/utils/constants";
 
 interface DropdownOption {
   label: string;
@@ -39,16 +40,36 @@ const DropdownSelector = observer(
     // State
     const [isVisible, setIsVisible] = useState(false);
 
-    // Computed values
+    // Computed values — string enum params (e.g. esp.param.light-mode) use string option values
+    const hasNumericBounds =
+      meta &&
+      typeof meta.min === "number" &&
+      typeof meta.max === "number" &&
+      !Number.isNaN(meta.max - meta.min);
+    const useStringDiscreteValues =
+      hasNumericBounds &&
+      meta.dataType === DATA_TYPE_STRING &&
+      !(
+        "validStrings" in meta && Array.isArray(meta.validStrings)
+      );
+
     const options: DropdownOption[] =
       "validStrings" in meta && Array.isArray(meta.validStrings)
         ? meta.validStrings.map((str: string) => ({ label: str, value: str }))
-        : Array.from({ length: meta.max - meta.min + 1 }, (_, i) => ({
-            label: String(i + meta.min),
-            value: i + meta.min,
-          }));
+        : hasNumericBounds
+          ? Array.from({ length: meta.max - meta.min + 1 }, (_, i) => {
+              const n = i + meta.min;
+              return useStringDiscreteValues
+                ? { label: String(n), value: String(n) }
+                : { label: String(n), value: n };
+            })
+          : [];
 
-    const selectedOption = options.find((option) => option.value === value);
+    const selectedOption = options.find(
+      (option) =>
+        option.value === value ||
+        String(option.value) === String(value),
+    );
 
     // Handlers
     const handleSelect = async (selectedValue: string | number) => {

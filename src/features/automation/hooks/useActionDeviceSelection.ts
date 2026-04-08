@@ -12,6 +12,7 @@ import { sortByConnectivity } from "@shared/utils/eventDeviceSelection";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useAutomation } from "@context/automation.context";
 import type { DeviceSelectionData } from "@src/types/global";
+import { ESPRMNGBaseAdaptorIdentifier } from "@config/sdk.identifiers";
 
 export type SelectActionDeviceResult =
   | { success: true; navigateParams: { pathname: string; params: object } }
@@ -40,6 +41,8 @@ export interface UseActionDeviceSelectionResult {
   getDeviceActions: (device: DeviceSelectionData) => Record<string, unknown>;
   /** Check if device should be disabled (e.g. offline) */
   checkDeviceDisabled: (isConnected: boolean) => { isDisabled: boolean; reason?: "offline" };
+  /** True when offline devices should be treated as selectable/normal in UI. */
+  allowOfflineSelection: boolean;
 }
 
 /**
@@ -59,6 +62,8 @@ export function useActionDeviceSelection(
     getActionValue,
     deleteAction,
   } = useAutomation();
+  const allowOfflineSelection =
+    store.getActiveAdaptorIdentifier() === ESPRMNGBaseAdaptorIdentifier;
 
   const eventInfo = useMemo(
     () => getEventInfoFromEvents(state.events),
@@ -111,7 +116,10 @@ export function useActionDeviceSelection(
 
   const selectDevice = useCallback(
     (device: DeviceSelectionData): SelectActionDeviceResult => {
-      if (!device.node.connectivityStatus?.isConnected) {
+      if (
+        !allowOfflineSelection &&
+        !device.node.connectivityStatus?.isConnected
+      ) {
         return { success: false };
       }
       setSelectedDevice({
@@ -127,7 +135,7 @@ export function useActionDeviceSelection(
         },
       };
     },
-    [isEditingAction, setSelectedDevice]
+    [allowOfflineSelection, isEditingAction, setSelectedDevice]
   );
 
   const deleteDevice = useCallback(
@@ -169,5 +177,6 @@ export function useActionDeviceSelection(
     deleteDevice,
     getDeviceActions,
     checkDeviceDisabled,
+    allowOfflineSelection,
   };
 }

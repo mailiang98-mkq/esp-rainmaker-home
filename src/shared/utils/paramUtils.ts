@@ -42,7 +42,13 @@ export const getParamControlComponent = (
   paramsUIMap?: Record<string, DeviceParamGroup["control"]>
 ): any => {
   const uiMap = paramsUIMap || getParamsUIMap();
-  const Control = uiMap[param.uiType ?? ""]?.control as any;
+  let Control = uiMap[param.uiType ?? ""]?.control as any;
+  if (!Control) {
+    Control = uiMap[param.type ?? ""]?.control as any;
+  }
+  if (!Control) {
+    return null;
+  }
   return Control || null;
 };
 

@@ -24,7 +24,7 @@ import { testProps } from "@shared/utils/testProps";
 
 export function ResetPasswordScreen() {
   const { t } = useTranslation();
-  const { email } = useLocalSearchParams();
+  const { username } = useLocalSearchParams();
   const {
     code,
     newPassword,
@@ -81,7 +81,9 @@ export function ResetPasswordScreen() {
                 globalStyles.verificationSubtitle,
               ]}
             >
-              {t("auth.verification.subtitle", { email: email as string })}
+              {t("auth.verification.subtitle", {
+                username: username as string,
+              })}
             </Text>
 
             <View

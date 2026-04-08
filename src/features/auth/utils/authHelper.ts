@@ -5,7 +5,31 @@
  */
 
 import type { TFunction } from "i18next";
-import { validateEmail } from "@shared/utils/validations";
+import { ActiveSDK, SDK_FEATURE_MAP } from "@config/sdk.config";
+import { runtimeConfigManager } from "@config/runtime.config";
+import {
+  validateEmail,
+  validatePhoneE164,
+  isPhoneLikeMissingLeadingPlus,
+} from "@shared/utils/validations";
+
+/** Username kinds accepted by the active SDK (`SDK_FEATURE_MAP.authAllowedUsernameTypes`). */
+export type AuthUsernameType = "email" | "phone";
+
+const FALLBACK: readonly AuthUsernameType[] = ["email"];
+
+/**
+ * Allowed username kinds for the active SDK (`SDK_FEATURE_MAP.authAllowedUsernameTypes`;
+ * runtime scan wins, else compile-time ActiveSDK).
+ */
+export function getAuthAllowedUsernameTypes(): readonly AuthUsernameType[] {
+  const sdk = runtimeConfigManager.activeSdk ?? ActiveSDK;
+  const raw = SDK_FEATURE_MAP[sdk]?.authAllowedUsernameTypes;
+  if (Array.isArray(raw) && raw.length > 0) {
+    return raw as readonly AuthUsernameType[];
+  }
+  return FALLBACK;
+}
 
 const VERIFICATION_CODE_LENGTH = 6;
 const NICKNAME_MIN_LENGTH = 2;
@@ -29,6 +53,58 @@ export const createEmailValidator =
       return { isValid: false, error: t("auth.validation.invalidEmail") };
     }
     return { isValid: true };
+  };
+
+export function isUsernameAllowedForAuth(
+  value: string,
+  allowed: readonly AuthUsernameType[]
+): boolean {
+  const v = value.trim();
+  if (!v) return false;
+  if (allowed.includes("email") && validateEmail(v)) return true;
+  if (allowed.includes("phone") && validatePhoneE164(v)) return true;
+  return false;
+}
+
+/**
+ * Validator for login/signup username based on SDK-allowed kinds (email and/or E.164 phone).
+ */
+export const createAuthUsernameValidator =
+  (allowed: readonly AuthUsernameType[], t: TFunction) =>
+  (username: string): AuthValidationResult => {
+    const v = username.trim();
+    if (!v) {
+      return { isValid: false };
+    }
+    if (isUsernameAllowedForAuth(username, allowed)) {
+      return { isValid: true };
+    }
+    const emailOnly = allowed.length === 1 && allowed[0] === "email";
+    if (emailOnly) {
+      return { isValid: false, error: t("auth.validation.invalidEmail") };
+    }
+
+    if (v.includes("@")) {
+      return { isValid: false, error: t("auth.validation.invalidEmail") };
+    }
+    if (allowed.includes("phone")) {
+      if (v.startsWith("+")) {
+        return {
+          isValid: false,
+          error: t("auth.validation.invalidPhoneE164"),
+        };
+      }
+      if (isPhoneLikeMissingLeadingPlus(v)) {
+        return {
+          isValid: false,
+          error: t("auth.validation.phoneMustStartWithCountryCode"),
+        };
+      }
+    }
+    return {
+      isValid: false,
+      error: t("auth.validation.invalidEmailOrPhone"),
+    };
   };
 
 /**

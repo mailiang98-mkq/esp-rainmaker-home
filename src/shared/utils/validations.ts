@@ -16,3 +16,24 @@ export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email.trim());
 };
+
+/**
+ * E.164 phone (Cognito-style): leading +, country code 1–9, total length ≤ 15 digits.
+ */
+export const validatePhoneE164 = (phone: string): boolean => {
+  if (!phone?.trim()) return false;
+  const normalized = phone.trim().replace(/\s/g, "");
+  return /^\+[1-9]\d{1,14}$/.test(normalized);
+};
+
+/**
+ * True when input looks like a phone (enough digits) but does not start with + — used for UX validation only.
+ */
+export const isPhoneLikeMissingLeadingPlus = (value: string): boolean => {
+  const t = value.trim().replace(/\s/g, "");
+  if (!t || t.startsWith("+")) return false;
+  if (t.includes("@")) return false;
+  if (validateEmail(value)) return false;
+  const digits = t.replace(/\D/g, "");
+  return digits.length >= 6;
+};

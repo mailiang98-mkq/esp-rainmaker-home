@@ -11,7 +11,7 @@ import { Header, ScreenWrapper } from "@shared/components";
 import {
   AddUserModal,
   HomeName,
-  HomeSharing,
+  GroupSharing,
   HomeRemove,
   SettingsRoomSection,
 } from "@features/group/components";
@@ -55,11 +55,14 @@ const Setting = () => {
     handleHomeNameUpdate,
     handleRemoveHome,
     handleRoom,
+    handleControlGroups,
     handleAddUser,
     handleRemoveUser,
     handleRemovePendingUser,
     handleCloseAddUserModal,
-    validateEmail,
+    handleInviteChange,
+    inviteValidator,
+    isInviteValid,
   } = useSettings({
     homeId: id,
     toast,
@@ -67,7 +70,8 @@ const Setting = () => {
     router: router as UseSettingsOptions["router"],
   });
 
-  const groupSharingEnabled = getFeatures().groupSharing;
+  const { groupSharing: groupSharingEnabled, controlGroups: controlGroupsEnabled } =
+    getFeatures();
 
   return (
     <>
@@ -87,15 +91,24 @@ const Setting = () => {
         />
 
         {isPrimary && (
-          <SettingsRoomSection
-            title={t("group.settings.roomManagement")}
-            onPress={handleRoom}
-            qaId="section_room_management"
-          />
+          <>
+            <SettingsRoomSection
+              title={t("group.settings.roomManagement")}
+              onPress={handleRoom}
+              qaId="section_room_management"
+            />
+            {controlGroupsEnabled && (
+              <SettingsRoomSection
+                title={t("group.settings.groupManagement")}
+                onPress={handleControlGroups}
+                qaId="section_group_management"
+              />
+            )}
+          </>
         )}
 
         {groupSharingEnabled && (
-          <HomeSharing
+          <GroupSharing
             sharedUsers={sharedUsers}
             pendingUsers={pendingUsers}
             sharedByUser={sharedByUser}
@@ -121,9 +134,10 @@ const Setting = () => {
             onClose={handleCloseAddUserModal}
             onAdd={handleAddUser}
             email={newUserEmail}
-            handleEmailChange={setNewUserEmail}
+            handleInviteChange={handleInviteChange}
             isLoading={isAddingUserLoading}
-            validateEmail={validateEmail}
+            inviteValidator={inviteValidator}
+            isInviteValid={isInviteValid}
             makePrimary={makePrimary}
             onMakePrimaryChange={setMakePrimary}
             transfer={transfer}

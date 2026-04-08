@@ -6,6 +6,10 @@
 
 import type { ESPCDFGroup, ESPCDFNode } from "@store";
 import { HOME_NAME_MAX_LENGTH } from "@shared/utils/constants";
+import {
+  isDeviceTypeSubgroup,
+  isRoomSubgroup,
+} from "@features/group/utils/controlGroupHelpers";
 
 export type HomeNameValidationError = "empty" | "tooLong" | "duplicate";
 export type HomeNameValidationErrorKey =
@@ -51,6 +55,7 @@ export function validateHomeNameForCreation(
 
 export interface HomeDescriptionCounts {
   devicesCount: number;
+  groupsCount: number;
   roomsCount: number;
 }
 
@@ -80,10 +85,10 @@ export function formatHomeDescription(
 }
 
 /**
- * Computes device and room counts for a home (pure).
+ * Computes device, control-group, and room counts for a home (pure).
  * @param home - The home group
  * @param nodesList - All nodes (used to count devices per home)
- * @returns Counts for devices and rooms
+ * @returns Counts for devices, group-control subgroups, and room subgroups
  */
 export function getHomeDescriptionCounts(
   home: ESPCDFGroup,
@@ -93,6 +98,12 @@ export function getHomeDescriptionCounts(
   const devicesCount = nodesList
     .filter((node) => homeNodeIds.has(node.id))
     .reduce((acc, node) => acc + (node.devices?.length ?? 0), 0);
-  const roomsCount = home.subGroups?.length ?? 0;
-  return { devicesCount, roomsCount };
+  const subGroups = home.subGroups ?? [];
+  let groupsCount = 0;
+  let roomsCount = 0;
+  for (const g of subGroups) {
+    if (isDeviceTypeSubgroup(g)) groupsCount += 1;
+    else if (isRoomSubgroup(g)) roomsCount += 1;
+  }
+  return { devicesCount, groupsCount, roomsCount };
 }

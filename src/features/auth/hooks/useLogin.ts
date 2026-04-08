@@ -4,17 +4,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@shared/hooks/useToast";
 import { executePostLoginPipeline } from "@features/auth/utils/postLoginPipeline";
 import { CDF_EXTERNAL_PROPERTIES } from "@shared/utils/constants";
+import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 import {
-  createEmailValidator,
+  createAuthUsernameValidator,
   createPasswordValidator,
+  isUsernameAllowedForAuth,
 } from "@features/auth/utils/authHelper";
+export type PostSignupLoginCredentials = {
+  username: string;
+  password: string;
+};
+
+let pendingPostSignupLogin: PostSignupLoginCredentials | null = null;
+
+/** Queue credentials for Login to consume and sign in (in-memory only; never in URL). */
+export function setPendingPostSignupLogin(
+  creds: PostSignupLoginCredentials
+): void {
+  pendingPostSignupLogin = creds;
+}
+
+export function peekPendingPostSignupLogin(): PostSignupLoginCredentials | null {
+  return pendingPostSignupLogin;
+}
+
+export function consumePendingPostSignupLogin(): PostSignupLoginCredentials | null {
+  const next = pendingPostSignupLogin;
+  pendingPostSignupLogin = null;
+  return next;
+}
 
 export type PipelineProgress = {
   currentStep: string;
@@ -34,8 +59,9 @@ export function useLogin() {
   const router = useRouter();
   const toast = useToast();
 
-  const emailParam = typeof params.email === "string" ? params.email : "";
-  const [email, setEmail] = useState(emailParam);
+  const usernameParam =
+    typeof params.username === "string" ? params.username : "";
+  const [email, setEmail] = useState(usernameParam);
   const [password, setPassword] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
@@ -44,17 +70,91 @@ export function useLogin() {
   const [pipelineProgress, setPipelineProgress] = useState<PipelineProgress | null>(null);
   const [showConfigResetDialog, setShowConfigResetDialog] = useState(false);
   const [isConfigResetting, setIsConfigResetting] = useState(false);
+  const [authFieldsKey, setAuthFieldsKey] = useState(0);
+  const postSignupAutoLoginStartedRef = useRef(false);
 
-  const emailValidator = createEmailValidator(t);
-  const passwordValidator = createPasswordValidator(t);
+  const usernameValidator = useMemo(
+    () => createAuthUsernameValidator(getAuthAllowedUsernameTypes(), t),
+    [t]
+  );
+  const passwordValidator = useMemo(() => createPasswordValidator(t), [t]);
+
+  const performLogin = useCallback(
+    async (username: string, pwd: string) => {
+      setIsLoading(true);
+      try {
+        await store?.userStore.auth.login({
+          username,
+          password: pwd,
+        });
+
+        if (!store?.userStore.user) return;
+
+        setESPCDFUser(store.userStore.user ?? null);
+        await executePostLoginPipeline({
+          store,
+          router,
+          syncHomeWithNodes,
+          initUserCustomData,
+        });
+      } catch (error: unknown) {
+        const err = error as { description?: string };
+        toast.showError(
+          t("auth.errors.signInFailed"),
+          err?.description || t("auth.errors.fallback")
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [
+      store,
+      router,
+      syncHomeWithNodes,
+      initUserCustomData,
+      setESPCDFUser,
+      toast,
+      t,
+    ]
+  );
 
   useEffect(() => {
-    if (emailParam) {
-      setEmail(emailParam);
-      const validation = emailValidator(emailParam);
+    if (usernameParam) {
+      setEmail(usernameParam);
+      const validation = usernameValidator(usernameParam);
       setIsEmailValid(validation.isValid);
     }
-  }, [emailParam]);
+  }, [usernameParam, usernameValidator]);
+
+  useEffect(() => {
+    if (postSignupAutoLoginStartedRef.current) return;
+    const peeked = peekPendingPostSignupLogin();
+    if (!peeked) return;
+
+    const allowed = getAuthAllowedUsernameTypes();
+    if (!isUsernameAllowedForAuth(peeked.username, allowed)) {
+      consumePendingPostSignupLogin();
+      return;
+    }
+    const uOk = usernameValidator(peeked.username).isValid;
+    const pOk = passwordValidator(peeked.password).isValid;
+    if (!uOk || !pOk) {
+      consumePendingPostSignupLogin();
+      return;
+    }
+
+    postSignupAutoLoginStartedRef.current = true;
+    const creds = consumePendingPostSignupLogin();
+    if (!creds) return;
+
+    setEmail(creds.username);
+    setPassword(creds.password);
+    setIsEmailValid(true);
+    setIsPasswordValid(true);
+    setAuthFieldsKey((k) => k + 1);
+
+    void performLogin(creds.username, creds.password);
+  }, [performLogin, usernameValidator, passwordValidator]);
 
   const handleEmailChange = (value: string, isValid: boolean) => {
     setEmail(value.trim());
@@ -69,31 +169,12 @@ export function useLogin() {
   const login = async () => {
     if (!isEmailValid || !isPasswordValid) return;
 
-    setIsLoading(true);
-    try {
-      await store?.userStore.auth.login({
-        username: email,
-        password: password,
-      });
-
-      if (!store?.userStore.user) return;
-
-      setESPCDFUser(store.userStore.user ?? null);
-      await executePostLoginPipeline({
-        store,
-        router,
-        syncHomeWithNodes,
-        initUserCustomData,
-      });
-    } catch (error: unknown) {
-      const err = error as { description?: string };
-      toast.showError(
-        t("auth.errors.signInFailed"),
-        err?.description || t("auth.errors.fallback")
-      );
-    } finally {
-      setIsLoading(false);
+    const allowed = getAuthAllowedUsernameTypes();
+    if (!isUsernameAllowedForAuth(email, allowed)) {
+      return;
     }
+
+    await performLogin(email, password);
   };
 
   const forgotPwd = () => {
@@ -227,8 +308,9 @@ export function useLogin() {
 
   return {
     email,
-    emailParam,
+    usernameParam,
     password,
+    authFieldsKey,
     isEmailValid,
     isPasswordValid,
     isLoading,
@@ -238,7 +320,7 @@ export function useLogin() {
     isConfigResetting,
     setShowConfigResetDialog,
     setIsConfigResetting,
-    emailValidator,
+    emailValidator: usernameValidator,
     passwordValidator,
     handleEmailChange,
     handlePasswordChange,

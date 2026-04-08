@@ -55,7 +55,7 @@ export function ConfirmationCodeScreen() {
             {...testProps("text_subtitle_confirmation_code")}
             style={[globalStyles.subHeading, globalStyles.verificationSubtitle]}
           >
-            {t("auth.verification.subtitle", { email: email as string })}
+            {t("auth.verification.subtitle", { username: email as string })}
           </Text>
 
           <View

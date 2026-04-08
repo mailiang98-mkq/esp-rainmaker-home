@@ -17,6 +17,7 @@ export interface EventDeviceSelectionDeviceItemProps {
   isCurrentEventDevice: boolean;
   isDisabled: boolean;
   offlineLabel: string;
+  treatOfflineAsOnline?: boolean;
   onPress: () => void;
 }
 
@@ -28,9 +29,11 @@ export const EventDeviceSelectionDeviceItem: React.FC<
   isCurrentEventDevice,
   isDisabled,
   offlineLabel,
+  treatOfflineAsOnline = false,
   onPress,
 }) => {
   const isOnline = device.node.connectivityStatus?.isConnected ?? false;
+  const showAsOnline = treatOfflineAsOnline || isOnline;
 
   const eventConditions =
     isCurrentEventDevice && currentEventInfo
@@ -46,7 +49,7 @@ export const EventDeviceSelectionDeviceItem: React.FC<
     <View
       style={[
         globalStyles.sceneDeviceSection,
-        !isOnline && globalStyles.deviceCardDisabled,
+        !showAsOnline && globalStyles.deviceCardDisabled,
         isDisabled && globalStyles.deviceCardDisabled,
       ]}
     >
@@ -58,7 +61,7 @@ export const EventDeviceSelectionDeviceItem: React.FC<
         eventConditions={eventConditions}
         isEventMode={!!isCurrentEventDevice}
         badgeLable={
-          !isOnline ? (
+          !showAsOnline ? (
             <Text style={[globalStyles.fontXs, globalStyles.textGray]}>
               {offlineLabel}
             </Text>

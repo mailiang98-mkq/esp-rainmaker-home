@@ -31,6 +31,7 @@ import {
   ESPRM_POWER_PARAM_TYPE,
   ESPRM_SATURATION_PARAM_TYPE,
   ESPRM_TEMPERATURE_PARAM_TYPE,
+  ESPRM_LIGHT_MODE_PARAM_TYPE,
 
   // SUPPORTED PARAM UI TYPES
   ESPRM_UI_DROPDOWN_PARAM_TYPE,
@@ -119,10 +120,14 @@ export const PARAM_CONTROLS = [
   },
   {
     name: "Dropdown",
-    types: [ESPRM_UI_DROPDOWN_PARAM_TYPE],
+    types: [
+      ESPRM_UI_DROPDOWN_PARAM_TYPE,
+      ESPRM_LIGHT_MODE_PARAM_TYPE,
+    ],
     control: DropdownSelector,
     dataTypes: [DATA_TYPE_INT, DATA_TYPE_STRING],
-    requirements: "bounds (min/max) for Int, valid strings for String",
+    requirements:
+      "bounds (min/max) for Int, valid strings for String; string + bounds = discrete string values",
   },
   {
     name: "Trigger",

@@ -21,6 +21,7 @@ import {
   ESPCDFNode,
   ESPCDFUser,
 } from "@store";
+import { isRoomSubgroup } from "@features/group/utils/controlGroupHelpers";
 
 /**
  * Validates and sanitizes home data
@@ -47,10 +48,12 @@ export const createRoomTabs = (
   }
   return [
     ...defaultTabs,
-    ...home.subGroups.map((room) => ({
-      label: room.name.trim() || 'Unnamed Room',
-      id: room.id,
-    })),
+    ...home.subGroups
+      .filter(isRoomSubgroup)
+      .map((room) => ({
+        label: room.name.trim() || "Unnamed Room",
+        id: room.id,
+      })),
   ];
 };
 

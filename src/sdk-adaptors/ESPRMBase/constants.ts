@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Adaptor identifier
-export const ESPRMBaseAdaptorIdentifier = "rainmaker-base-sdk";
+export { ESPRMBaseAdaptorIdentifier } from "@config/sdk.identifiers";
 
 // SUPPORTED PARAM TYPES
 export const ESPRM_NAME_PARAM_TYPE = "esp.param.name";

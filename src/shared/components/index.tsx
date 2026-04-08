@@ -6,6 +6,8 @@
 
 // Banners
 export { default as EmptyState } from "./Banners/EmptyState";
+export { default as WarningBanner } from "./Banners/WarningBanner";
+export type { WarningBannerProps } from "./Banners/WarningBanner";
 
 // Cards
 export { default as DeviceCard } from "./Cards/DeviceCard";

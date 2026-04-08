@@ -39,7 +39,26 @@ export {
   type UseCustomizeRoomNameOptions,
 } from "./useCustomizeRoomName";
 export {
+  useCustomizeControlGroupName,
+  type UseCustomizeControlGroupNameResult,
+  type UseCustomizeControlGroupNameOptions,
+} from "./useCustomizeControlGroupName";
+export {
   useSettings,
   type UseSettingsResult,
   type UseSettingsOptions,
 } from "./useSettings";
+export {
+  useControlGroups,
+  type UseControlGroupsResult,
+  type UseControlGroupsOptions,
+  useCreateGroup,
+  type UseCreateGroupResult,
+  type UseCreateGroupOptions,
+} from "./useControlGroups";
+export {
+  useGroupControl,
+  type UseGroupControlResult,
+  type UseGroupControlOptions,
+  type ParamBroadcastRow,
+} from "./useGroupControl";

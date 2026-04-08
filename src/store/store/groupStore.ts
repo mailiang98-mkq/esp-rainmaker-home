@@ -151,9 +151,9 @@ class GroupStore {
   }
 
   @action deleteGroup(group: ESPCDFGroup) {
-    const { id, parentGroupId } = group;
-    if (parentGroupId) {
-      const parentGroup = this.groupsByIDMap[parentGroupId];
+    const { id, parentId } = group;
+    if (parentId) {
+      const parentGroup = this.groupsByIDMap[parentId];
       if (parentGroup) {
         parentGroup.subGroups =
           parentGroup.subGroups?.filter((sg) => sg.id !== id) || [];
