@@ -152,7 +152,7 @@ class ESPMatterCommissioningService : Service(), CommissioningService.Callback {
 
     /**
      * Send commissioning complete event via EventBus
-     * This event will be picked up by ESPMatterCommissioningModule and forwarded to React Native
+     * This event is picked up by [ESPMatterModule] and forwarded to React Native
      */
     private fun sendCommissioningCompleteEvent(
         deviceId: String,

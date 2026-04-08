@@ -7,6 +7,7 @@
 package com.app.matter
 
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.view.View
 import com.facebook.react.ReactPackage
@@ -30,12 +31,19 @@ import java.security.KeyStore
 import java.util.Base64
 import javax.security.auth.x500.X500Principal
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 class ESPMatterModule(reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext), ReactPackage {
 
     companion object {
         private const val TAG = "ESPMatterModule"
+    }
+
+    init {
+        EventBus.getDefault().register(this)
     }
 
     /**
@@ -52,7 +60,30 @@ class ESPMatterModule(reactContext: ReactApplicationContext) :
     override fun getName() = "ESPMatterModule"
 
     override fun onCatalystInstanceDestroy() {
+        try {
+            EventBus.getDefault().unregister(this)
+        } catch (e: Exception) {
+            Log.w(TAG, "EventBus unregister: ${e.message}")
+        }
         super.onCatalystInstanceDestroy()
+    }
+
+    /**
+     * Forwards commissioning events from [ESPMatterCommissioningService] and
+     * [MatterCommissioningActivity] (posted on EventBus) to React Native.
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMatterEvent(event: MatterEvent) {
+        try {
+            val params = Arguments.fromBundle(event.data ?: Bundle()).apply {
+                putString(AppConstants.KEY_EVENT_TYPE, event.eventType)
+            }
+            reactApplicationContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                .emit(AppConstants.EVENT_MATTER_COMMISSIONING, params)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to forward MatterEvent to RN: ${e.message}", e)
+        }
     }
 
 
@@ -160,11 +191,20 @@ class ESPMatterModule(reactContext: ReactApplicationContext) :
 
         } catch (error: Exception) {
             Log.e(TAG, "Matter commissioning failed: ${error.message}", error)
-            promise.reject(
-                "COMMISSIONING_ERROR",
-                "Failed to start Matter commissioning: ${error.message}",
-                error
-            )
+            val msg = "Failed to start Matter commissioning: ${error.message}"
+            try {
+                val params = Arguments.createMap().apply {
+                    putString(AppConstants.KEY_EVENT_TYPE, AppConstants.EVENT_COMMISSIONING_ERROR)
+                    putString(AppConstants.KEY_ERROR_MESSAGE_CAMEL, msg)
+                    putBoolean(AppConstants.KEY_SUCCESS, false)
+                }
+                reactApplicationContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                    .emit(AppConstants.EVENT_MATTER_COMMISSIONING, params)
+            } catch (emitError: Exception) {
+                Log.e(TAG, "Failed to emit commissioning error to RN: ${emitError.message}")
+            }
+            promise.reject("COMMISSIONING_ERROR", msg, error)
         }
     }
 

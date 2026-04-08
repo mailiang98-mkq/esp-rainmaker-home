@@ -41,7 +41,9 @@ export type ESPCDFGroupOperationType =
   | "updateGroupInfo"
   | "addNodes"
   | "removeNodes"
-  | "leave";
+  | "leave"
+  | "issueUserNoC"
+  | "startCommissioning";
 
 /**
  * Interface representing a group sharing user information.
@@ -87,6 +89,28 @@ export interface ESPCDFGroupOperation {
   addNodes(nodeIds: string[]): Promise<ESPCDFAPIResponse>;
   removeNodes(nodeIds: string[]): Promise<ESPCDFAPIResponse>;
   leave(): Promise<ESPCDFAPIResponse>;
+
+  // Optional Matter commissioning operations (present when isMatter === true)
+  issueUserNoC?(): Promise<ESPCDFIssueUserNoCResponse>;
+  startCommissioning?(
+    qrData: string,
+    onProgress?: (message: ESPCDFCommissioningProgress) => void
+  ): Promise<() => void>;
+}
+
+export interface ESPCDFIssueUserNoCResponse {
+  status: string;
+  description: string;
+  certificates?: Array<{
+    groupId: string;
+    matterUserId: string;
+    userNoC: string;
+  }>;
+}
+
+export interface ESPCDFCommissioningProgress {
+  status?: string;
+  description?: string;
 }
 
 export interface ESPCDFGroupInterface {
@@ -106,6 +130,7 @@ export interface ESPCDFGroupInterface {
   customData?: Record<string, any>;
   isMatter?: boolean;
   fabricId?: string;
+  fabricDetails?: Record<string, any>;
   operations: ESPCDFGroupOperation;
   _raw: any;
 }

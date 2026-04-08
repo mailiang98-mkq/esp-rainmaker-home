@@ -6,12 +6,9 @@
 
 import { ESPCDF, AdaptorRegistry, initCDF, ESPSDKAdaptor } from "@store";
 import { ESPRMBaseSDKAdaptor, ESPRMBaseAdaptorIdentifier } from '@sdk-adaptors/ESPRMBase';
+import { ESPRMMatterBaseSDKAdaptor, ESPRMMatterBaseAdaptorIdentifier } from '@sdk-adaptors/ESPRMMatterBase';
 import { ActiveSDK, getRMSDKConfig, getMatterSDKConfig } from '@config/sdk.config';
 import { runtimeConfigManager } from '@config/runtime.config';
-import {
-    ESPRMMatterBase,
-    type ESPRMMatterBaseConfig,
-} from '@espressif/rainmaker-matter-sdk';
 
 /**
  * Available adaptor identifiers.
@@ -19,6 +16,7 @@ import {
  */
 export const ADAPTOR_IDENTIFIERS = {
     ESPRM_BASE: ESPRMBaseAdaptorIdentifier,
+    ESPRM_MATTER_BASE: ESPRMMatterBaseAdaptorIdentifier,
 } as const;
 
 /**
@@ -29,6 +27,7 @@ class AdaptorFactory {
     createAll(): ESPSDKAdaptor[] {
         return [
             new ESPRMBaseSDKAdaptor(getRMSDKConfig()),
+            new ESPRMMatterBaseSDKAdaptor(getMatterSDKConfig()),
         ];
     }
 }
@@ -136,14 +135,9 @@ export const cdfBootstrap = CDFBootstrap.getInstance();
  *
  * Execution order:
  *   1. Load persisted runtime config from storage.
- *   2. Boot the CDF runtime and register all SDK adaptors.
- *   3. Configure the Matter SDK as a standalone side-effect (not a CDF adaptor).
+ *   2. Boot the CDF runtime and register all SDK adaptors (including Matter).
  */
 export async function initializeApp(): Promise<void> {
     await runtimeConfigManager.loadFromStorage();
     await cdfBootstrap.initialize();
-
-    if (ActiveSDK === "rainmaker-base-sdk") {
-        ESPRMMatterBase.configure(getMatterSDKConfig() as ESPRMMatterBaseConfig);
-    }
 }

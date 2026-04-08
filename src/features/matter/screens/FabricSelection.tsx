@@ -12,9 +12,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   DeviceEventEmitter,
-  Platform,
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 // Theme and Styles
@@ -27,14 +26,10 @@ import { ScreenWrapper, Header } from "@shared/components";
 // Hooks
 import { useToast } from "@shared/hooks/useToast";
 import { useCDF } from "@shared/hooks/useCDF";
+import { updateLastSelectedHome } from "@shared/utils/common";
 
 // Types
-import { ESPCDFGroup } from "@store";
-import {
-  ESPCommissioningResponse,
-  ESPRMFabric,
-} from "@espressif/rainmaker-matter-sdk";
-import { ESPMatterUtilityAdapter } from "@native-adaptors/implementations/ESPMatterUtilityAdapter";
+import { ESPCDFCommissioningProgress, ESPCDFGroup } from "@store";
 import {
   DEFAULT_MATTER_DEVICE_NAME,
   MATTER_COMMISSIONING_EVENT,
@@ -51,14 +46,45 @@ import {
   getValidHomes,
 } from "@store";
 
+/** iOS wraps fields in `requestBody`; Android often sends a flat map. */
+function getMatterCommissioningPayload(event: Record<string, unknown>) {
+  const rb = event.requestBody;
+  if (rb && typeof rb === "object" && !Array.isArray(rb)) {
+    return rb as Record<string, unknown>;
+  }
+  return event;
+}
+
+function commissioningPayloadIndicatesFailure(payload: Record<string, unknown>) {
+  if (payload.success === false) return true;
+  const st = String(payload.status ?? "").toLowerCase();
+  if (st && st !== "success") return true;
+  return false;
+}
+
+function extractCommissioningErrorMessage(payload: Record<string, unknown>) {
+  const msg =
+    payload.errorMessage ??
+    payload.error_message ??
+    payload.error ??
+    payload.description ??
+    "";
+  return typeof msg === "string" ? msg : String(msg);
+}
+
 export function FabricSelectionScreen() {
   const { qrData } = useLocalSearchParams();
   const router = useRouter();
   const toast = useToast();
-  const { espCDFUser } = useCDF();
-  const [groupsAndFabrics, setGroupsAndFabrics] = useState<
-    (ESPCDFGroup | ESPRMFabric)[]
-  >([]);
+  const { espCDFUser, initUserCustomData, store } = useCDF();
+  const groupsListRef = useRef<ESPCDFGroup[]>([]);
+  const userRef = useRef(espCDFUser);
+  const toastRef = useRef(toast);
+  const routerRef = useRef(router);
+  const initUserCustomDataRef = useRef(initUserCustomData);
+  const storeRef = useRef(store);
+  const commissioningTargetGroupIdRef = useRef<string | null>(null);
+  const [groupsAndFabrics, setGroupsAndFabrics] = useState<ESPCDFGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCommissioning, setIsCommissioning] = useState(false);
@@ -71,17 +97,121 @@ export function FabricSelectionScreen() {
   }, []);
 
   useEffect(() => {
+    groupsListRef.current = groupsAndFabrics;
+  }, [groupsAndFabrics]);
+
+  useEffect(() => {
+    userRef.current = espCDFUser;
+  }, [espCDFUser]);
+
+  useEffect(() => {
+    toastRef.current = toast;
+  }, [toast]);
+
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
+
+  useEffect(() => {
+    initUserCustomDataRef.current = initUserCustomData;
+  }, [initUserCustomData]);
+
+  useEffect(() => {
+    storeRef.current = store;
+  }, [store]);
+
+  useEffect(() => {
+    const handleCommissioningFailure = (message?: string) => {
+      const failureMessage =
+        message && message.trim().length > 0
+          ? message
+          : "Matter commissioning failed. Please try again.";
+
+      toastRef.current.showError("Matter commissioning failed", failureMessage);
+      setIsCommissioning(false);
+      setCommissioningStatus(MATTER_STATUS_PREPARING);
+      commissioningTargetGroupIdRef.current = null;
+    };
+
+    const handleCommissioningComplete = async (rawEvent: Record<string, unknown>) => {
+      const payload = getMatterCommissioningPayload(rawEvent);
+
+      if (commissioningPayloadIndicatesFailure(payload)) {
+        handleCommissioningFailure(extractCommissioningErrorMessage(payload));
+        return;
+      }
+
+      const deviceName =
+        (payload.deviceName as string) ??
+        (rawEvent.deviceName as string) ??
+        DEFAULT_MATTER_DEVICE_NAME;
+
+      setIsCommissioning(false);
+      setCommissioningStatus(MATTER_STATUS_PREPARING);
+
+      toastRef.current.showSuccess(
+        `Device "${deviceName}" commissioned successfully!`,
+      );
+
+      const user = userRef.current;
+      const targetGroupId = commissioningTargetGroupIdRef.current;
+      commissioningTargetGroupIdRef.current = null;
+
+      try {
+        if (user && targetGroupId) {
+          const homeGroup = groupsListRef.current.find(
+            (g) => g.id === targetGroupId,
+          );
+          if (homeGroup && user.setCurrentHome) {
+            await user.setCurrentHome(homeGroup);
+            await initUserCustomDataRef.current?.();
+          } else {
+            storeRef.current.groupStore.setCurrentHomeId(targetGroupId);
+            await updateLastSelectedHome(user, targetGroupId);
+            await initUserCustomDataRef.current?.();
+          }
+        }
+
+        if (user) {
+          await user.syncHomeWithNodes?.();
+        }
+
+        routerRef.current.dismissTo("/(group)/Home");
+      } catch (error) {
+        console.error(
+          "[FabricSelection] Failed to refresh nodes after commissioning:",
+          error,
+        );
+        routerRef.current.dismissTo("/(group)/Home");
+      }
+    };
+
+    const handleConfirmResponse = (event: Record<string, unknown>) => {
+      const payload = getMatterCommissioningPayload(event);
+      const status = String(payload.status ?? event.status ?? "").toLowerCase();
+      if (status && status !== "success") {
+        const description =
+          (payload.description as string) ||
+          (payload.errorMessage as string) ||
+          (event.description as string) ||
+          (event.errorMessage as string) ||
+          "Invalid challenge response.";
+        handleCommissioningFailure(description);
+      }
+    };
+
     const commissioningCompleteListener = DeviceEventEmitter.addListener(
       MATTER_COMMISSIONING_EVENT,
-      (event: any) => {
+      (event: Record<string, unknown>) => {
         if (event.eventType === MATTER_EVENT_COMMISSIONING_COMPLETE) {
-          handleCommissioningComplete(event);
+          void handleCommissioningComplete(event);
         } else if (
           event.eventType === MATTER_EVENT_COMMISSIONING_CONFIRMATION_RESPONSE
         ) {
           handleConfirmResponse(event);
         } else if (event.eventType === MATTER_EVENT_COMMISSIONING_ERROR) {
-          handleCommissioningFailure(event?.errorMessage);
+          const p = getMatterCommissioningPayload(event);
+          handleCommissioningFailure(extractCommissioningErrorMessage(p));
         }
       },
     );
@@ -90,62 +220,6 @@ export function FabricSelectionScreen() {
       commissioningCompleteListener.remove();
     };
   }, []);
-
-  const handleCommissioningComplete = async (event: any) => {
-    const deviceName = event.deviceName ?? DEFAULT_MATTER_DEVICE_NAME;
-
-    setIsCommissioning(false);
-    setCommissioningStatus(MATTER_STATUS_PREPARING);
-
-    toast.showSuccess(`Device "${deviceName}" commissioned successfully!`);
-
-    try {
-      // Refresh nodes and groups to show the newly commissioned device
-      // const shouldFetchFirstPage = true;
-      // await fetchNodesAndGroups(shouldFetchFirstPage);
-
-      // On Android, also refresh groups and fabrics to update the fabric selection list
-      if (Platform.OS === "android") {
-        await loadGroupsAndFabrics();
-      }
-
-      // Navigate to home screen after successful commissioning and data refresh
-      router.dismissTo("/(group)/Home");
-    } catch (error) {
-      console.error(
-        "[FabricSelection] Failed to refresh nodes after commissioning:",
-        error,
-      );
-      // Still navigate to home even if refresh failed - the node is commissioned
-      router.dismissTo("/(group)/Home");
-    }
-  };
-
-  const handleCommissioningFailure = (message?: string) => {
-    const failureMessage =
-      message && message.trim().length > 0
-        ? message
-        : "Matter node confirmation failed. Please try again.";
-
-    toast.showError("Matter commissioning failed", failureMessage);
-    setIsCommissioning(false);
-    setCommissioningStatus(MATTER_STATUS_PREPARING);
-
-    setTimeout(() => {
-      router.dismissTo("/(group)/Home");
-    }, 500);
-  };
-
-  const handleConfirmResponse = (event: any) => {
-    const status = String(event?.status || "").toLowerCase();
-    if (status && status !== "success") {
-      const description =
-        event?.description ||
-        event?.errorMessage ||
-        "Invalid challenge response.";
-      handleCommissioningFailure(description);
-    }
-  };
 
   const loadGroupsAndFabrics = async () => {
     try {
@@ -156,11 +230,9 @@ export function FabricSelectionScreen() {
         throw new Error("No authenticated user found. Please login first.");
       }
 
-      const response = await espCDFUser._raw.getGroupsAndFabrics();
+      const cdfGroups = await espCDFUser.getGroupsAndFabrics();
 
-      const allItems = [...response.fabrics, ...response.groups];
-
-      const { primaryGroups } = categorizeGroupsByOwnership(allItems);
+      const { primaryGroups } = categorizeGroupsByOwnership(cdfGroups);
       await ensureHomesAreMutuallyExclusive(primaryGroups, true);
       const validPrimaryHomes = getValidHomes(primaryGroups);
 
@@ -178,8 +250,9 @@ export function FabricSelectionScreen() {
     }
   };
 
-  const handleItemPress = async (item: ESPCDFGroup | ESPRMFabric) => {
+  const handleItemPress = async (item: ESPCDFGroup) => {
     try {
+      commissioningTargetGroupIdRef.current = item.id ?? null;
       setIsCommissioning(true);
       setCommissioningStatus(MATTER_STATUS_PREPARING_FABRIC);
       setError(null);
@@ -188,28 +261,27 @@ export function FabricSelectionScreen() {
         throw new Error("No authenticated user found. Please login first.");
       }
 
-      const fabricForCommissioning =
-        await espCDFUser._raw.prepareFabricForMatterCommissioning(item);
+      const preparedFabric =
+        await espCDFUser.prepareFabricForMatterCommissioning(item);
       setCommissioningStatus(MATTER_STATUS_STARTING_COMMISSIONING);
 
-      const isUserNocAvailableForFabric =
-        await ESPMatterUtilityAdapter.isUserNocAvailableForFabric(
-          fabricForCommissioning.fabricId || "",
-        );
+      const nocAvailable = await espCDFUser.isUserNocAvailableForFabric(
+        preparedFabric.fabricId || "",
+      );
 
-      if (!isUserNocAvailableForFabric) {
-        const response = await fabricForCommissioning.issueUserNoC();
+      if (!nocAvailable) {
+        const response = await preparedFabric.issueUserNoC();
         const groupIdFromResponse = response.certificates?.at(0)?.groupId || "";
-        if (groupIdFromResponse !== (item as ESPRMFabric).id) {
+        if (groupIdFromResponse !== item.id) {
           throw new Error("Fabric ID mismatch between response and fabric");
         }
 
         const fabricDetails =
-          fabricForCommissioning.fabricDetails || ({} as any);
+          preparedFabric.fabricDetails ??
+          {};
         const userNoc = response.certificates?.at(0)?.userNoC || "";
-        const rootCa = fabricDetails?.rootCa || fabricDetails?.root_ca || "";
-        const matterUserId =
-          fabricDetails?.matterUserId || fabricDetails?.matter_user_id || "";
+        const rootCa = fabricDetails.rootCa || "";
+        const matterUserId = fabricDetails.matterUserId || "";
 
         if (!userNoc || !rootCa || !matterUserId) {
           throw new Error(
@@ -217,44 +289,40 @@ export function FabricSelectionScreen() {
           );
         }
 
-        await ESPMatterUtilityAdapter.storePrecommissionInfo({
-          groupId: fabricForCommissioning.id,
-          fabricId: fabricForCommissioning.fabricId || "",
-          name: fabricForCommissioning.name,
+        await espCDFUser.storePrecommissionInfo({
+          groupId: preparedFabric.id,
+          fabricId: preparedFabric.fabricId || "",
+          name: preparedFabric.name,
           userNoc,
           matterUserId,
           rootCa,
-          ipk: fabricDetails?.ipk,
-          groupCatIdOperate:
-            fabricDetails?.groupCatIdOperate ||
-            fabricDetails?.group_cat_id_operate,
-          groupCatIdAdmin:
-            fabricDetails?.groupCatIdAdmin || fabricDetails?.group_cat_id_admin,
-          userCatId: fabricDetails?.userCatId || fabricDetails?.user_cat_id,
+          ipk: fabricDetails.ipk,
+          groupCatIdOperate: fabricDetails.groupCatIdOperate,
+          groupCatIdAdmin: fabricDetails.groupCatIdAdmin,
+          userCatId: fabricDetails.userCatId,
         });
       }
 
-      const progressLogger = (message: ESPCommissioningResponse) => {
-        // Update UI with progress messages from the SDK
-        if (message.description) {
-          setCommissioningStatus(message.description);
-        }
-      };
-      await fabricForCommissioning.startCommissioning(
+      await preparedFabric.startCommissioning(
         qrData as string,
-        progressLogger,
+        (message: ESPCDFCommissioningProgress) => {
+          if (message.description) {
+            setCommissioningStatus(message.description);
+          }
+        },
       );
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       toast.showError(`Failed to start commissioning: ${errorMessage}`);
 
+      commissioningTargetGroupIdRef.current = null;
       setIsCommissioning(false);
-      setCommissioningStatus("Preparing...");
+      setCommissioningStatus(MATTER_STATUS_PREPARING);
     }
   };
 
-  const renderItem = ({ item }: { item: ESPCDFGroup | ESPRMFabric }) => (
+  const renderItem = ({ item }: { item: ESPCDFGroup }) => (
     <TouchableOpacity
       style={[styles.item, globalStyles.shadowElevationForLightTheme]}
       onPress={() => handleItemPress(item)}

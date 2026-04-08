@@ -10,6 +10,7 @@ import android.app.Activity
 import android.content.ComponentName
 import android.os.Build
 import android.os.Bundle
+import org.greenrobot.eventbus.EventBus
 import android.text.TextUtils
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
@@ -46,9 +47,38 @@ class MatterCommissioningActivity : AppCompatActivity() {
                     result.data?.let { data ->
                         Log.e(TAG, "Commissioning failed: ${data.extras}")
                     }
+                    val message =
+                        if (resultCode == Activity.RESULT_CANCELED) {
+                            "Matter setup was cancelled."
+                        } else {
+                            "Matter setup was dismissed or failed."
+                        }
+                    notifyCommissioningFailure(message)
                     finishNoAnim()
                 }
             }
+    }
+
+    private fun notifyCommissioningFailure(message: String) {
+        try {
+            val bundle = Bundle().apply {
+                putString(AppConstants.KEY_STATUS, AppConstants.STATUS_ERROR)
+                putString(AppConstants.KEY_ERROR_MESSAGE, message)
+                putString(AppConstants.KEY_ERROR_MESSAGE_CAMEL, message)
+                putBoolean(AppConstants.KEY_SUCCESS, false)
+                putString(AppConstants.KEY_SOURCE_CAMEL, AppConstants.GPS_COMMISSIONING_SOURCE)
+            }
+            EventBus.getDefault().post(
+                MatterEvent(AppConstants.EVENT_COMMISSIONING_ERROR, bundle)
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to post commissioning failure event", e)
+        }
+        try {
+            FabricSessionManager.getCurrentChipClient()?.onCommissioningFailed(message)
+        } catch (e: Exception) {
+            Log.w(TAG, "onCommissioningFailed: ${e.message}")
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O_MR1)
@@ -78,6 +108,9 @@ class MatterCommissioningActivity : AppCompatActivity() {
                 commissionDeviceLauncher.launch(IntentSenderRequest.Builder(result).build())
             }.addOnFailureListener { error ->
                 Log.e(TAG, "commissionDevice() failed", error)
+                notifyCommissioningFailure(
+                    error.message ?: "Could not open Google Play Matter commissioning."
+                )
                 finishNoAnim()
             }
     }

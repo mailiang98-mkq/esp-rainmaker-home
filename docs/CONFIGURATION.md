@@ -129,10 +129,38 @@ Feature flags use a **two-level gating** system:
 
 ### Matter Configuration
 
-| Variable                | Description                                | Default          |
-| ----------------------- | ------------------------------------------ | ---------------- |
-| `MATTER_VENDOR_ID`      | Matter vendor ID for commissioning         | `0x131B`         |
-| `MATTER_ECOSYSTEM_NAME` | Ecosystem name shown during Matter pairing | `Rainmaker Home` |
+| Variable                | Description                                          | Default          |
+| ----------------------- | ---------------------------------------------------- | ---------------- |
+| `MATTER_VENDOR_ID`      | Vendor ID used by the Matter SDK                     | `0x131B`         |
+| `MATTER_ECOSYSTEM_NAME` | Ecosystem name displayed during Matter commissioning | `Rainmaker Home` |
+
+---
+
+### Scope
+
+**Commissioning only**
+
+## This application integrates Matter exclusively for **device commissioning (onboarding)**.
+
+### Notes
+
+- Matter support is limited to **commissioning**.
+  It does **not** include a full Matter controller implementation for device control.
+
+- References to local discovery and control in `getRMSDKConfig()` correspond to
+  **ESP RainMaker transports**, not a Matter control plane.
+
+- The `SDK_FEATURE_MAP` in `config/sdk.config.ts` enables Matter commissioning via:
+
+  ```ts
+  matterCommissioning: true;
+  ```
+
+  for the `rainmaker-matter-sdk` variant.
+
+- The commissioning UI is driven by:
+  - QR code scanning
+  - Native platform modules
 
 ---
 
@@ -521,7 +549,7 @@ This is the **SDK wiring layer** — it reads `.env` values from `app.config.ts`
 - **`getRMSDKConfig()`** merges values in priority order: _runtime config (QR scan) → `.env` → hardcoded fallback_. If a QR-scanned config is present it always wins over `.env` for `baseUrl`, `version`, `authUrl`, `clientId`, and `redirectUrl`.
 - **`SDK_FEATURE_MAP`** is the Level 2 hard gate for feature flags. If you integrate a new SDK adaptor, you **must** add its entry here listing which features it supports. Features absent from the map default to disabled.
 - **`CDFConfig.autoSync`** is driven by `ENABLE_CDF_AUTOSYNC` in `.env`. Setting it to `false` disables automatic CDF data synchronisation — device state will only refresh on explicit user action.
-- **`getMatterSDKConfig()`** extends the RM SDK config with the Matter vendor ID and Matter native adaptor. It is only called for `rainmaker-base-sdk`.
+- **`getMatterSDKConfig()`** extends the RM SDK config with the Matter vendor ID (`matterVendorId`) and the React Native **Matter** adaptor (`matterAdapter`). It is passed into **`ESPRMMatterBaseSDKAdaptor`** whenever adaptors are created — not a separate post-CDF step.
 
 ---
 
@@ -583,12 +611,11 @@ This is the **app-level initialisation entry point**. It wires all SDK adaptors 
 
 - **Execution order inside `initializeApp()` is fixed:**
   1. Load persisted runtime config from storage.
-  2. Boot CDF and register all SDK adaptors.
-  3. Configure the Matter SDK as a standalone side-effect (only for `rainmaker-base-sdk`).
+  2. Boot CDF and register **all** SDK adaptors from the factory (this includes **`ESPRMMatterBaseSDKAdaptor`** with `getMatterSDKConfig()`).
 
-  Do not reorder these steps — the SDK config read in step 2 depends on the runtime config loaded in step 1.
+  Do not reorder these steps — adaptor config must see the runtime overrides loaded in step 1.
 
-- **Matter SDK** is configured outside CDF as a standalone side-effect. It is only initialised when `ActiveSDK === "rainmaker-base-sdk"`. Adding Matter support to a new SDK requires a corresponding block here.
+- **Matter commissioning** is not a third init phase: the Matter-enabled RainMaker SDK adaptor is registered together with the base adaptor. Native Matter modules are loaded early where required (e.g. side import in the app entry path). Extending Matter support means keeping `matterAdapter`, HeadlessJS tasks, and native projects in sync with `@espressif/rainmaker-matter-sdk`.
 
 ---
 

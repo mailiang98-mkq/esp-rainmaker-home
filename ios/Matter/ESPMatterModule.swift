@@ -73,6 +73,16 @@ class ESPMatterModule: RCTEventEmitter {
     ]
     sendEvent(withName: matterEventIdentifier, body: eventData)
   }
+
+  /// Notifies React Native (DeviceEventEmitter) when commissioning fails, so UI can leave the loading state.
+  /// Promise rejection alone may not reach screens that only listen for Matter events.
+  private func emitCommissioningErrorToReactNative(message: String) {
+    let data: [String: Any] = [
+      ESPMatterConstants.errorMessage: message,
+      ESPMatterConstants.success: false
+    ]
+    emitMatterEvent(eventType: ESPMatterConstants.commissioningError, data: data)
+  }
   
   
   
@@ -150,7 +160,9 @@ class ESPMatterModule: RCTEventEmitter {
         // Note: Custom fabric commissioning will be triggered after Apple commissioning complete
       } catch {
         DispatchQueue.main.async {
-          reject(ESPMatterConstants.commissioningFailed, String(format: ESPMatterConstants.failedToStartCommissioning, error.localizedDescription), error)
+          let msg = String(format: ESPMatterConstants.failedToStartCommissioning, error.localizedDescription)
+          self.emitCommissioningErrorToReactNative(message: msg)
+          reject(ESPMatterConstants.commissioningFailed, msg, error)
         }
       }
     }
@@ -362,19 +374,20 @@ class ESPMatterModule: RCTEventEmitter {
             let setupRequest = MatterAddDeviceRequest(topology: topology, setupPayload: setupPayload)
             
             try await setupRequest.perform()
-                        
+
             // Step 2: Start custom fabric commissioning after Apple commissioning
             if let qrData = ESPMatterEcosystemInfo.shared.getOnboardingPayload() {
               try await self.startCustomFabricCommissioning(qrData: qrData, fabric: fabric)
             }
           }
         } catch {
-          if let qrData = ESPMatterEcosystemInfo.shared.getOnboardingPayload() {
-            try await self.startCustomFabricCommissioning(qrData: qrData, fabric: fabric)
-          } else {
-              self.currentCommissioningReject?(ESPMatterConstants.appleCommissioningFailed,
-                                               String(format: ESPMatterConstants.appleCommissioningFailedMsg, error.localizedDescription),
-                                               error)
+
+          let msg = String(format: ESPMatterConstants.appleCommissioningFailedMsg, error.localizedDescription)
+          DispatchQueue.main.async {
+            self.emitCommissioningErrorToReactNative(message: msg)
+            self.currentCommissioningReject?(ESPMatterConstants.appleCommissioningFailed, msg, error)
+            self.currentCommissioningCompletion = nil
+            self.currentCommissioningReject = nil
           }
         }
       }
@@ -1352,9 +1365,13 @@ extension ESPMatterModule: MTRDevicePairingDelegate {
     
     guard error == nil else {
       DispatchQueue.main.async {
+        let msg = String(format: ESPMatterConstants.pairingFailedMsg, error!.localizedDescription)
+        self.emitCommissioningErrorToReactNative(message: msg)
         self.currentCommissioningReject?(ESPMatterConstants.pairingFailed,
-                                         String(format: ESPMatterConstants.pairingFailedMsg, error!.localizedDescription),
+                                         msg,
                                          error)
+        self.currentCommissioningCompletion = nil
+        self.currentCommissioningReject = nil
       }
       return
     }
@@ -1372,9 +1389,13 @@ extension ESPMatterModule: MTRDevicePairingDelegate {
       try controller.commissionNode(withID: NSNumber(value: deviceId), commissioningParams: params)
     } catch {
       DispatchQueue.main.async {
+        let msg = String(format: ESPMatterConstants.failedToStartCommissionNode, error.localizedDescription)
+        self.emitCommissioningErrorToReactNative(message: msg)
         self.currentCommissioningReject?(ESPMatterConstants.commissionNodeAfterPairingFailed,
-                                         String(format: ESPMatterConstants.failedToStartCommissionNode, error.localizedDescription),
+                                         msg,
                                          error)
+        self.currentCommissioningCompletion = nil
+        self.currentCommissioningReject = nil
       }
     }
   }
@@ -1388,9 +1409,13 @@ extension ESPMatterModule: MTRDevicePairingDelegate {
     
     guard error == nil else {
       DispatchQueue.main.async {
+        let msg = String(format: ESPMatterConstants.commissioningFailedPairingMsg, error!.localizedDescription)
+        self.emitCommissioningErrorToReactNative(message: msg)
         self.currentCommissioningReject?(ESPMatterConstants.commissioningFailedPairing,
-                                         String(format: ESPMatterConstants.commissioningFailedPairingMsg, error!.localizedDescription),
+                                         msg,
                                          error)
+        self.currentCommissioningCompletion = nil
+        self.currentCommissioningReject = nil
       }
       return
     }
@@ -1439,13 +1464,19 @@ extension ESPMatterModule: MTRDeviceControllerDelegate {
   func controller(_ controller: MTRDeviceController, commissioningComplete error: Error?) {
     
     guard error == nil else {
-      // Send commissioning failure event to React Native
+      let err = error!
       let failureEvent: [String: Any] = [
         ESPMatterConstants.eventType: ESPMatterConstants.commissioningComplete,
         ESPMatterConstants.success: false,
-        ESPMatterConstants.error: error!.localizedDescription
+        ESPMatterConstants.error: err.localizedDescription
       ]
-      emitMatterEvent(eventType: ESPMatterConstants.commissioningComplete, data: failureEvent)
+      let msg = String(format: ESPMatterConstants.commissioningFailedPairingMsg, err.localizedDescription)
+      DispatchQueue.main.async {
+        self.emitMatterEvent(eventType: ESPMatterConstants.commissioningComplete, data: failureEvent)
+        self.currentCommissioningReject?(ESPMatterConstants.commissioningFailedPairing, msg, err)
+        self.currentCommissioningCompletion = nil
+        self.currentCommissioningReject = nil
+      }
       return
     }
     
@@ -1455,18 +1486,33 @@ extension ESPMatterModule: MTRDeviceControllerDelegate {
   }
   
   func controller(_ : MTRDeviceController, commissioningSessionEstablishmentDone error: Error?) {
-    guard let _ = error else {
-      if let deviceId = currentDeviceId {
-        let params = MTRCommissioningParameters()
-        params.deviceAttestationDelegate = self
-        if let controller = currentMatterController {
-          do {
-            try controller.commissionNode(withID: NSNumber(value: deviceId), commissioningParams: params)
-          } catch {
+    if let error = error {
+      let msg = String(format: ESPMatterConstants.failedToSetupSession, error.localizedDescription)
+      DispatchQueue.main.async {
+        self.emitCommissioningErrorToReactNative(message: msg)
+        self.currentCommissioningReject?(ESPMatterConstants.commissioningFailed, msg, error)
+        self.currentCommissioningCompletion = nil
+        self.currentCommissioningReject = nil
+      }
+      shutdownMatterController()
+      return
+    }
+    if let deviceId = currentDeviceId {
+      let params = MTRCommissioningParameters()
+      params.deviceAttestationDelegate = self
+      if let controller = currentMatterController {
+        do {
+          try controller.commissionNode(withID: NSNumber(value: deviceId), commissioningParams: params)
+        } catch {
+          DispatchQueue.main.async {
+            let failMsg = String(format: ESPMatterConstants.failedToStartCommissionNode, error.localizedDescription)
+            self.emitCommissioningErrorToReactNative(message: failMsg)
+            self.currentCommissioningReject?(ESPMatterConstants.commissionNodeAfterPairingFailed, failMsg, error)
+            self.currentCommissioningCompletion = nil
+            self.currentCommissioningReject = nil
           }
         }
       }
-      return
     }
   }
   
