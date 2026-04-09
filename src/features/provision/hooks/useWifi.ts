@@ -14,10 +14,14 @@ import { ESPCDFProvisioningDevice } from "@store";
 import type { WifiNetwork } from "@src/types/global";
 import { isAIAgentFromAdvertisement } from "@shared/utils/device";
 import { getAgentTermsAccepted } from "@features/agent/utils/storage";
+import StorageAdapter from "@native-adaptors/implementations/ESPAsyncStorage";
+
+const LAST_USED_WIFI_KEY = "@wifi_last_used_ssid";
 
 interface UseWifiReturn {
   wifiList: WifiNetwork[];
   selectedWifi: string;
+  lastUsedSsid: string;
   password: string;
   isLoading: boolean;
   showPassword: boolean;
@@ -49,6 +53,7 @@ export const useWifi = (): UseWifiReturn => {
 
   const [wifiList, setWifiList] = useState<WifiNetwork[]>([]);
   const [selectedWifi, setSelectedWifi] = useState("");
+  const [lastUsedSsid, setLastUsedSsid] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -107,6 +112,10 @@ export const useWifi = (): UseWifiReturn => {
   const scanWifiNetworks = async () => {
     try {
       setIsLoading(true);
+      const storedLastUsedSsid = await StorageAdapter.getItem(
+        LAST_USED_WIFI_KEY
+      );
+      setLastUsedSsid(storedLastUsedSsid || "");
       const networks = await device.scanWifiList();
       const validNetworks = networks
         .filter((network) => network.ssid && network.ssid.trim().length > 0)
@@ -117,8 +126,18 @@ export const useWifi = (): UseWifiReturn => {
             secure: network.secure,
           })
         );
-      validNetworks.sort((a, b) => b.rssi - a.rssi);
+      validNetworks.sort((a, b) => {
+        const aIsLastUsed = !!storedLastUsedSsid && a.ssid === storedLastUsedSsid;
+        const bIsLastUsed = !!storedLastUsedSsid && b.ssid === storedLastUsedSsid;
+
+        if (aIsLastUsed !== bIsLastUsed) {
+          return aIsLastUsed ? -1 : 1;
+        }
+
+        return b.rssi - a.rssi;
+      });
       setWifiList(validNetworks);
+      setIsModalVisible(true);
     } catch (error) {
       console.error("Error scanning networks:", error);
       toast.showError(t("device.errors.failedToScanNetworks"));
@@ -149,6 +168,9 @@ export const useWifi = (): UseWifiReturn => {
     if (shouldSave && password) {
       await saveNetwork(selectedWifi, password);
     }
+
+    await StorageAdapter.setItem(LAST_USED_WIFI_KEY, selectedWifi);
+    setLastUsedSsid(selectedWifi);
 
     router.push({
       pathname: "/(provision)/Provision",
@@ -186,6 +208,7 @@ export const useWifi = (): UseWifiReturn => {
   return {
     wifiList,
     selectedWifi,
+    lastUsedSsid,
     password,
     isLoading,
     showPassword,

@@ -9,7 +9,10 @@ import type { ESPCDFDeviceParam } from "@store";
 import type { DeviceParamGroup } from "@src/types/global";
 import {
   ESPRM_NAME_PARAM_TYPE,
+  ESPRM_POWER_PARAM_TYPE,
   ESPRM_UI_HIDDEN_PARAM_TYPE,
+  ESPRM_UI_PUSH_BUTTON_PARAM_TYPE,
+  ESPRM_UI_TOGGLE_PARAM_TYPE,
 } from "./constants";
 
 /**
@@ -59,12 +62,14 @@ export const getParamControlComponent = (
  * @returns Default value for the given type
  */
 export const defaultValueBasedOnParamDataType = (type: string) => {
-  switch (type) {
+  const normalizedType = String(type ?? "").trim().toLowerCase();
+  switch (normalizedType) {
     case "string":
       return "";
     case "int":
       return 0;
     case "bool":
+    case "boolean":
       return false;
     case "float":
       return 0.0;
@@ -72,6 +77,28 @@ export const defaultValueBasedOnParamDataType = (type: string) => {
       return "";
   }
 };
+
+/**
+ * Uses {@link defaultValueBasedOnParamDataType}, then infers boolean defaults when
+ * RMNG/cloud config omits or mislabels `dataType` (e.g. Power ends up as "string").
+ * Used for schedule/scene/automation pickers so toggle params don't save as "".
+ */
+function isLikelyBooleanControlParam(param: ESPCDFDeviceParam): boolean {
+  const t = param.type ?? "";
+  const ui = param.uiType ?? "";
+  return (
+    t === ESPRM_POWER_PARAM_TYPE ||
+    ui === ESPRM_UI_TOGGLE_PARAM_TYPE ||
+    ui === ESPRM_UI_PUSH_BUTTON_PARAM_TYPE
+  );
+}
+
+export function defaultWritableParamValue(param: ESPCDFDeviceParam): unknown {
+  const fromDataType = defaultValueBasedOnParamDataType(param.dataType ?? "");
+  if (fromDataType !== "") return fromDataType;
+  if (isLikelyBooleanControlParam(param)) return false;
+  return fromDataType;
+}
 
 /**
  * Filters out parameters with excluded types (name and hidden parameters)

@@ -157,6 +157,7 @@ export interface NetworkListModalProps {
   visible: boolean;
   onClose: () => void;
   wifiList: WifiNetwork[];
+  lastUsedSsid?: string;
   onSelect: (ssid: string) => void;
   isLoading: boolean;
   onRefresh: () => void;

@@ -17,6 +17,7 @@ import { testProps } from "@shared/utils/testProps";
 interface WifiItemProps {
   item: WifiNetwork;
   onSelect: (ssid: string) => void;
+  isLastUsed?: boolean;
 }
 
 /**
@@ -24,7 +25,11 @@ interface WifiItemProps {
  *
  * Displays a single WiFi network item in the list
  */
-export const WifiItem: React.FC<WifiItemProps> = ({ item, onSelect }) => {
+export const WifiItem: React.FC<WifiItemProps> = ({
+  item,
+  onSelect,
+  isLastUsed = false,
+}) => {
   const { t } = useTranslation();
   const signalInfo = getSignalStrength(item.rssi, t);
 
@@ -48,9 +53,22 @@ export const WifiItem: React.FC<WifiItemProps> = ({ item, onSelect }) => {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }} {...testProps("view_wifi")}>
             {item.secure && <Lock {...testProps("icon_lock")} size={14} color={tokens.colors.gray} />}
             <Text style={globalStyles.settingsItemText} {...testProps("text_ssid")}>{item.ssid}</Text>
+            {isLastUsed && (
+              <Text style={styles.lastUsedTag} {...testProps("text_last_used_wifi")}>
+                {t("device.wifi.lastUsed")}
+              </Text>
+            )}
           </View>
         </View>
       </View>
     </TouchableOpacity>
   );
+};
+
+const styles = {
+  lastUsedTag: {
+    fontSize: tokens.fontSize.xs,
+    fontFamily: tokens.fonts.medium,
+    color: tokens.colors.primary,
+  },
 };

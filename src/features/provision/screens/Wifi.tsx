@@ -51,6 +51,7 @@ const Wifi = () => {
   const {
     wifiList,
     selectedWifi,
+    lastUsedSsid,
     password,
     isLoading,
     showPassword,
@@ -108,6 +109,7 @@ const Wifi = () => {
                 selectedWifi={selectedWifi}
                 placeholder={t("device.wifi.selectNetwork")}
                 onPress={() => setIsModalVisible(true)}
+                isLoading={isLoading}
               />
 
               {selectedWifi && isSecureNetwork && (
@@ -158,6 +160,7 @@ const Wifi = () => {
           visible={isModalVisible}
           onClose={() => setIsModalVisible(false)}
           wifiList={wifiList}
+          lastUsedSsid={lastUsedSsid}
           onSelect={handleWifiSelect}
           isLoading={isLoading}
           onRefresh={scanWifiNetworks}

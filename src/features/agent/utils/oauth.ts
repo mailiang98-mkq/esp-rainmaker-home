@@ -4,14 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import StorageAdapter from '@native-adaptors/implementations/ESPAsyncStorage';
 import { ESPOauthAdapter } from '@native-adaptors/implementations/ESPOauthAdapter';
 import { connectConnectorWithCode, connectConnectorWithTokens } from './apiHelper';
 import { ESPCDF } from '@store';
-import {
-  AGENT_STORAGE_KEYS,
-  TOKEN_STORAGE_KEYS,
-} from './constants';
+import { AGENT_STORAGE_KEYS } from './constants';
 import type { OAuthMetadata, OAuthState } from './types';
 
 // ==================== OAuth Utilities ====================
@@ -84,7 +81,7 @@ export async function storeOAuthState(
   state: string,
   metadata: OAuthState
 ): Promise<void> {
-  await AsyncStorage.setItem(
+  await StorageAdapter.setItem(
     `${AGENT_STORAGE_KEYS.OAUTH_STATE_PREFIX}${state}`,
     JSON.stringify(metadata)
   );
@@ -94,7 +91,7 @@ export async function getOAuthState(
   state: string
 ): Promise<OAuthState | null> {
   try {
-    const stored = await AsyncStorage.getItem(
+    const stored = await StorageAdapter.getItem(
       `${AGENT_STORAGE_KEYS.OAUTH_STATE_PREFIX}${state}`
     );
     if (!stored) {
@@ -108,7 +105,7 @@ export async function getOAuthState(
 
 export async function clearOAuthState(state: string): Promise<void> {
   try {
-    await AsyncStorage.removeItem(
+    await StorageAdapter.removeItem(
       `${AGENT_STORAGE_KEYS.OAUTH_STATE_PREFIX}${state}`
     );
   } catch (error) {
@@ -244,12 +241,12 @@ export async function connectToolWithOAuth(
       throw new Error('State parameter not found in authorization URL');
     }
 
-    await AsyncStorage.setItem(AGENT_STORAGE_KEYS.CURRENT_OAUTH_STATE, state);
+    await StorageAdapter.setItem(AGENT_STORAGE_KEYS.CURRENT_OAUTH_STATE, state);
 
     const espOauthAdapter = new ESPOauthAdapter();
     const code = await espOauthAdapter.getOauthCode(authUrl);
 
-    const storedState = await AsyncStorage.getItem(
+    const storedState = await StorageAdapter.getItem(
       AGENT_STORAGE_KEYS.CURRENT_OAUTH_STATE
     );
     if (!storedState || storedState !== state) {
@@ -258,11 +255,11 @@ export async function connectToolWithOAuth(
 
     const result = await completeOAuthFlow(code, state);
 
-    await AsyncStorage.removeItem(AGENT_STORAGE_KEYS.CURRENT_OAUTH_STATE);
+    await StorageAdapter.removeItem(AGENT_STORAGE_KEYS.CURRENT_OAUTH_STATE);
 
     return result;
   } catch (error) {
-    await AsyncStorage.removeItem(AGENT_STORAGE_KEYS.CURRENT_OAUTH_STATE).catch(
+    await StorageAdapter.removeItem(AGENT_STORAGE_KEYS.CURRENT_OAUTH_STATE).catch(
       () => { }
     );
     throw error;

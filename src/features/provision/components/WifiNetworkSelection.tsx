@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { Text, TouchableOpacity, StyleSheet } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { ChevronDown } from "lucide-react-native";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
@@ -15,6 +15,7 @@ interface WifiNetworkSelectionProps {
   selectedWifi: string;
   placeholder: string;
   onPress: () => void;
+  isLoading?: boolean;
 }
 
 /**
@@ -26,6 +27,7 @@ export const WifiNetworkSelection: React.FC<WifiNetworkSelectionProps> = ({
   selectedWifi,
   placeholder,
   onPress,
+  isLoading = false,
 }) => (
   <TouchableOpacity
     style={[
@@ -35,6 +37,7 @@ export const WifiNetworkSelection: React.FC<WifiNetworkSelectionProps> = ({
     ]}
     {...testProps("button_select_network_wifi")}
     onPress={onPress}
+    disabled={isLoading}
   >
     <Text
       style={
@@ -44,7 +47,15 @@ export const WifiNetworkSelection: React.FC<WifiNetworkSelectionProps> = ({
     >
       {selectedWifi || placeholder}
     </Text>
-    <ChevronDown size={20} color={tokens.colors.gray} />
+    {isLoading ? (
+      <ActivityIndicator
+        size="small"
+        color={tokens.colors.gray}
+        {...testProps("loading_select_network_wifi")}
+      />
+    ) : (
+      <ChevronDown size={20} color={tokens.colors.gray} />
+    )}
   </TouchableOpacity>
 );
 

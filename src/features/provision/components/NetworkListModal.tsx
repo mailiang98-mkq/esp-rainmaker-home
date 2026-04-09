@@ -32,6 +32,7 @@ export const NetworkListModal: React.FC<NetworkListModalProps> = ({
   visible,
   onClose,
   wifiList,
+  lastUsedSsid,
   onSelect,
   isLoading,
   onRefresh,
@@ -79,7 +80,11 @@ export const NetworkListModal: React.FC<NetworkListModalProps> = ({
           <FlatList
             data={wifiList}
             renderItem={({ item, index }) => (
-              <WifiItem item={item} onSelect={onSelect} />
+              <WifiItem
+                item={item}
+                onSelect={onSelect}
+                isLastUsed={item.ssid === lastUsedSsid}
+              />
             )}
             keyExtractor={(item, index) =>
               createNetworkKey(item.ssid, item.rssi, index)

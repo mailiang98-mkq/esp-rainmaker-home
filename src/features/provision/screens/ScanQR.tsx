@@ -359,6 +359,7 @@ const ScanQR = () => {
         const photo = await camera.takePictureAsync({
           quality: 0.5, // Lower quality for faster capture
           skipProcessing: true, // Skip processing for faster capture
+          shutterSound: false, // Keep preview capture silent
         });
         if (photo?.uri) {
           setPreviewImageUri(photo.uri);

@@ -8,6 +8,7 @@ import { formatTime } from "@shared/utils/common";
 import { WRITE_PERMISSION } from "@shared/utils/constants";
 import {
   defaultValueBasedOnParamDataType,
+  defaultWritableParamValue,
   filterExcludedParamTypes,
 } from "@shared/utils/paramUtils";
 import type { ScheduleTrigger } from "@src/types/global";
@@ -90,8 +91,8 @@ export const getScheduleDeviceParams = (
     .map((param) => ({
       ...param,
       value:
-        getActionValue(nodeId, device.name, param.name) ||
-        defaultValueBasedOnParamDataType(param.dataType!),
+        getActionValue(nodeId, device.name, param.name) ??
+        defaultWritableParamValue(param),
     })) as Array<ESPCDFDeviceParam & { value: any }>;
 };
 
