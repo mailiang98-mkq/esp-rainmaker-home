@@ -5,7 +5,7 @@
  */
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import StorageAdapter from '@native-adaptors/implementations/ESPAsyncStorage';
 import { AGENTS_API_BASE_URL } from '@/config/agent.config';
 import { ESPCDF } from '@store';
 import UserStore from '@store/store/userStore';
@@ -59,7 +59,7 @@ const axiosInstance = createAxiosInstance();
 /**
  * Generic API helper function to make HTTP requests
  * Authorization Bearer token is added directly to each request
- * The token is fetched from AsyncStorage.getItem('com.esprmbase.accessToken')
+ * The token is fetched via ESPAsyncStorage (access token key)
  * @param config - API request configuration
  * @returns Promise with the response data
  */
@@ -74,7 +74,7 @@ export const apiRequest = async <T = any>(
         params,
     } = config;
 
-    // Fetch token from AsyncStorage and add to headers
+    // Fetch token from ESPAsyncStorage and add to headers
     let authToken: string | null = null;
     try {
         const instance = ESPCDF.instance;
@@ -88,7 +88,7 @@ export const apiRequest = async <T = any>(
             throw new Error('Store not ready');
         }
     } catch (error) {
-        authToken = await AsyncStorage.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
+        authToken = await StorageAdapter.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
     }
 
     const requestConfig: AxiosRequestConfig = {
@@ -126,7 +126,7 @@ export const apiRequest = async <T = any>(
 /**
  * Get agent configuration
  * Authorization Bearer token is added directly via apiRequest()
- * The token is fetched from AsyncStorage.getItem('com.esprmbase.accessToken')
+ * The token is fetched via ESPAsyncStorage (access token key)
  * @param agentId - The agent ID
  * @returns Promise with the agent configuration
  */
@@ -203,7 +203,7 @@ export async function updateUserProfile(profile: Partial<UserProfile>): Promise<
  * Matches: GET /user/connectors
  * Headers: Authorization: Bearer <token>, Accept: application/json
  * Authorization Bearer token is added directly via apiRequest()
- * The token is fetched from AsyncStorage.getItem('com.esprmbase.accessToken')
+ * The token is fetched via ESPAsyncStorage (access token key)
  */
 export async function getConnectedConnectors(): Promise<ConnectedConnector[]> {
     const response = await apiRequest<{ connectors?: ConnectedConnector[] } | ConnectedConnector[]>({
@@ -225,7 +225,7 @@ export async function getConnectedConnectors(): Promise<ConnectedConnector[]> {
  * Get OAuth authorization URL for a connector
  * This URL should be opened in a browser to initiate OAuth flow
  * Authorization Bearer token is added directly via apiRequest()
- * The token is fetched from AsyncStorage.getItem('com.esprmbase.accessToken')
+ * The token is fetched via ESPAsyncStorage (access token key)
  */
 export async function getConnectorAuthorizationUrl(params: {
     connectorUrl: string;

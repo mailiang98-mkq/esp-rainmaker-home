@@ -5,6 +5,26 @@ All notable changes to the ESP RainMaker Home app will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.1]
+
+### Fixed
+
+**Stability & Data Integrity**
+
+- Prevented saving of **empty or invalid values** in automations and schedules.
+- Fixed **redundant time zone updates** triggered during the post-provisioning flow.
+
+### Enhanced
+
+**RMNG Integration**
+
+- Improved accuracy of the **group sharing** feature, ensuring correct handling of **creation and revocation flows**.
+- Added support for using a **phone number as the preferred username** in phone number–based login flows.
+
+**Wi-Fi Listing Experience**
+
+- Improved the **Wi-Fi listing flow** flow by auto-loading available networks on page load for better user experience.
+
 ## [4.0.0]
 
 ### Added

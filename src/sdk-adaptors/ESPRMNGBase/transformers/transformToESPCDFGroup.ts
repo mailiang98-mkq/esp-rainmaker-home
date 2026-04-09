@@ -57,13 +57,18 @@ export function transformToESPCDFGroup(
             return transformToESPCDFGroup(subgroup, user, identifier);
         },
         async getSharingInfo(options: { metadata?: boolean; withSubGroups?: boolean; withParentGroups?: boolean }): Promise<ESPSDKAdaptorAPIDataResponse<ESPCDFGroupSharingInfoInterface>> {
-            const userName = ESPCDF.instance?.userStore.user?.userInfo?.username;
+            const { users = [] } = await group.getSharingInfo()
+            cdfGroup._raw.shardingInfo = users
             return Promise.resolve({
                 data: {
                     groupId: group.groupId,
                     mutuallyExclusive: true,
-                    primaryUsers: [{ username: userName}],
-                    secondaryUsers: [],
+                    primaryUsers: users.filter((u) => u.access_type === "primary").map((u) => ({
+                        username: u.email || u.phone || u.user_id,
+                    })),
+                    secondaryUsers: users.filter((u) => u.access_type === "secondary").map((u) => ({
+                        username: u.email || u.phone || u.user_id,
+                    })),
                 },
                 status: "success",
             });
@@ -112,12 +117,26 @@ export function transformToESPCDFGroup(
         },
         async transfer(params: { toUserName: string }): Promise<any> {
             return group.share({
-                userCode: params.toUserName,    
+                userCode: params.toUserName,
                 accessType: "primary",
             });;
         },
         async removeSharingFor(username: string): Promise<ESPCDFAPIResponse> {
-            return await group.removeMember(username);
+            const shardingInfo = cdfGroup._raw.shardingInfo as
+                | Array<{ email?: string; phone?: string; user_id: string }>
+                | undefined;
+            const member = shardingInfo?.find(
+                (u) => u.email == username || u.phone == username || u.user_id == username,
+            );
+            if (!member) {
+                throw new Error(`User ${username} not found in sharing info`);
+            }
+            try {
+                await group.removeMember(member.user_id);
+            } catch (error) {
+                console.log(error)
+            }
+            return Promise.resolve({ status: "success", description: `Sharing removed for user ${username}` });
         },
         async createScene(sceneData: { id?: string; name: string; info?: string; nodes?: string[]; actions: { [key: string]: { [key: string]: any } } }): Promise<ESPCDFScene> {
             throw new Error("RMNGBase SDK does not support createScene");
@@ -413,3 +432,4 @@ async function resolveAutomationTriggerDetails(
     }
     return resolved;
 }
+ 

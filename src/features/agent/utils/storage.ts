@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import StorageAdapter from '@src/native-adaptors/implementations/ESPAsyncStorage';
 import {
   AGENT_STORAGE_KEYS,
   CUSTOM_DATA_KEYS,
@@ -194,7 +194,7 @@ export const hasAgentsConfigured = (
 
 export const getMessageDisplayConfig = async (): Promise<MessageDisplayConfig> => {
   try {
-    const config = await AsyncStorage.getItem(
+    const config = await StorageAdapter.getItem(
       AGENT_STORAGE_KEYS.MESSAGE_DISPLAY_CONFIG
     );
     if (config) {
@@ -219,7 +219,7 @@ export const getMessageDisplayConfig = async (): Promise<MessageDisplayConfig> =
 export const saveMessageDisplayConfig = async (
   config: MessageDisplayConfig
 ): Promise<void> => {
-  await AsyncStorage.setItem(
+  await StorageAdapter.setItem(
     AGENT_STORAGE_KEYS.MESSAGE_DISPLAY_CONFIG,
     JSON.stringify(config)
   );
@@ -229,7 +229,7 @@ export const saveMessageDisplayConfig = async (
 
 export const getChatFontSize = async (): Promise<number> => {
   try {
-    const fontSize = await AsyncStorage.getItem(AGENT_STORAGE_KEYS.CHAT_FONT_SIZE);
+    const fontSize = await StorageAdapter.getItem(AGENT_STORAGE_KEYS.CHAT_FONT_SIZE);
     if (fontSize !== null) {
       const size = parseInt(fontSize, 10);
       if (size >= MIN_FONT_SIZE && size <= MAX_FONT_SIZE) {
@@ -247,7 +247,7 @@ export const saveChatFontSize = async (fontSize: number): Promise<void> => {
     MIN_FONT_SIZE,
     Math.min(MAX_FONT_SIZE, Math.round(fontSize))
   );
-  await AsyncStorage.setItem(
+  await StorageAdapter.setItem(
     AGENT_STORAGE_KEYS.CHAT_FONT_SIZE,
     validSize.toString()
   );

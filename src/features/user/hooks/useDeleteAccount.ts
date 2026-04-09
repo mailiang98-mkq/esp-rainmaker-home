@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import StorageAdapter from "@native-adaptors/implementations/ESPAsyncStorage";
 
 // Hooks
 import { useRouter } from "expo-router";
@@ -70,7 +70,7 @@ export const useDeleteAccount = () => {
     setIsLoading(true);
     try {
       await user?.confirmAccountDeletion(code.trim());
-      await AsyncStorage.clear();
+      await StorageAdapter.clear();
       toast.showSuccess(t("user.deleteAccount.deleteConfirmed"));
       router.dismissTo("/(auth)/Login");
     } catch (error: unknown) {

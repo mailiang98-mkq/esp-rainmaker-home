@@ -11,7 +11,7 @@ import type {
   ESPCDFAutomationNodeParamsEvent,
 } from "@store";
 import { ESPCDFAutomationConditionOperator } from "@store";
-import { defaultValueBasedOnParamDataType, filterExcludedParamTypes } from "@shared/utils/paramUtils";
+import { defaultWritableParamValue, filterExcludedParamTypes } from "@shared/utils/paramUtils";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useAutomation } from "@context/automation.context";
 
@@ -87,7 +87,7 @@ export function useEventDeviceParamSelection(
 
     const withDefaults = (device.params ?? []).map((param) => ({
       ...param,
-      value: defaultValueBasedOnParamDataType(param.dataType ?? ""),
+      value: defaultWritableParamValue(param),
     }));
     const filtered = filterExcludedParamTypes(withDefaults as ESPCDFDeviceParam[]);
 

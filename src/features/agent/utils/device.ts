@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import StorageAdapter from '@native-adaptors/implementations/ESPAsyncStorage';
 import { DEVICE_TYPE_LIST } from '@/config/devices.config';
 import {
   ESPRM_AGENT_AUTH_SERVICE,
@@ -117,8 +117,8 @@ export async function setUserAuthForNode(node: ESPCDFNode): Promise<void> {
       return;
     }
 
-    // Get refresh token from AsyncStorage
-    const refreshToken = await AsyncStorage.getItem(
+    // Get refresh token from ESPAsyncStorage
+    const refreshToken = await StorageAdapter.getItem(
       TOKEN_STORAGE_KEYS.REFRESH_TOKEN
     );
 
@@ -154,7 +154,7 @@ export async function updateRefreshTokensForAllAIDevices(
       return;
     }
 
-    const refreshToken = await AsyncStorage.getItem(
+    const refreshToken = await StorageAdapter.getItem(
       TOKEN_STORAGE_KEYS.REFRESH_TOKEN
     );
 

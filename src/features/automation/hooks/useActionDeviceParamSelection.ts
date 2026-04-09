@@ -6,7 +6,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import type { ESPCDFDeviceParam, ESPCDFDevice } from "@store";
-import { defaultValueBasedOnParamDataType, filterExcludedParamTypes } from "@shared/utils/paramUtils";
+import { defaultWritableParamValue, filterExcludedParamTypes } from "@shared/utils/paramUtils";
 import { ESPRM_PARAM_WRITE_PROPERTY } from "@shared/utils/constants";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useAutomation } from "@context/automation.context";
@@ -73,7 +73,7 @@ export function useActionDeviceParamSelection(): UseActionDeviceParamSelectionRe
       ...param,
       value:
         getActionValue(nId, device.name, param.name) ??
-        defaultValueBasedOnParamDataType(param.dataType ?? ""),
+        defaultWritableParamValue(param),
     }));
     const filtered = filterExcludedParamTypes(withValues as ESPCDFDeviceParam[]);
     const writable =

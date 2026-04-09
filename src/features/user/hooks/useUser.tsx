@@ -5,7 +5,7 @@
  */
 
 import { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import StorageAdapter  from "@native-adaptors/implementations/ESPAsyncStorage";
 
 // Icons
 import { Bell, Shield, FileText, Bot } from "lucide-react-native";
@@ -168,7 +168,7 @@ export const useUser = () => {
           {
             name: "clearAsyncStorage",
             run: async () => {
-              await AsyncStorage.clear();
+              await StorageAdapter.clear();
             },
             dependsOn: ["clearUserData"],
           },
