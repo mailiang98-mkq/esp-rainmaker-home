@@ -1,0 +1,20 @@
+commit_msg=$(cat "$1")
+
+pattern="^(Task|Feature|Bugfix|Hotfix|Enhancement|Release): .+"
+
+if ! echo "$commit_msg" | grep -qE "$pattern"; then
+  echo ""
+  echo "❌ Invalid commit message format."
+  echo ""
+  echo "   Allowed prefixes:"
+  echo "     Task:         <message>"
+  echo "     Feature:      <message>"
+  echo "     Bugfix:       <message>"
+  echo "     Hotfix:       <message>"
+  echo "     Enhancement:  <message>"
+  echo "     Release:      <message>"
+  echo ""
+  echo "   Your message: \"$commit_msg\""
+  echo ""
+  exit 1
+fi

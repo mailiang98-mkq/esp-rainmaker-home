@@ -1,6 +1,7 @@
 # GitLab CI/CD Pipeline for ESP RainMaker Home App
 
 stages:
+  - quality
   - build
   - test
 
@@ -28,12 +29,30 @@ before_script:
 
 
 ###############################################################
+# QUALITY — ESLint + TypeScript + architecture check on every MR
+# Mirrors the local pre-commit gate: npm run check
+# Fails the pipeline before any build starts if standards are violated.
+###############################################################
+
+code_quality:
+  stage: quality
+  tags: [mac-mobile-runner]
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+  script:
+    - npm ci
+    - npm run check
+  allow_failure: false
+
+###############################################################
 # ANDROID — MR builds APK
 ###############################################################
 
 android_apk:
   stage: build
   tags: [mac-mobile-runner]
+  needs:
+    - job: code_quality
   rules:
     - if: $CI_MERGE_REQUEST_ID
   script:
