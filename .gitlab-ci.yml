@@ -41,6 +41,21 @@ android_apk:
 
     - if [ -f .env.example ]; then cp .env.example .env; echo "Created .env from .env.example"; else echo ".env.example not found, skipping"; fi
 
+    # Release signing + Firebase config from CI variables (base64-encoded files; same as GitHub FS_* secrets).
+    # Configure: FS_KEYSTORE_FILE, FS_KEY_PROPERTIES_FILE, FS_GOOGLE_SERVICES_JSON (see scripts/secrets_to_base64.sh).
+    # keystore.properties must use e.g. storeFile=app/release.keystore when the keystore is under android/app/.
+    - |
+      set -euo pipefail
+      umask 077
+      [ -n "${FS_KEYSTORE_FILE:-}" ] && [ -n "${FS_KEY_PROPERTIES_FILE:-}" ] && [ -n "${FS_GOOGLE_SERVICES_JSON:-}" ] || exit 1
+      mkdir -p android/app
+      printf '%s' "$FS_KEYSTORE_FILE" | base64 -d > android/app/release.keystore
+      printf '%s' "$FS_KEY_PROPERTIES_FILE" | base64 -d > android/keystore.properties
+      printf '%s' "$FS_GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json
+      test -s android/app/release.keystore
+      test -s android/keystore.properties
+      test -s android/app/google-services.json
+
     - if [ -z "${ANDROID_HOME:-}" ]; then echo "ANDROID_HOME is not set (configure it as a GitLab CI variable or runner env)"; exit 1; fi
     - echo "sdk.dir=${ANDROID_HOME}" > android/local.properties
     - cat android/local.properties

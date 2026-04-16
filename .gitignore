@@ -85,3 +85,8 @@ android/app/google-services.json
 
 # Cursor
 .cursor/expo-env.d.ts
+.cursor/
+
+# Local base64 blobs for GitHub Actions signing secrets (never commit)
+secrets-base64/
+keystore.properties
