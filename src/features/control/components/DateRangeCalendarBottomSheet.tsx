@@ -254,7 +254,7 @@ const DateRangeCalendarBottomSheetV2 = forwardRef<
     }
 
     return disabled;
-  }, [minDate, maxDate, calendarMinDate, calendarMaxDate, selectedStart, maxInterval, isSimpleTimeSeries]);
+  }, [minDate, maxDate, calendarMinDate, calendarMaxDate, selectedStart, maxInterval]);
 
   /**
    * Formats the selected date range for display.
@@ -568,5 +568,4 @@ const DateRangeCalendarBottomSheetV2 = forwardRef<
   );
 });
 
-DateRangeCalendarBottomSheetV2.displayName = "DateRangeCalendarBottomSheetV2";
 export default DateRangeCalendarBottomSheetV2;

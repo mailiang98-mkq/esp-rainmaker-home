@@ -14,6 +14,9 @@ interface FloatingChatButtonProps {
   style?: any;
 }
 
+/**
+ * Renders the floating chat button UI section.
+ */
 const FloatingChatButton: React.FC<FloatingChatButtonProps> = ({ style }) => {
   const router = useRouter();
   const insets = useSafeAreaInsets();

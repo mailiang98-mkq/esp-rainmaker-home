@@ -29,6 +29,10 @@ import {
 import { getAgentTermsAccepted } from "@features/agent/utils/storage";
 import type { AgentConfig } from "@src/types/global";
 
+/**
+ * useAgentSettings hook
+ * @returns Agent settings state and handler functions
+ */
 export function useAgentSettings() {
   const { t } = useTranslation();
   const toast = useToast();

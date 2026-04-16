@@ -24,6 +24,9 @@ type RouteMap = {
   handleAboutUs: "/(user)/AboutUs";
 };
 
+/**
+ * Renders the settings UI section.
+ */
 const Settings: React.FC = () => {
   const router = useRouter();
   const { t } = useTranslation();

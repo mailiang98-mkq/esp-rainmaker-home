@@ -117,6 +117,9 @@ export function getProvisionBleIconName(advertisementData: unknown): string {
   return BLE_KIND_TO_ICON[parsed.kind];
 }
 
+/**
+ * Checks whether ai agent from advertisement matches the expected condition.
+ */
 export function isAIAgentFromAdvertisement(advertisementData: unknown): boolean {
   return parseBleManufacturerAdvertisement(advertisementData)?.kind === "ai_agent";
 }

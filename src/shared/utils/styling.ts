@@ -16,11 +16,17 @@ const [shortDimension, longDimension] =
 const guidelineBaseWidth = 375;
 const guidelineBaseHeight = 812;
 
+/**
+ * Handles scale logic for this module.
+ */
 export const scale = (size: number) =>
   Math.round(
     PixelRatio.roundToNearestPixel(shortDimension / guidelineBaseWidth) *
       (size as number)
   );
+/**
+ * Handles vertical scale logic for this module.
+ */
 export const verticalScale = (size: number) =>
   Math.round(
     PixelRatio.roundToNearestPixel(longDimension / guidelineBaseHeight) *

@@ -107,8 +107,8 @@ const InputDialog: React.FC<InputDialogProps> = ({
               qaId="name"
               placeholder={inputPlaceholder}
               initialValue={value}
-              onFieldChange={(value) => {
-                setValue((prev) => value);
+              onFieldChange={(next) => {
+                setValue(next);
               }}
               border={true}
               paddingHorizontal={false}

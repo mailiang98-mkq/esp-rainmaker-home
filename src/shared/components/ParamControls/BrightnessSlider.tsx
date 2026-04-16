@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { View, Text, GestureResponderEvent } from "react-native";
 
 // Components
@@ -25,10 +25,9 @@ import { tokens } from "@shared/theme/tokens";
  *
  * A slider component for controlling device brightness parameter.
  * Displays current brightness value and allows adjustment through a slider.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for brightness control
+ * @returns Brightness slider with percent display and clamped values
  */
 const BRIGHTNESS_DEFAULTS = { min: 0, max: 100, step: 1 };
 

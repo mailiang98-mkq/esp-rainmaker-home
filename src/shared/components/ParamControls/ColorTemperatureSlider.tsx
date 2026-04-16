@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useId } from "react";
+import { useMemo, useId } from "react";
 import { View, Text, GestureResponderEvent } from "react-native";
 
 // Components
@@ -29,10 +29,9 @@ import { paramControlStyles as styles } from "./lib/styles";
  * A slider component for controlling color temperature of a light.
  * Features a gradient background representing warm to cool temperatures
  * and displays the current value in Kelvin.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for color temperature control
+ * @returns Color-temperature slider (K) with rounded commits
  */
 const KELVIN_DEFAULTS = { min: 2700, max: 6500, step: 100 };
 

@@ -9,6 +9,9 @@ import { VoiceAssistantGuide } from "@features/user/components";
 import { useTranslation } from "react-i18next";
 import { ALEXA_IMAGES } from "@features/user/constants/voiceAssistantImages";
 
+/**
+ * Renders the alexa guide UI section.
+ */
 const AlexaGuide: React.FC = () => {
   const { t } = useTranslation();
 

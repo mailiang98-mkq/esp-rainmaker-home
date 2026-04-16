@@ -9,7 +9,12 @@
  * (operations return array of { node_id, status }).
  */
 
-import { ESPCDFSchedule, ESPCDFScheduleEditInput, ESPCDFScheduleOperation } from "@store";
+import {
+    ESPCDFAPIResponse,
+    ESPCDFSchedule,
+    ESPCDFScheduleEditInput,
+    ESPCDFScheduleOperation,
+} from "@store";
 import { ESPRMNGUser } from "@espressif/rmng-base-sdk";
 import { SUCCESS } from "@store/utils/constants";
 
@@ -99,29 +104,36 @@ export function transformToESPCDFSchedule(
         return results;
     };
 
+    const toScheduleResponse = (data: NodeResult[]): ESPCDFAPIResponse<NodeResult[]> => ({
+        status: SUCCESS,
+        data,
+    });
+
     const operations: ESPCDFScheduleOperation = {
-        async add(): Promise<NodeResult[]> {
-            return performPerNode("add");
+        async add(): Promise<ESPCDFAPIResponse> {
+            return toScheduleResponse(await performPerNode("add"));
         },
-        async edit(data: ESPCDFScheduleEditInput): Promise<NodeResult[]> {
-            return performPerNode("edit", {
-                name: data.name,
-                triggers: data.triggers,
-                action: data.action,
-                info: data.info,
-                flags: data.flags,
-                validity: data.validity,
-                enabled: data.enabled,
-            });
+        async edit(data: ESPCDFScheduleEditInput): Promise<ESPCDFAPIResponse> {
+            return toScheduleResponse(
+                await performPerNode("edit", {
+                    name: data.name,
+                    triggers: data.triggers,
+                    action: data.action,
+                    info: data.info,
+                    flags: data.flags,
+                    validity: data.validity,
+                    enabled: data.enabled,
+                })
+            );
         },
-        async remove(): Promise<NodeResult[]> {
-            return performPerNode("remove");
+        async remove(): Promise<ESPCDFAPIResponse> {
+            return toScheduleResponse(await performPerNode("remove"));
         },
-        async enable(): Promise<NodeResult[]> {
-            return performPerNode("enable", { enabled: true });
+        async enable(): Promise<ESPCDFAPIResponse> {
+            return toScheduleResponse(await performPerNode("enable", { enabled: true }));
         },
-        async disable(): Promise<NodeResult[]> {
-            return performPerNode("disable", { enabled: false });
+        async disable(): Promise<ESPCDFAPIResponse> {
+            return toScheduleResponse(await performPerNode("disable", { enabled: false }));
         },
     };
 

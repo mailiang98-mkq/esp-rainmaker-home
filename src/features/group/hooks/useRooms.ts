@@ -39,7 +39,7 @@ export function useRooms(options: UseRoomsOptions): UseRoomsResult {
   const rooms = useMemo(() => {
     const subGroups = (home?.subGroups as ESPCDFGroup[]) || [];
     return getRoomSubGroups(subGroups);
-  }, [home?.subGroups, home?.id]);
+  }, [home?.subGroups]);
 
   const loadRooms = useCallback(async () => {
     if (!homeId) return;

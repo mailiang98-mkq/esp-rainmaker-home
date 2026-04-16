@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ESPCDFCreateGroupRequest, ESPCDFGroup, ESPCDFUser, ESPCDFUserInfo, ESPCDFGroupSharingRequest, ESPCDFProvisioningDevice, ESPCDFAPIDataResponse, ESPCDFPaginatedAPIResponse, ESPCDFNode, ESPCDFUserOperation, ESPCDFAPIResponse, ESPCDFNodeUpdateSubscriptionContext, ESPCDFSubscribeToNodeUpdatesRequestParams } from "@store";
+
+import { ESPCDFCreateGroupRequest, ESPCDFGroup, ESPCDFUser, ESPCDFUserInfo, ESPCDFGroupSharingRequest, ESPCDFProvisioningDevice, ESPCDFAPIDataResponse, ESPCDFPaginatedAPIResponse, ESPCDFNode, ESPCDFUserOperation, ESPCDFAPIResponse, ESPCDFSubscribeToNodeUpdatesRequestParams } from "@store";
 import { mapNodeUpdateDataToEvent } from "@shared/utils/subscriptionHelper";
 import { ESPRMUser, ESPSecurity, ESPTransport, ESPRMEventType, UserCustomDataRequest, ESPGroupSharingRequest, ESPRMGroup, ESPRMBase, ESPNodeUpdateData, ESPRMNode } from "@espressif/rainmaker-base-sdk";
 import { ESPRMBaseAdaptorIdentifier } from "../constants";
@@ -17,12 +18,11 @@ import { transformToESPCDFNode } from "./transformToESPCDFNode";
 
 /**
  * Transforms ESPRMUser from the RainMaker SDK to ESPCDFUser format.
- * 
+ *
  * This utility converts the SDK user object to the CDF user format with:
  * - User info (id, name, email, nickname, phone)
  * - Operations wrapper that delegates to ESPRMUser methods
  * - Raw reference to the original ESPRMUser
- * 
  * @param esprmUser - The ESPRMUser instance from the SDK
  * @param identifier - The adaptor identifier
  * @param cdfContext - Optional CDF context for operations
@@ -267,7 +267,7 @@ export function transformToESPCDFUser(
         async unsubscribeFromEvent(event: string, callback: (event: any) => void): Promise<void> {
             esprmUser.unsubscribe(event as ESPRMEventType, callback);
         },
-        async setMultipleNodesParams(payload: Array<{ nodeId: string; payload: any }>): Promise<any> {
+        async setMultipleNodesParams(payload: { nodeId: string; payload: any }[]): Promise<any> {
             return await esprmUser.setMultipleNodesParams(payload);
         },
         async getGroups(): Promise<ESPCDFPaginatedAPIResponse<ESPCDFGroup[]>> {

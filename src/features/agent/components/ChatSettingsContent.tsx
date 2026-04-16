@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import {
   View,
   Text,
@@ -44,6 +45,9 @@ interface ChatSettingsContentProps {
   disconnectingToolUrl: string | null;
 }
 
+/**
+ * Full chat settings body: loading/error, basic agent info, tool grid with connector actions, and font size slider.
+ */
 export function ChatSettingsContent({
   isLoading,
   error,

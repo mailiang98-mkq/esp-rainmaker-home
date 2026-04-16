@@ -27,6 +27,9 @@ export interface CreateAutomationActionButtonsProps {
   onDelete: () => void;
 }
 
+/**
+ * Renders the create automation action buttons UI section.
+ */
 export const CreateAutomationActionButtons: React.FC<
   CreateAutomationActionButtonsProps
 > = ({

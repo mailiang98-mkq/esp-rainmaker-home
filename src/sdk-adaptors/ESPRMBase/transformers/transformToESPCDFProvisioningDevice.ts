@@ -9,12 +9,11 @@ import { ESPDevice, ChallengeResponseHelper } from "@espressif/rainmaker-base-sd
 
 /**
  * Transforms ESPDevice from the RainMaker SDK to ESPCDFProvisioningDevice format.
- * 
+ *
  * This utility converts the SDK device object to the CDF provisioning device format with:
  * - Device properties (name, transport, security, etc.)
  * - Operations wrapper that delegates to ESPDevice methods
  * - Raw reference to the original ESPDevice
- * 
  * @param espDevice - The ESPDevice instance from the SDK
  * @returns ESPCDFProvisioningDevice instance with all required operations
  */
@@ -62,7 +61,12 @@ export function transformToESPCDFProvisioningDevice(
             onProgress?: (response: any) => void,
             homeId?: string
         ): Promise<void> {
-            await espDevice.provision(ssid, password, onProgress, homeId);
+            await espDevice.provision(
+                ssid,
+                password,
+                onProgress ?? (() => {}),
+                homeId
+            );
         },
 
         async initiateUserNodeMapping(params?: Record<string, any>): Promise<any> {

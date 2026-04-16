@@ -8,6 +8,9 @@ import {
     ESPCDFAutomation,
     ESPCDFAPIResponse,
     ESPCDFAutomationEditInput,
+    type ESPCDFAutomationEvent,
+    type ESPCDFAutomationEventOperator,
+    type ESPCDFAutomationEventType,
 } from "@store";
 import { ESPAutomation } from "@espressif/rainmaker-base-sdk";
 import {
@@ -17,10 +20,9 @@ import {
 
 /**
  * Transforms ESPAutomation (from SDK) to ESPCDFAutomation entity with operations
- * 
+ *
  * Creates an ESPCDFAutomation entity with update, delete, and enable operations
  * that use the ESPAutomation's methods to perform automation operations.
- * 
  * @param automation - ESPAutomation instance from SDK
  * @param identifier - Adaptor identifier for the automation
  * @returns ESPCDFAutomation entity with operations
@@ -102,9 +104,10 @@ export function transformToESPCDFAutomation(
         name: automation.automationName,
         enabled: automation.enabled,
         nodeId: automation.nodeId,
-        eventType: automation.eventType,
-        events: automation.events || [],
-        eventOperator: automation.eventOperator,
+        eventType: automation.eventType as unknown as ESPCDFAutomationEventType,
+        events: (automation.events || []) as ESPCDFAutomationEvent[],
+        eventOperator:
+            automation.eventOperator as unknown as ESPCDFAutomationEventOperator,
         actions: transformToESPCDFAutomationActions(automation.actions),
         retrigger: automation.retrigger,
         location: automation.location,

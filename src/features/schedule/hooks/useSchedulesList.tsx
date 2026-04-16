@@ -78,6 +78,7 @@ export const useSchedulesList = () => {
       isFetchingRef.current = false;
       setIsLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []); // Empty deps - MobX stores are stable and accessed via closure
 
   // Update refs when values change (after fetchSchedules is defined)
@@ -93,6 +94,7 @@ export const useSchedulesList = () => {
   useFocusEffect(
     useCallback(() => {
       fetchSchedules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     }, []), // Empty deps - only run on focus change
   );
 

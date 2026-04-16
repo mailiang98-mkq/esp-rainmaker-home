@@ -13,6 +13,9 @@ export interface UseCreateRoomSuccessResult {
   handleDone: () => void;
 }
 
+/**
+ * Manages create room success state and related actions.
+ */
 export function useCreateRoomSuccess(): UseCreateRoomSuccessResult {
   const { id, updated = false } = useLocalSearchParams<{ id?: string; updated?: string }>();
   const router = useRouter();

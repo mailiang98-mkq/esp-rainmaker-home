@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { RotateCcw } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import type { WifiNetwork, NetworkListModalProps } from "@src/types/global";
+import type { NetworkListModalProps } from "@src/types/global";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { WifiItem } from "./WifiItem";
@@ -79,7 +79,7 @@ export const NetworkListModal: React.FC<NetworkListModalProps> = ({
 
           <FlatList
             data={wifiList}
-            renderItem={({ item, index }) => (
+            renderItem={({ item }) => (
               <WifiItem
                 item={item}
                 onSelect={onSelect}
@@ -102,7 +102,7 @@ export const NetworkListModal: React.FC<NetworkListModalProps> = ({
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -156,4 +156,4 @@ const styles = {
     paddingHorizontal: tokens.spacing._20,
     paddingBottom: tokens.spacing._20,
   },
-};
+});

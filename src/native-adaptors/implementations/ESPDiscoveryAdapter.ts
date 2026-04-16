@@ -56,19 +56,18 @@ function resolvedMdnsParams(
 export const EspLocalDiscoveryAdapter: ESPLocalDiscoveryAdapterInterface = {
   /**
    * Start the discovery process and handle updates via callbacks.
-   * 
+   *
    * This function initiates the device discovery process on the local network
    * to find ESP nodes that are available for provisioning. It sets up event
    * listeners to receive real-time updates about discovered devices.
-   *
-   * @param {(data: Record<string, any>) => void} callback - Callback function to handle 
+   * @param callback - Callback function to handle 
    *        discovery updates, device announcements, status changes, or errors. The callback
    *        receives data about discovered nodes including device information, network
    *        details, and provisioning status.
-   * @param {DiscoveryParamsInterface} Params - Configuration parameters for the discovery
+   * @param Params - Configuration parameters for the discovery
    *        process, such as network interface settings, timeout values, and discovery
    *        scope (local network, specific subnets, etc.)
-   * @returns {Promise<() => void>} A cleanup function that can be called to stop listening
+   * @returns A cleanup function that can be called to stop listening
    *          for discovery updates and remove event listeners.
    */
   startDiscovery: async (

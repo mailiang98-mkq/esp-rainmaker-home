@@ -20,13 +20,11 @@ let discoveryStoreRef: ESPCDF | null = null;
 
 /**
  * Starts local discovery for nodes in the network.
- * 
+ *
  * This function initializes local discovery by subscribing to discovery events.
  * When a node is discovered locally, it updates the node's transport configuration
  * and sets up event listeners.
- * 
- * @param {CDF} store - The CDF (Connected Device Framework) store instance that manages application state
- * @returns {void}
+ * @param store - The CDF (Connected Device Framework) store instance that manages application state
  */
 const startNodeLocalDiscovery = (store: ESPCDF) => {
   discoveryStoreRef = store;

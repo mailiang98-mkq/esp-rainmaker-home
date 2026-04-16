@@ -22,6 +22,9 @@ interface OAuthLoadingOverlayProps {
   progressMessage?: string;
 }
 
+/**
+ * Renders the o auth loading overlay UI section.
+ */
 export function OAuthLoadingOverlay({
   onClose,
   message,

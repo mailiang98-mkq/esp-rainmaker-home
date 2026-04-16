@@ -14,9 +14,10 @@ import { globalStyles } from "@shared/theme/globalStyleSheet";
 // Types
 import type { ChartPeriodSelectorProps, PeriodTabProps, TimeSeriesPeriod } from "@src/types/global";
 
+/**
+ * Renders the period tab UI component.
+ */
 const PeriodTab = ({ period, isActive, loading, onPress }: PeriodTabProps) => {
-  if (!period) return null;
-
   const styles = useMemo(() => {
     return {
       periodTab: globalStyles.periodTab,
@@ -25,7 +26,9 @@ const PeriodTab = ({ period, isActive, loading, onPress }: PeriodTabProps) => {
       periodTabTextActive: globalStyles.periodTabTextActive,
       periodTabTextInactive: globalStyles.periodTabTextInactive,
     };
-  }, [isActive, loading]);
+  }, []);
+
+  if (!period) return null;
 
   return (
     <TouchableOpacity
@@ -50,6 +53,9 @@ const PeriodTab = ({ period, isActive, loading, onPress }: PeriodTabProps) => {
   );
 };
 
+/**
+ * Renders the chart period selector UI section.
+ */
 const ChartPeriodSelector = ({  
   periods,
   selectedPeriod,

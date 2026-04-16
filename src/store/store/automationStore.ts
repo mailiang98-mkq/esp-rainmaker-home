@@ -119,7 +119,6 @@ export default class AutomationStore {
   /**
    * Processes a paginated automations response and updates the store
    * Similar to existing-app-cdf's processAutomationsRes method
-   *
    * @param response - The paginated response from getAutomations
    * @param sdkIdentifier - Optional SDK identifier for storing pagination context per SDK
    * @returns The processed response with automations
@@ -164,7 +163,6 @@ export default class AutomationStore {
   /**
    * Fetches the next page of automations if available
    * Similar to existing-app-cdf's fetchNext method
-   *
    * @param sdkIdentifier - Optional SDK identifier to fetch next page for specific SDK
    * @returns The next page of automations
    */
@@ -204,8 +202,8 @@ export default class AutomationStore {
 
   /**
    * Deletes an automation from both the backend (via SDK) and the local store
-   * @param {string} id The ID of the automation to delete
-   * @returns {Promise<{ success: boolean; error?: string }>} Result of the operation
+   * @param id The ID of the automation to delete
+   * @returns Result of the operation
    */
   @action async deleteAutomation(id: string): Promise<void> {
     const automation = this.getAutomationById(id);
@@ -217,8 +215,8 @@ export default class AutomationStore {
 
   /**
    * Get an automation by its ID
-   * @param {string} id The automation ID
-   * @returns {ESPCDFAutomation | undefined} The automation entity or undefined if not found
+   * @param id The automation ID
+   * @returns The automation entity or undefined if not found
    */
   getAutomationById(id: string): ESPCDFAutomation | undefined {
     return this.ESPCDFAutomationsByIDMap[id];

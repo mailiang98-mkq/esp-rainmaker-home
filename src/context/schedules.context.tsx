@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { createContext, useContext, useReducer } from "react";
 import { useCDF } from "@shared/hooks/useCDF";
 import { ESPCDFDevice } from "@store";
@@ -245,6 +246,9 @@ const ScheduleContext = createContext<ScheduleContextType | undefined>(
   undefined,
 );
 
+/**
+ * Wraps schedule create/edit: triggers, actions, validity, and save/delete via schedule store and APIs.
+ */
 export function ScheduleProvider({ children }: ScheduleProviderProps) {
   const { store } = useCDF();
   const [state, dispatch] = useReducer(scheduleReducer, initialState);
@@ -300,7 +304,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
           return false;
         }
 
-        const resp = (await schedule.edit({
+        let resp = (await schedule.edit({
           name: scheduleData.name,
           action: scheduleData.action,
           triggers: state.triggers,
@@ -310,6 +314,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
           enabled: scheduleData.enabled,
         })) as any;
 
+        resp = Array.isArray(resp) ? resp : resp.data;
         if (resp && resp.some((resp: any) => resp.status !== SUCESS)) {
           toast.showError(t("schedule.schedules.someDevicesFailedUpdate"));
           return false;
@@ -337,7 +342,8 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
               scheduleData as any,
             );
             if (schedule) {
-              const resp = (await schedule.add()) as any;
+              let resp = await schedule.add() as any;
+              resp = Array.isArray(resp) ? resp : resp.data;
               if (resp && resp.some((resp: any) => resp.status !== SUCESS)) {
                 toast.showError(
                   t("schedule.schedules.someDevicesFailedUpdate"),
@@ -349,10 +355,11 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
               return false;
             }
             toast.showSuccess(
-              t("schedule.createSchedule.scheduleCreatedSuccessfully"),
+            t("schedule.createSchedule.scheduleCreatedSuccessfully"),
             );
             return true;
-          } catch (groupError: any) {
+          } catch (error) {
+            console.error("Error creating schedule:", error);
             toast.showError(t("schedule.errors.scheduleCreationFailed"));
             return false;
           }
@@ -381,7 +388,8 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
         return false;
       }
 
-      const resp = (await schedule.remove()) as any;
+      let resp = await schedule.remove() as any;
+      resp = Array.isArray(resp) ? resp : resp.data;
       if (resp && resp.some((resp: any) => resp.status !== SUCESS)) {
         toast.showError(t("schedule.schedules.someDevicesFailedDelete"));
         return false;
@@ -798,7 +806,9 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
   );
 }
 
-// Custom hook for using the Schedule context
+/**
+ * Schedule editor context value (must be used under `ScheduleProvider`).
+ */
 export function useSchedule() {
   const context = useContext(ScheduleContext);
   if (context === undefined) {

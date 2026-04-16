@@ -59,6 +59,21 @@ export function cdfActionsToTargets(
     }));
 }
 
+/**
+ * Maps API / legacy comparison strings to RMNG {@link TriggerOperator} values.
+ * @param op - Raw operator from node trigger metadata (e.g. "==", ">=").
+ * @returns Normalized trigger operator for {@link TriggerItem}.
+ */
+export function apiOperatorToTriggerOperator(op: string | undefined): TriggerOperator {
+    if (op === "eq" || op === "==") return "eq";
+    if (op === "ne" || op === "!=") return "ne";
+    if (op === "lt" || op === "<") return "lt";
+    if (op === "le" || op === "<=") return "le";
+    if (op === "gt" || op === ">") return "gt";
+    if (op === "ge" || op === ">=") return "ge";
+    return "eq";
+}
+
 export function operatorToBackend(check: ESPCDFAutomationConditionOperator | undefined): TriggerOperator {
     if (check === ESPCDFAutomationConditionOperator.EQUAL) return "eq";
     if (check === ESPCDFAutomationConditionOperator.NOT_EQUAL) return "ne";

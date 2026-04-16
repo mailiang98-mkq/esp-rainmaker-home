@@ -7,7 +7,6 @@
 /**
  * Generic operation event emitter for entity operations
  * Provides a consistent, reusable pattern for emitting and listening to operation events
- *
  * @template TEntity - The entity type that emits events
  * @template TOperation - The operation type (string literal union)
  */

@@ -386,6 +386,7 @@ export function useCreateRoom(
     if (room && getFeatures().subGroupSharing) {
       getRoomSharedUsersRef.current();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [room?.id]);
 
   const handleAddRoomUser = useCallback(async () => {

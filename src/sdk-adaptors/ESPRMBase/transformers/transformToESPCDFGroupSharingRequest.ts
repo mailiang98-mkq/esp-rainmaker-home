@@ -15,7 +15,6 @@ import { ESPGroupSharingRequest } from "@espressif/rainmaker-base-sdk";
 
 /**
  * Transforms a raw SDK group sharing request to ESPCDFGroupSharingRequest entity
- * 
  * @param rawRequest - The raw group sharing request from SDK (ESPRMGroupSharingRequest or similar)
  * @returns ESPCDFGroupSharingRequest entity instance
  */

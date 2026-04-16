@@ -23,10 +23,9 @@ import { tokens } from "@shared/theme/tokens";
  *
  * A basic slider component for controlling numeric parameters.
  * Provides a simple slider interface with current value display.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for basic slider control
+ * @returns Generic labeled slider with min/max from `meta`
  */
 const SliderControl = observer(
   ({

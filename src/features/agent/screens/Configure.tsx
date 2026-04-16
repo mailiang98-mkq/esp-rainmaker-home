@@ -15,18 +15,18 @@ import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
-import {
-  Header,
-  ScreenWrapper,
-  AgentTermsBottomSheet,
-} from "@shared/components";
+import { Header, ScreenWrapper } from "@shared/components";
 import {
   ConfigureChatCard,
   ConfigureDeviceCard,
+  AgentTermsBottomSheet,
 } from "@features/agent/components";
 import { useConfigure } from "@features/agent/hooks";
 import { testProps } from "@shared/utils/testProps";
 
+/**
+ * Screen to link chat vs devices for an AI agent: pick devices, update agent id, and accept terms when required.
+ */
 export const ConfigureScreen = observer(() => {
   const { t } = useTranslation();
   const {

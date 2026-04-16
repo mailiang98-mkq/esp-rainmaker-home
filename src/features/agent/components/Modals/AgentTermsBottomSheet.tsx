@@ -164,7 +164,10 @@ const AgentTermsBottomSheet: React.FC<AgentTermsBottomSheetProps> = ({
       }
 
       // Store terms acceptance
-      await setAgentTermsAccepted(store.userStore.user, true);
+      const cdfUser = store.userStore.user;
+      if (cdfUser) {
+        await setAgentTermsAccepted(cdfUser, true);
+      }
 
       toast.showSuccess(t("auth.agentTerms.profileSavedSuccess"));
 

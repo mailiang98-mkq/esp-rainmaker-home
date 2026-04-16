@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import type {
   ESPCDFTSDataRequest,
   ESPCDFSimpleTSDataRequest,
@@ -67,7 +68,7 @@ type BoundaryUnit = "hour" | "day" | "month" | "week" | "end-of-day" | "end-of-m
 /**
  * Aligns a timestamp to a specific boundary
  * Consolidates all alignment operations into a single function
- * 
+ *
  * Time series data needs to be aligned to consistent boundaries (start of hour, day, week, month)
  * for proper aggregation and chart display. This function ensures all timestamps are normalized
  * to these boundaries, which is critical for:
@@ -75,7 +76,6 @@ type BoundaryUnit = "hour" | "day" | "month" | "week" | "end-of-day" | "end-of-m
  * - Proper chart axis labeling
  * - Accurate time range calculations
  * - Handling DST (Daylight Saving Time) transitions correctly
- * 
  * @param timestamp - Unix timestamp in milliseconds
  * @param unit - The boundary unit to align to ("hour", "day", "week", "month", "end-of-day", "end-of-month")
  * @param weekStart - Week start day (0 = Sunday, 1 = Monday, etc.) - only for "week" alignment
@@ -258,16 +258,15 @@ const PERIOD_CONFIG: Record<NonNullTimeSeriesPeriod, PeriodConfig> = {
 
 /**
  * Calculates the start time based on the selected period
- * 
+ *
  * When users select a time period (1H, 1D, 7D, etc.), we need to calculate the exact start time
  * for that period. This function handles period-specific logic:
  * - 1H: Start 1 hour before end time
  * - 1D: Start at midnight (00:00) of the same day
  * - 7D/4W: Start at midnight of N days before (using date arithmetic for DST safety)
  * - 1Y: Uses custom calendar year boundaries (January 1st)
- * 
+ *
  * This is essential for building accurate API requests and ensuring charts display the correct time range.
- * 
  * @param period - The time period (TIME_SERIES_PERIOD_1H, TIME_SERIES_PERIOD_1D, etc.)
  * @param endTime - The end time in milliseconds (defaults to current time)
  * @returns Unix timestamp in milliseconds representing the start of the period
@@ -314,18 +313,17 @@ export const calculateStartTime = (
 
 /**
  * Calculates the aligned end time based on the selected period
- * 
+ *
  * End times need to be aligned to appropriate boundaries for consistent data retrieval.
  * This function ensures:
  * - 1H period: Uses exact end time (already aligned to hour boundary)
  * - Other periods: Aligns to end of day (23:59:59.999) for complete day coverage
  * - 1Y period: Uses custom logic (current time for current year, Dec 31 for past years)
- * 
+ *
  * Proper end time alignment is critical for:
  * - Ensuring we get all data for the selected period
  * - Consistent API request formatting
  * - Accurate chart data display
- * 
  * @param period - The time period (TIME_SERIES_PERIOD_1H, TIME_SERIES_PERIOD_1D, etc.)
  * @param endTime - The end time in milliseconds (defaults to current time)
  * @returns Unix timestamp in milliseconds representing the aligned end of the period
@@ -357,15 +355,14 @@ export const calculateEndTime = (
 
 /**
  * Calculates time range based on period and offset
- * 
+ *
  * Enables navigation through historical periods. Users can view "current period" (offset=0),
  * "previous period" (offset=1), etc. This function:
  * - Calculates the base end time by subtracting offset periods
  * - Handles special cases (1H uses hour boundaries, 1Y uses 360-day calculation)
  * - Returns properly aligned start and end times for the requested period
- * 
+ *
  * Used by chart navigation controls to allow users to browse through historical data periods.
- * 
  * @param period - The time period (TIME_SERIES_PERIOD_1H, TIME_SERIES_PERIOD_1D, etc.)
  * @param offset - The offset from current time (0 = current period, 1 = previous period, 2 = 2 periods ago, etc.)
  * @param baseTime - Optional base time in milliseconds (defaults to current time)
@@ -423,7 +420,6 @@ export const getTimeRange = (
 
 /**
  * Formats time in HH:MM AM/PM format
- * 
  * @param date - Date object to format
  * @returns Formatted time string (e.g., "02:30 PM")
  */
@@ -438,7 +434,6 @@ const formatTimeHHMM = (date: Date): string => {
 
 /**
  * Formats date in dd-MMM-YY format
- * 
  * @param date - Date object to format
  * @returns Formatted date string (e.g., "15-Jan-24")
  */
@@ -453,18 +448,17 @@ const formatDateDDMMMYY = (date: Date): string => {
 
 /**
  * Formats a timestamp for chart tooltips as "dd-MMM-YY h:mm am/pm"
- * 
+ *
  * Chart tooltips need a compact, human-friendly date-time representation that includes
  * both the calendar date and local time. This helper centralizes the formatting so that
  * multiple tooltip components can share the same behavior and avoids duplicating
  * date-handling logic across the codebase.
- * 
+ *
  * WORKLET DIRECTIVE: This function is marked as a "worklet" because it's called from
  * `useDerivedValue` in React Native Reanimated, which runs on the UI thread. Functions
  * called from worklets must be marked as worklets themselves to be executed synchronously
  * on the UI thread. Without this directive, Reanimated would throw an error:
  * "Tried to synchronously call a non-worklet function on the UI thread."
- * 
  * @param timestamp - Unix timestamp in milliseconds
  * @returns Formatted date-time string (e.g., "15-Jan-24 2:30 pm")
  */
@@ -486,22 +480,21 @@ export const formatTooltipDateTime = (timestamp: number): string => {
 
 /**
  * Formats a numeric value for display in chart tooltips with appropriate decimal places
- * 
+ *
  * Chart tooltips need numeric values formatted with contextually appropriate precision:
  * - Large values (>= 1000): No decimal places (e.g., "1234")
  * - Medium values (>= 1): 2 decimal places (e.g., "12.34")
  * - Small values (< 1): 4 decimal places (e.g., "0.1234")
  * - Invalid values (NaN): Empty string
- * 
+ *
  * This ensures tooltips show readable values without unnecessary precision for large numbers
  * or insufficient precision for small numbers.
- * 
+ *
  * WORKLET DIRECTIVE: This function is marked as a "worklet" because it's called from
  * `useDerivedValue` in React Native Reanimated, which runs on the UI thread. Functions
  * called from worklets must be marked as worklets themselves to be executed synchronously
  * on the UI thread. Without this directive, Reanimated would throw an error:
  * "Tried to synchronously call a non-worklet function on the UI thread."
- * 
  * @param value - Numeric value to format
  * @returns Formatted value string with appropriate decimal places, or empty string if NaN
  */
@@ -522,16 +515,15 @@ export const formatTooltipValue = (value: number): string => {
 
 /**
  * Formats time range display based on period and offset
- * 
+ *
  * Provides user-friendly date/time range labels for the UI. Different periods need different
  * formatting:
  * - 1H: Shows time range (e.g., "02:30 PM - 03:30 PM") or "Last Hour" for current
  * - 1D: Shows date (e.g., "15-Jan-24") or "Today" for current
  * - 7D/4W: Shows date range (e.g., "01-Jan - 07-Jan") or "Last 7 Days" for current
  * - 1Y: Shows year (e.g., "2024") or "Last Year" for current
- * 
+ *
  * This function is used to display the selected time range in chart headers and navigation controls.
- * 
  * @param period - The time period (TIME_SERIES_PERIOD_1H, TIME_SERIES_PERIOD_1D, etc.)
  * @param offset - The offset from current time (0 = current period, 1 = previous period, etc.)
  * @param baseTime - Optional base time in milliseconds (defaults to current time)
@@ -584,16 +576,15 @@ export const formatTimeRangeDisplay = (
 
 /**
  * Gets aggregation interval from period config
- * 
+ *
  * Each time period has a corresponding aggregation interval that determines how data is grouped.
  * This mapping is essential for building correct API requests:
  * - 1H period → "minute" aggregation (60 data points per hour)
  * - 1D period → "hour" aggregation (24 data points per day)
  * - 7D/4W period → "day" aggregation (7/28 data points)
  * - 1Y period → "month" aggregation (12 data points per year)
- * 
+ *
  * The aggregation interval tells the API how to bucket the data points for efficient retrieval.
- * 
  * @param period - The time period (TIME_SERIES_PERIOD_1H, TIME_SERIES_PERIOD_1D, etc.)
  * @returns Aggregation interval string ("minute", "hour", "day", "month") for the period
  * @throws TimeSeriesValidationError if period is null
@@ -607,7 +598,7 @@ export const getAggregationInterval = (period: TimeSeriesPeriod | null): ESPCDFA
 
 /**
  * Gets number of intervals from period config
- * 
+ *
  * The API can calculate time ranges automatically when given numIntervals and aggregationInterval.
  * This is used for "current period" requests where we want the API to calculate the range dynamically.
  * Each period has a fixed number of intervals:
@@ -616,9 +607,8 @@ export const getAggregationInterval = (period: TimeSeriesPeriod | null): ESPCDFA
  * - 7D: 7 intervals (7 days)
  * - 4W: 28 intervals (28 days)
  * - 1Y: 12 intervals (12 months)
- * 
+ *
  * This allows the API to handle time zone and DST calculations server-side for current data.
- * 
  * @param period - The time period (TIME_SERIES_PERIOD_1H, TIME_SERIES_PERIOD_1D, etc.)
  * @returns Number of intervals for the period
  * @throws TimeSeriesValidationError if period is null
@@ -636,10 +626,9 @@ export const getNumIntervals = (period: TimeSeriesPeriod | null): number => {
 
 /**
  * Validates time series request inputs before processing
- * 
+ *
  * Centralizes all input validation logic to ensure requests are valid before
  * building the payload. This follows the fail-fast pattern to catch errors early.
- * 
  * @param params - The time series request parameters
  * @param dataType - Optional parameter data type for validation
  * @throws TimeSeriesValidationError if validation fails
@@ -667,10 +656,9 @@ const validateTimeSeriesInputs = (
 
 /**
  * Builds a simple time series request (no aggregation, no intervals)
- * 
+ *
  * Simple time series requests only need startTime and endTime. This function
  * handles both custom date ranges and period-based calculations for simple requests.
- * 
  * @param params - The time series request parameters
  * @returns ESPCDFSimpleTSDataRequest payload
  * @throws TimeSeriesValidationError if period is missing for period-based requests
@@ -714,10 +702,9 @@ const buildSimpleTimeSeriesRequest = (
 
 /**
  * Applies max duration cap for period-based requests if configured
- * 
+ *
  * Some periods (like 1Y) have special max duration limits that need to be
  * enforced. This function applies those caps to prevent exceeding API limits.
- * 
  * @param period - The time period
  * @param startTime - Calculated start time (may be modified)
  * @param endTime - Calculated end time
@@ -749,10 +736,9 @@ const applyMaxDurationCap = (
 
 /**
  * Calculates time range for aggregated data requests
- * 
+ *
  * Aggregated data needs special time range calculation using the aggregation
  * interval state machine. This handles both custom ranges and period-based ranges.
- * 
  * @param params - The time series request parameters
  * @returns Object with calculated startTime and endTime
  * @throws TimeSeriesValidationError if period is missing for period-based requests
@@ -786,10 +772,9 @@ const calculateTimeRangeForAggregatedData = (
 
 /**
  * Calculates time range for raw data requests
- * 
+ *
  * Raw data uses simpler time range calculation based on periods or custom ranges.
  * This function handles both cases and validates the range doesn't exceed limits.
- * 
  * @param params - The time series request parameters
  * @returns Object with calculated startTime and endTime
  * @throws TimeSeriesValidationError if period is missing or range exceeds limits
@@ -825,10 +810,9 @@ const calculateTimeRangeForRawData = (
 
 /**
  * Determines the aggregation interval for the request
- * 
+ *
  * Aggregation interval can come from multiple sources (custom interval, period config).
  * This function determines the correct interval with proper priority.
- * 
  * @param params - The time series request parameters
  * @returns The aggregation interval to use
  * @throws TimeSeriesValidationError if interval cannot be determined
@@ -851,10 +835,9 @@ const determinePeriodAggregationInterval = (
 
 /**
  * Builds the aggregated data request payload
- * 
+ *
  * Aggregated requests need special handling for current vs historical data.
  * Current data uses numIntervals (API calculates range), historical uses startTime/endTime.
- * 
  * @param params - The time series request parameters
  * @param timeRange - Calculated time range
  * @param baseRequest - Base request object to build upon
@@ -891,10 +874,9 @@ const buildAggregatedRequestPayload = (
 
 /**
  * Builds the raw data request payload
- * 
+ *
  * Raw data requests always use startTime/endTime (no numIntervals, no aggregationInterval).
  * This function creates the appropriate payload structure.
- * 
  * @param timeRange - Calculated time range
  * @param baseRequest - Base request object to build upon
  * @returns Complete ESPCDFTSDataRequest for raw data
@@ -912,10 +894,9 @@ const buildRawDataRequestPayload = (
 
 /**
  * Adds optional parameters to the request
- * 
+ *
  * Optional parameters (resultCount, timezone) are added to requests.
  * Note: timezone is only available for ESPCDFTSDataRequest, not ESPCDFSimpleTSDataRequest.
- * 
  * @param request - The request object to modify
  * @param params - The time series request parameters
  */
@@ -938,17 +919,16 @@ const addOptionalRequestParams = (
 /**
  * Builds a time series data request payload from Chart component parameters
  * Validates inputs first, then computes time ranges
- * 
+ *
  * This is the main function that converts UI parameters into API request format. It handles:
  * - Simple time series requests (raw data without aggregation)
  * - Aggregated time series requests (with avg, min, max, etc.)
  * - Period-based requests (using predefined periods like 1H, 1D, 7D)
  * - Custom date range requests (user-selected start/end dates)
  * - Current vs historical data (uses numIntervals for current, startTime/endTime for historical)
- * 
+ *
  * The function ensures all requests are properly formatted and validated before sending to the API.
  * It's the bridge between the chart UI and the backend time series API.
- * 
  * @param params - The time series request parameters (period, aggregation, startTime, endTime, etc.)
  * @param dataType - Optional parameter data type for validation (float, int, bool, string)
  * @returns ESPCDFTSDataRequest or ESPCDFSimpleTSDataRequest payload ready for SDK methods
@@ -1024,15 +1004,14 @@ interface FormatterConfig {
 /**
  * Creates formatter configuration for a period
  * Consolidates formatting logic in one place
- * 
+ *
  * Different time periods require different timestamp formatting for readability:
  * - 1H: Show minutes (e.g., "14:30") - users need minute-level precision
  * - 1D: Show hours (e.g., "2 PM") - hourly granularity is sufficient
  * - 7D/4W: Show dates (e.g., "Jan 15") - daily granularity
  * - 1Y: Show months (e.g., "Jan") - monthly granularity
- * 
+ *
  * This function centralizes all formatting logic to ensure consistent display across the app.
- * 
  * @param period - The time period (TIME_SERIES_PERIOD_1H, TIME_SERIES_PERIOD_1D, etc.)
  * @param locale - Locale string for formatting (defaults to "en-US")
  * @returns FormatterConfig object with formatTimestamp and formatXAxisLabel functions
@@ -1109,13 +1088,12 @@ const createFormatterForPeriod = (period: TimeSeriesPeriod, locale: string = "en
 
 /**
  * Helper function to format timestamp for display based on the time period
- * 
+ *
  * Chart data points need formatted labels for tooltips and axis labels. This function
  * selects the appropriate format based on the time period to ensure labels are readable
  * and contextually appropriate. For custom ranges (null period), it defaults to day format.
- * 
+ *
  * Used throughout the chart rendering pipeline to format timestamps consistently.
- * 
  * @param timestamp - Unix timestamp in milliseconds
  * @param period - The time period for context (null for custom ranges)
  * @param locale - Optional locale string for internationalization (defaults to "en-US")
@@ -1135,7 +1113,7 @@ export const formatTimestampForPeriod = (
 /**
  * State machine for determining X-axis label format based on visible time range
  * Uses strict zoom breakpoints to prevent label changes during small pans
- * 
+ *
  * When users zoom/pan charts, the visible time range changes. The X-axis labels should
  * adapt to show the most appropriate format:
  * - < 6 hours: Show "hh:mm" (minute precision needed)
@@ -1144,10 +1122,9 @@ export const formatTimestampForPeriod = (
  * - 8-31 days: Show "dd MMM" (date and month)
  * - 1-12 months: Show "mmm" (month name)
  * - 1+ years: Show "YYYY" (year)
- * 
+ *
  * Strict breakpoints prevent label format from changing during small pans, which would be jarring.
  * This improves UX by providing stable, contextually appropriate labels.
- * 
  * @param visibleStartTime - Start timestamp of visible range in milliseconds
  * @param visibleEndTime - End timestamp of visible range in milliseconds
  * @param locale - Optional locale string for formatting (defaults to "en-US")
@@ -1169,7 +1146,6 @@ export const formatTimestampForPeriod = (
  * - 3: 8–31 days
  * - 4: 1–12 months
  * - 5: 1+ years
- *
  * @param timeSpanMs - Time span in milliseconds
  * @returns Breakpoint index (0–5) for format selection
  */
@@ -1186,6 +1162,9 @@ export const getFormatBreakpoint = (timeSpanMs: number): number => {
   return 5;
 };
 
+/**
+ * Retrieves dynamic x label formatter for downstream consumers.
+ */
 export const getDynamicXLabelFormatter = (
   visibleStartTime: number,
   visibleEndTime: number,
@@ -1250,13 +1229,12 @@ export const getDynamicXLabelFormatter = (
 
 /**
  * Maps parameter type to its unit symbol
- * 
+ *
  * Different sensor parameters have different units that should be displayed with their values.
  * For example, temperature values should show "°" (degree symbol), while other parameters might
  * not need units. This function provides the appropriate unit symbol for each parameter type.
- * 
+ *
  * Used in chart Y-axis labels and value displays to show units alongside numeric values.
- * 
  * @param paramType - The parameter type (e.g., "esp.param.temperature", "esp.param.humidity")
  * @returns Unit symbol (e.g., "°" for temperature, empty string for others)
  */
@@ -1276,14 +1254,13 @@ export const getParamUnit = (paramType?: string): string => {
 
 /**
  * Clamps a numeric value between a minimum and maximum value.
- * 
+ *
  * Utility function for constraining numeric values within specified bounds.
  * Used throughout chart rendering to ensure visual properties (sizes, widths, etc.)
  * stay within acceptable ranges regardless of input values or zoom levels.
- * 
+ *
  * Used by chart components to limit visual element sizes, stroke widths, and other
  * numeric properties to prevent rendering issues or poor visual appearance.
- * 
  * @param value - The value to clamp
  * @param min - The minimum allowed value
  * @param max - The maximum allowed value
@@ -1295,19 +1272,18 @@ export const clamp = (value: number, min: number, max: number): number =>
 /**
  * Scales a base value inversely proportional to zoom scale, then clamps it.
  * As zoom increases, the scaled value decreases. The result is clamped between min and max bounds.
- * 
+ *
  * Chart visual elements (points, lines, bars) need to scale inversely with zoom level
  * to maintain readability. When users zoom in, elements should appear smaller to avoid
  * overcrowding. When zoomed out, elements can be larger for visibility.
- * 
+ *
  * This function ensures:
  * - Visual elements scale appropriately with zoom level
  * - Values never exceed min/max bounds (prevents rendering issues)
  * - Minimum zoom scale protection (prevents division by zero or extreme values)
- * 
+ *
  * Used by chart components to calculate adaptive point radius, stroke width, and bar width
  * based on current zoom level.
- * 
  * @param base - The base value to scale (e.g., point radius, stroke width)
  * @param zoomScale - The current zoom scale factor (typically >= 1)
  * @param min - Minimum allowed value after scaling
@@ -1323,15 +1299,14 @@ export const scaleByZoom = (
 
 /**
  * Calculates evenly spaced X-axis tick values from chart data within a visible time range.
- * 
+ *
  * Charts need a limited number of X-axis labels (typically 5) to avoid overcrowding.
  * This function filters data points to the visible range and selects evenly spaced timestamps:
  * - If 5 or fewer points exist in the visible range, returns all of them
  * - If more than 5 points exist, selects 5 evenly spaced ones (first, 3 evenly distributed middle ones, last)
- * 
+ *
  * This ensures charts display readable X-axis labels regardless of zoom level or data density.
  * Used by chart components to generate tick values for X-axis rendering.
- * 
  * @param chartData - Array of data points with timestamp property
  * @param visibleStartTime - Start timestamp of visible range in milliseconds (or null to use dataStartTime)
  * @param visibleEndTime - End timestamp of visible range in milliseconds (or null to use dataEndTime)
@@ -1517,14 +1492,13 @@ const AGGREGATION_INTERVAL_STATE_MACHINE: Record<AggregationIntervalType, Interv
 
 /**
  * Validates if a data type supports the given aggregation method
- * 
+ *
  * Not all aggregation methods make sense for all data types:
  * - Float/Int: Support avg, min, max, count, latest, raw
  * - Bool/String: Only support count, latest, raw (no avg/min/max)
- * 
+ *
  * This validation prevents invalid API requests and provides clear error messages to users
  * when they try to use unsupported aggregations (e.g., "average" for boolean values).
- * 
  * @param dataType - The parameter data type ("float", "int", "bool", "string")
  * @param aggregation - The aggregation method to validate
  * @throws TimeSeriesValidationError if the aggregation method is not supported for the data type
@@ -1554,7 +1528,7 @@ export const validateAggregationForDataType = (
 
 /**
  * Validates the time range for a given aggregation interval
- * 
+ *
  * Each aggregation interval has maximum duration limits enforced by the API:
  * - minute: 1 day max
  * - hour: 1 day max
@@ -1563,10 +1537,9 @@ export const validateAggregationForDataType = (
  * - month: 360 days max
  * - year: 5 years max
  * - raw data: 31 days max (special limit)
- * 
+ *
  * This validation prevents API errors by catching invalid time ranges before making requests.
  * It also ensures endTime > startTime to prevent invalid queries.
- * 
  * @param interval - The aggregation interval type ("minute", "hour", "day", "week", "month", "year")
  * @param startTime - Start time in milliseconds
  * @param endTime - End time in milliseconds
@@ -1616,7 +1589,7 @@ export const validateTimeRange = (
 
 /**
  * Gets the time range for a given aggregation interval using the state machine
- * 
+ *
  * When users select a custom date range with a specific aggregation interval, we need to
  * calculate the appropriate time range. The state machine defines how each interval calculates
  * its range:
@@ -1626,9 +1599,8 @@ export const validateTimeRange = (
  * - month: 12 months back
  * - year: 360 days back (API limit)
  * - minute: 1 hour back
- * 
+ *
  * This ensures custom ranges align properly with aggregation boundaries for accurate data retrieval.
- * 
  * @param interval - The aggregation interval type ("minute", "hour", "day", "week", "month", "year")
  * @param endTime - The end time in milliseconds (defaults to current time)
  * @param weekStart - Optional week start day (0 = Sunday, 1 = Monday, etc.) for week interval
@@ -1666,15 +1638,14 @@ export const getTimeRangeForInterval = (
 
 /**
  * Validates if a period and aggregation combination is supported for a given duration
- * 
+ *
  * Comprehensive validation function that checks:
  * 1. Data type compatibility with aggregation method
  * 2. Time range validity (endTime > startTime)
  * 3. Time range duration limits for the aggregation interval
- * 
+ *
  * This is a convenience function that combines multiple validations to ensure a complete
  * time series request is valid before sending to the API. Used as a final validation step.
- * 
  * @param period - The time period (TIME_SERIES_PERIOD_1H, TIME_SERIES_PERIOD_1D, etc.)
  * @param aggregation - The aggregation method ("raw", "avg", "min", "max", etc.)
  * @param startTime - Start time in milliseconds
@@ -1712,17 +1683,16 @@ export const validateTimeSeriesRequest = (
 
 /**
  * Determines the appropriate aggregation interval for data interpolation
- * 
+ *
  * When interpolating chart data (filling missing values), we need to know the interval
  * between expected data points. This function determines the correct interval with priority:
  * 1. requestInterval (from API response)
  * 2. aggregationInterval (from custom range selection)
  * 3. period-based interval (from period selection)
  * 4. Default to "hour" for custom ranges
- * 
+ *
  * Raw data always uses "minute" interval for fine-grained interpolation.
  * This ensures interpolation generates timestamps at the correct granularity.
- * 
  * @param aggregation - The aggregation method ("raw" always uses "minute", others use provided interval)
  * @param requestInterval - Optional aggregation interval from the API request/response
  * @param aggregationInterval - Optional aggregation interval parameter from custom range
@@ -1770,16 +1740,15 @@ export const getInterpolationInterval = (
 
 /**
  * Generates expected timestamps for interpolation based on aggregation interval
- * 
+ *
  * - minute: Every minute
  * - hour: Every hour
  * - day: Every day (using date arithmetic for DST safety)
  * - week: Every week (7 days)
  * - month: Every month
  * - year: Every year
- * 
+ *
  * Uses date arithmetic for day/week/month/year to handle DST transitions correctly.
- * 
  * @param startTime - Start timestamp in milliseconds
  * @param endTime - End timestamp in milliseconds
  * @param aggregationInterval - Aggregation interval ("minute", "hour", "day", "week", "month", "year")
@@ -1869,14 +1838,13 @@ export const generateExpectedTimestampsForInterval = (
 /**
  * Calculates the time interval (start and end) for a given expected timestamp based on period
  * Uses PERIOD_CONFIG to determine interval size
- * 
+ *
  * When matching API data points to expected timestamps, we need to know the time interval
  * each timestamp represents. For example, if we expect a timestamp at "Jan 1, 00:00", the interval
  * might be "Jan 1, 00:00" to "Jan 1, 01:00" for hourly aggregation.
- * 
+ *
  * This function calculates the interval boundaries for each expected timestamp, which is used
  * to determine which API data points belong to which expected timestamp during interpolation.
- * 
  * @param expectedTimestamp - The expected timestamp in milliseconds
  * @param period - Time series period (TIME_SERIES_PERIOD_1H, TIME_SERIES_PERIOD_1D, etc.)
  * @returns Object with intervalStart and intervalEnd in milliseconds for the timestamp
@@ -1909,7 +1877,7 @@ export const getIntervalForTimestamp = (
 
 /**
  * Calculates the time interval (start and end) for a given expected timestamp based on aggregation interval
- * 
+ *
  * Similar to getIntervalForTimestamp, but works with aggregation intervals directly.
  * Calculates the time window that each expected timestamp represents:
  * - minute: 1 minute window
@@ -1918,9 +1886,8 @@ export const getIntervalForTimestamp = (
  * - week: 7 day window
  * - month: 1 month window
  * - year: 1 year window
- * 
+ *
  * Used during interpolation to match API data points to their corresponding expected timestamps.
- * 
  * @param expectedTimestamp - The expected timestamp in milliseconds
  * @param aggregationInterval - Aggregation interval ("minute", "hour", "day", "week", "month", "year")
  * @returns Object with intervalStart and intervalEnd in milliseconds for the timestamp
@@ -1977,11 +1944,10 @@ export const getIntervalForAggregationInterval = (
 
 /**
  * Builds a map of expected timestamps to their time intervals
- * 
+ *
  * Each expected timestamp represents a time interval (e.g., "Jan 1, 00:00" to "Jan 1, 01:00").
  * This map is used to determine which API data points belong to which expected timestamp
  * during the interpolation process.
- * 
  * @param expectedTimestamps - Expected timestamps for the time range
  * @param period - Time series period (for interval calculation)
  * @param aggregationInterval - Optional aggregation interval (if provided, used instead of period)
@@ -2015,11 +1981,10 @@ const buildIntervalMap = (
 
 /**
  * Buckets data points to their corresponding expected timestamps based on interval boundaries
- * 
+ *
  * API data points need to be matched to expected timestamps. A data point belongs to an
  * expected timestamp if it falls within that timestamp's time interval. This function performs
  * this matching efficiently by iterating through intervals sequentially.
- * 
  * @param chartData - Original chart data points from API response
  * @param expectedTimestamps - Expected timestamps for the time range
  * @param intervalMap - Map of expected timestamp -> { intervalStart, intervalEnd }
@@ -2071,12 +2036,11 @@ const bucketDataPointsToIntervals = (
 
 /**
  * Builds the final interpolated data array with null values for missing data points
- * 
+ *
  * Charts need complete time ranges with consistent timestamp spacing. This function
  * creates the final array where:
  * - Timestamps with data use the actual data point (with expected timestamp for spacing)
  * - Timestamps without data use null values (shown as gaps in line charts)
- * 
  * @param expectedTimestamps - Expected timestamps for the time range
  * @param expectedToDataPoint - Map of expected timestamp -> ChartDataPoint (only for timestamps with data)
  * @param period - Time series period (for label formatting)
@@ -2117,20 +2081,19 @@ const buildInterpolatedDataArray = (
  * Interpolates data points to fill missing values in the expected time range
  * This ensures the chart shows the complete time range even when data is sparse
  * Optimized from O(n²) to O(n) by pre-bucketing data points
- * 
+ *
  * API responses may have gaps (missing data points), but charts need complete time ranges
  * for proper visualization. This function:
  * 1. Generates all expected timestamps for the time range
  * 2. Matches API data points to expected timestamps based on interval boundaries
  * 3. Fills missing timestamps with null values
- * 
+ *
  * This ensures charts display:
  * - Complete time ranges (no gaps in X-axis)
  * - Null values for missing data (shown as gaps in line charts)
  * - Consistent timestamp spacing for proper chart rendering
- * 
+ *
  * The O(n) optimization uses pre-bucketing to avoid nested loops when matching data points.
- * 
  * @param chartData - Original chart data points from API response
  * @param expectedTimestamps - Expected timestamps for the time range (from generateExpectedTimestamps)
  * @param period - Time series period (for label formatting)
@@ -2172,13 +2135,12 @@ export const interpolateData = (
 
 /**
  * Formats a date range for display
- * 
+ *
  * Custom date ranges selected by users need to be displayed in a readable format.
  * This function creates a simple "Start Date - End Date" string for display in UI components
  * like date pickers and chart headers.
- * 
+ *
  * Used when users select custom date ranges (not predefined periods) to show the selected range.
- * 
  * @param startTime - Start timestamp in milliseconds
  * @param endTime - End timestamp in milliseconds
  * @param locale - Optional locale string for formatting (defaults to "en-US")
@@ -2203,13 +2165,12 @@ export const formatDateRangeForDisplay = (
 
 /**
  * Calculates the previous date range by sliding the window backward
- * 
+ *
  * Enables navigation through historical custom date ranges. When users click "Previous",
  * this function slides the time window backward by the same duration, maintaining the range size.
- * 
+ *
  * Used by date range navigation controls to allow users to browse through historical periods
  * while keeping the same time window size.
- * 
  * @param range - Current date range object with start, end, and aggregationInterval
  * @returns Previous date range with same duration, shifted backward in time
  */
@@ -2232,14 +2193,13 @@ export const calculatePreviousDateRange = (range: DateRange): DateRange => {
 
 /**
  * Calculates the next date range by sliding the window forward
- * 
+ *
  * Enables forward navigation through custom date ranges. When users click "Next",
  * this function slides the time window forward by the same duration. However, it prevents
  * navigating beyond the current time (maxEndTime) since future data doesn't exist.
- * 
+ *
  * Used by date range navigation controls. Returns null when next range would exceed current time,
  * which disables the "Next" button in the UI.
- * 
  * @param range - Current date range object with start, end, and aggregationInterval
  * @param maxEndTime - Maximum allowed end time in milliseconds (defaults to current time)
  * @returns Next date range with same duration, shifted forward in time, or null if exceeds maxEndTime
@@ -2272,15 +2232,14 @@ export const calculateNextDateRange = (
 
 /**
  * Checks if navigation to next period is possible
- * 
+ *
  * UI needs to know when to enable/disable the "Next" navigation button. This function
  * determines if forward navigation is possible:
  * - For custom date ranges: Check if next range would exceed current time
  * - For period-based navigation: Check if timeOffset > 0 (can go forward from past to present)
- * 
+ *
  * Used by chart navigation controls to conditionally enable/disable the "Next" button,
  * preventing users from trying to navigate to future data that doesn't exist.
- * 
  * @param customDateRange - Custom date range object if active, null if using period-based navigation
  * @param timeOffset - Time offset for period-based navigation (0 = current, 1 = previous, etc.)
  * @param maxEndTime - Maximum allowed end time in milliseconds (defaults to current time)
@@ -2301,17 +2260,16 @@ export const canNavigateToNext = (
 
 /**
  * Determines aggregation interval based on date range duration
- * 
+ *
  * When users select custom date ranges, we need to determine the appropriate aggregation
  * interval based on the duration. This ensures efficient data retrieval and proper chart display:
  * - Raw aggregation: Always uses "day" interval (31 day limit)
  * - 1-31 days: Uses "day" interval (hourly or daily aggregation)
  * - 31-350 days: Uses "month" interval (monthly aggregation)
  * - 350+ days: Uses "year" interval (yearly aggregation)
- * 
+ *
  * This function is used when users select custom date ranges to automatically determine the
  * best aggregation interval for the selected duration.
- * 
  * @param durationMs - Duration of the date range in milliseconds
  * @param aggregation - Optional aggregation method ("raw", "avg", "min", "max", etc.)
  * @returns Aggregation interval type ("day", "month", or "year")
@@ -2339,13 +2297,12 @@ export const determineIntervalFromDuration = (
 
 /**
  * Calculates inner padding for bar charts based on the number of visible data points.
- * 
+ *
  * Bar charts need different spacing between bars depending on how many bars are visible.
  * More bars require tighter spacing (higher innerPadding) to prevent overlap, while fewer bars
  * can use looser spacing (lower innerPadding) for better visual separation.
- * 
+ *
  * Used by chart components to dynamically adjust bar spacing for optimal visual appearance.
- * 
  * @param numVisiblePoints - Number of visible data points in the chart
  * @returns Inner padding value (0.6 to 0.8) for bar chart spacing
  */

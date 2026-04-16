@@ -84,7 +84,7 @@ export class ESPCDFNode implements ESPCDFNodeInterface {
   tags?: string[];
   role?: string;
   transportOrder?: string[];
-  availableTransports?: Partial<Record<string, ESPCDFTransportConfig>> | {};
+  availableTransports?: Partial<Record<string, ESPCDFTransportConfig>>;
   operations: ESPCDFNodeOperation;
   _raw: any;
   [key: string]: any;

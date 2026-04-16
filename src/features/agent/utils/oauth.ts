@@ -13,6 +13,9 @@ import type { OAuthMetadata, OAuthState } from './types';
 
 // ==================== OAuth Utilities ====================
 
+/**
+ * Handles generate state logic for this module.
+ */
 export function generateState(): string {
   const array = new Uint8Array(32);
   for (let i = 0; i < array.length; i++) {
@@ -53,6 +56,9 @@ function base64UrlEncode(buffer: Uint8Array): string {
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
+/**
+ * Handles generate code verifier logic for this module.
+ */
 export function generateCodeVerifier(): string {
   const array = new Uint8Array(32);
   for (let i = 0; i < array.length; i++) {
@@ -61,6 +67,9 @@ export function generateCodeVerifier(): string {
   return base64UrlEncode(array);
 }
 
+/**
+ * Handles generate code challenge logic for this module.
+ */
 export async function generateCodeChallenge(
   verifier: string
 ): Promise<string> {
@@ -72,11 +81,14 @@ export async function generateCodeChallenge(
       return base64UrlEncode(new Uint8Array(digest));
     }
     return verifier;
-  } catch (error) {
+  } catch {
     return verifier;
   }
 }
 
+/**
+ * Handles store oauth state logic for this module.
+ */
 export async function storeOAuthState(
   state: string,
   metadata: OAuthState
@@ -87,6 +99,9 @@ export async function storeOAuthState(
   );
 }
 
+/**
+ * Retrieves oauth state for downstream consumers.
+ */
 export async function getOAuthState(
   state: string
 ): Promise<OAuthState | null> {
@@ -98,21 +113,27 @@ export async function getOAuthState(
       return null;
     }
     return JSON.parse(stored) as OAuthState;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
+/**
+ * Handles clear oauth state logic for this module.
+ */
 export async function clearOAuthState(state: string): Promise<void> {
   try {
     await StorageAdapter.removeItem(
       `${AGENT_STORAGE_KEYS.OAUTH_STATE_PREFIX}${state}`
     );
-  } catch (error) {
+  } catch {
     // Silent error handling
   }
 }
 
+/**
+ * Handles build authorization url logic for this module.
+ */
 export function buildAuthorizationUrl(
   config: {
     authorizationEndpoint: string;
@@ -148,6 +169,9 @@ export function buildAuthorizationUrl(
   return `${config.authorizationEndpoint}?${params.toString()}`;
 }
 
+/**
+ * Handles initiate oauth flow logic for this module.
+ */
 export async function initiateOAuthFlow(
   connectorUrl: string,
   oauthMetadata: OAuthMetadata,
@@ -196,6 +220,9 @@ export async function initiateOAuthFlow(
   return authUrl;
 }
 
+/**
+ * Handles complete oauth flow logic for this module.
+ */
 export async function completeOAuthFlow(
   code: string,
   state: string
@@ -220,6 +247,9 @@ export async function completeOAuthFlow(
   return result;
 }
 
+/**
+ * Handles connect tool with oauth logic for this module.
+ */
 export async function connectToolWithOAuth(
   toolUrl: string,
   oauthMetadata: OAuthMetadata,
@@ -306,11 +336,14 @@ function decodeJWT(token: string): any | null {
     }
 
     return JSON.parse(decoded);
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
+/**
+ * Handles connect tool with tokens logic for this module.
+ */
 export async function connectToolWithTokens(
   store: ESPCDF,
   connectorUrl: string,
@@ -333,7 +366,7 @@ export async function connectToolWithTokens(
       throw new Error('Authorised entity not found');
     }
     accessToken = await authorisedEntity.getAccessToken();
-  } catch (error) {
+  } catch {
     throw new Error('Access token not found. Please login again.');
   }
 
@@ -346,7 +379,7 @@ export async function connectToolWithTokens(
   return await connectConnectorWithTokens({
     connectorUrl,
     accessToken,
-    refreshToken,
+    refreshToken: refreshToken ?? "",
     expiresAt,
     tokenType: 'Bearer',
     scope: 'email',

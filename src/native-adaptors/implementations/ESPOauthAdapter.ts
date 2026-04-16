@@ -22,7 +22,6 @@ export class ESPOauthAdapter {
    * This method opens the OAuth authorization URL in the default browser
    * and waits for the deep link redirect to be handled by the native Android code.
    * The authorization code is extracted and returned directly.
-   *
    * @param requestURL The OAuth authorization URL to open
    * @returns Promise that resolves with the authorization code
    * @throws Error if the OAuth flow fails or times out

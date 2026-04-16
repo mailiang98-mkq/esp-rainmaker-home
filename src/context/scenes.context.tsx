@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { createContext, useContext, useReducer, ReactNode } from "react";
 import { useCDF } from "@shared/hooks/useCDF";
 import { deepClone } from "@shared/utils/common";
@@ -305,6 +306,9 @@ interface SceneProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Wraps scene create/edit: scene metadata, node and action selection, and persistence through the scene store.
+ */
 export function SceneProvider({ children }: SceneProviderProps) {
   const { store } = useCDF();
   const [state, dispatch] = useReducer(sceneReducer, initialState);
@@ -407,7 +411,7 @@ export function SceneProvider({ children }: SceneProviderProps) {
       );
 
       const sceneActions = Object.entries(deviceActions)
-        .filter(([deviceName, action]) => action !== undefined)
+        .filter(([, action]) => action !== undefined)
         .map(([deviceName, action]) => {
           return {
             nodeId,
@@ -579,7 +583,9 @@ export function SceneProvider({ children }: SceneProviderProps) {
   );
 }
 
-// Custom hook for using the Scene context
+/**
+ * Scene editor context value (must be used under `SceneProvider`).
+ */
 export function useScene() {
   const context = useContext(SceneContext);
   if (context === undefined) {

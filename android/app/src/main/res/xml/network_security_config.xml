@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 
+        Allow cleartext HTTP traffic for the entire app.
+        This is safe for IoT apps because:
+        - Local ESP devices use HTTP on private network (secure by network isolation)
+        - All cloud/internet APIs use HTTPS (enforced by the SDK)
+    -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

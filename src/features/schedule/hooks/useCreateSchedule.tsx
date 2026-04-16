@@ -90,6 +90,7 @@ export const useCreateSchedule = () => {
     };
 
     initSchedule();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [paramScheduleId]);
 
   // Set schedule name from params
@@ -97,6 +98,7 @@ export const useCreateSchedule = () => {
     if (paramScheduleName) {
       setScheduleName(paramScheduleName as string);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [paramScheduleName]);
 
   // Handle save schedule
@@ -204,6 +206,7 @@ export const useCreateSchedule = () => {
     return (
       loading.save || !state.scheduleName || getScheduleActions().length === 0
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [loading.save, state.scheduleName, getScheduleActions().length]);
 
   // Get warning message for offline nodes
@@ -212,6 +215,7 @@ export const useCreateSchedule = () => {
       return t("schedule.schedules.someDevicesNotConnected");
     }
     return "";
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [state.nodes, checkOfflineNodes]);
 
   return {

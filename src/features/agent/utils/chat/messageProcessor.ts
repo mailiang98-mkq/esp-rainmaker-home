@@ -50,7 +50,7 @@ export const processWebSocketMessage = (
         ) {
           timeoutMessage = timeoutData.message;
         }
-      } catch (error) {
+      } catch {
         // Silent error handling
       }
     } else if (typeof content === "string") {
@@ -156,9 +156,6 @@ export const processWebSocketMessage = (
     case "handshake":
       shouldDisplay = true;
       break;
-    case "handshake_ack":
-      shouldDisplay = messageDisplayConfig.showHandshakeAck;
-      break;
     default:
       shouldDisplay = true;
   }
@@ -172,18 +169,6 @@ export const processWebSocketMessage = (
       messageType: "thinking",
       text: textContent,
       isUser: false,
-      shouldSetThinking: true,
-    };
-  }
-
-  // If not should display, still handle thinking messages
-  if (!shouldDisplay && type === "thinking") {
-    const textContent =
-      typeof content === "string" ? content : JSON.stringify(content);
-    return {
-      action: "skip",
-      messageType: "thinking",
-      text: textContent,
       shouldSetThinking: true,
     };
   }
@@ -293,12 +278,8 @@ export const processWebSocketMessage = (
     };
   }
 
-  // Handle usage_info, handshake, and handshake_ack - JSON expandable
-  if (
-    type === "usage_info" ||
-    type === "handshake" ||
-    type === "handshake_ack"
-  ) {
+  // Handle usage_info and handshake - JSON expandable (handshake_ack handled above)
+  if (type === "usage_info" || type === "handshake") {
     let jsonData: any = null;
 
     if (content_type === "json") {

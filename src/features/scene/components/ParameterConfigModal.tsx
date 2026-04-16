@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { useCallback, useRef } from "react";
 import { View, Modal, Pressable, StyleSheet } from "react-native";
 import { ParamWrap } from "@shared/components";
@@ -29,7 +30,6 @@ type ParameterConfigModalProps = {
  *
  * Reusable bottom sheet modal for configuring device parameters
  * Used in scene, automation, and schedule parameter selection screens
- *
  * @param visible - Whether the modal is visible
  * @param param - The parameter being configured
  * @param showDelete - Whether to show the delete button

@@ -8,7 +8,7 @@ import { Router } from "expo-router";
 import { pipelineTask, PipelineStep } from "@shared/utils/pipelineTask";
 import { registerForNotification } from "@shared/utils/notifications";
 import { setUserTimeZone } from "@shared/utils/timezone";
-import { RAINMAKER_MCP_CONNECTOR_ID, updateRefreshTokensForAllAIDevices } from "@features/agent/utils";
+import { RAINMAKER_MCP_CONNECTOR_ID } from "@features/agent/utils";
 import { getUserProfile, getAgentConfig, getConnectedConnectors } from "@features/agent/utils/apiHelper";
 import { getSelectedAgentId } from "@features/agent/utils/storage";
 import { connectToolWithTokens } from "@features/agent/utils/oauth";
@@ -38,7 +38,6 @@ export interface PostLoginPipelineOptions {
  * - Creating platform endpoint for notifications
  * - Initializing user custom data
  * - Syncing homes and nodes
- *
  * @param options - Configuration options for the pipeline
  */
 export async function executePostLoginPipeline(
@@ -177,7 +176,7 @@ export async function executePostLoginPipeline(
       try {
         await getUserProfile();
         router.replace("/(group)/Home");
-      } catch (error: any) {
+      } catch {
         // Always route to Home, profile setup will be shown when needed
         router.replace("/(group)/Home");
       }

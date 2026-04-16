@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
@@ -23,7 +24,7 @@ interface DeviceTypeCardProps {
  *
  * Displays a card for a device type with its label and icon
  * @param props - Device type information and onPress handler
- * @returns JSX component
+ * @returns Tappable card with icon, label, and disabled styling when not available
  */
 export const DeviceTypeCard: React.FC<DeviceTypeCardProps> = ({
   label,

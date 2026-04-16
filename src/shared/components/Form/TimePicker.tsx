@@ -25,6 +25,9 @@ import { Platform } from "react-native";
 const ITEM_HEIGHT = 46;
 const VISIBLE_ITEMS = 5;
 
+/**
+ * Renders the time picker UI section.
+ */
 const TimePicker: React.FC<TimePickerProps> = ({
   visible,
   onClose,
@@ -76,6 +79,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
         });
       }, 0);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [visible]);
 
   const handleScroll = ({

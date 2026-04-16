@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
 import { View, Text, Modal, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 import { globalStyles } from "@shared/theme/globalStyleSheet";

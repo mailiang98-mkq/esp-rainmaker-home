@@ -30,10 +30,9 @@ interface DropdownOption {
  *
  * A dropdown component that allows selecting from a list of options.
  * Supports both string and numeric values, with optional validation bounds.
- *
  * @param param - The parameter object containing value, bounds, and setValue function
  * @param disabled - Optional flag to disable the control
- * @returns JSX component
+ * @returns Closed row that opens a modal list of enum/numeric options from `meta`
  */
 const DropdownSelector = observer(
   ({ label, value, onValueChange, disabled, meta }: ParamControlChildProps) => {

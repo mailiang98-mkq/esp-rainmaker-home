@@ -8,8 +8,8 @@
  * Validates the email input.
  *
  * This function checks if the email input is a valid email address.
- * @param {string} email - The email to validate.
- * @returns {boolean} - True if the email is valid, false otherwise.
+ * @param email - The email to validate.
+ * @returns - True if the email is valid, false otherwise.
  */
 export const validateEmail = (email: string): boolean => {
   if (!email?.trim()) return false;

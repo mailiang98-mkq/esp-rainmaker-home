@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useMemo, useState } from "react";
 import {
   View,
@@ -42,10 +43,9 @@ import { testProps } from "@shared/utils/testProps";
  * A simple control panel for temperature sensor devices that displays:
  * - Current temperature reading with segmented circular gauge
  * - Read-only temperature display
- *
  * @param node - The ESPRMNode representing the temperature sensor
  * @param device - The ESPRMDevice representing the temperature sensor
- * @returns JSX component for temperature sensor display
+ * @returns Scrollable panel with gauge, current reading, and pull-to-refresh
  */
 const Temperature: React.FC<ControlPanelProps> = ({ node, device }) => {
   // Hooks
@@ -54,7 +54,7 @@ const Temperature: React.FC<ControlPanelProps> = ({ node, device }) => {
 
   // State
   const [refreshing, setRefreshing] = useState(false);
-  const [scrollEnabled, _] = useState(true);
+  const [scrollEnabled] = useState(true);
 
   // Computed Values
   const isConnected = node.connectivityStatus?.isConnected || false;
@@ -90,7 +90,7 @@ const Temperature: React.FC<ControlPanelProps> = ({ node, device }) => {
       if (device && params) {
         device.params = params;
       }
-    } catch (error) {
+    } catch {
       toast.showError(
         t("layout.shared.errorHeader"),
         t("device.errors.failedToRefreshDeviceState"),

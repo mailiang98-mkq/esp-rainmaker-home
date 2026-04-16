@@ -6,6 +6,9 @@
 
 import { useCallback, useRef } from 'react';
 
+/**
+ * Manages throttle state and related actions.
+ */
 export function useThrottle<T extends (...args: any[]) => void>(
   callback: T,
   delay: number

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { formatTime } from "@shared/utils/common";
 import { WRITE_PERMISSION } from "@shared/utils/constants";
 import {
@@ -82,7 +83,7 @@ export const getScheduleDeviceParams = (
   device: { params?: ESPCDFDeviceParam[]; name: string },
   nodeId: string,
   getActionValue: (nodeId: string, deviceName: string, paramName: string) => any
-): Array<ESPCDFDeviceParam & { value: any }> => {
+): (ESPCDFDeviceParam & { value: any })[] => {
   const filteredParams = filterExcludedParamTypes(device.params);
   if (!filteredParams) return [];
 
@@ -93,7 +94,7 @@ export const getScheduleDeviceParams = (
       value:
         getActionValue(nodeId, device.name, param.name) ??
         defaultWritableParamValue(param),
-    })) as Array<ESPCDFDeviceParam & { value: any }>;
+    })) as (ESPCDFDeviceParam & { value: any })[];
 };
 
 /** @deprecated Use defaultValueBasedOnParamDataType from paramUtils */

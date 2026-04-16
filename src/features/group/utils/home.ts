@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { RoomTab } from "@src/types/global";
 import { transformNodesToDevices } from "@shared/utils/device";
 import {
@@ -246,7 +247,6 @@ export const categorizeGroupsByOwnership = (
 /**
  * Finds home groups that need mutuallyExclusive flag updated
  * Identifies groups with type "home" but mutuallyExclusive set to false
- *
  * @param groups List of groups to check
  * @returns Array of groups that need mutuallyExclusive updated to true
  */
@@ -270,7 +270,6 @@ export const getHomesNeedingMutualExclusiveUpdate = (
  *
  * Note: Updates are reflected immediately in all references to these groups
  * due to MobX observable and CDF interceptor pattern.
- *
  * @param groups List of primary groups to check and update
  * @param needManualUpdate Whether to manually update the groups necessary fields after the promise.allSettled is resolved
  * @returns Promise that resolves when all updates complete (success or failure)
@@ -315,7 +314,6 @@ export const ensureHomesAreMutuallyExclusive = async (
 /**
  * Returns a unique default home name that does not conflict with existing group names.
  * Tries "Home", "Home 1", "Home 2", ... until one is available.
- *
  * @param existingGroups List of existing groups to check names against
  * @returns A name that is unique among existing group names
  */
@@ -341,7 +339,6 @@ export const getUniqueDefaultHomeName = (
 /**
  * Creates a default home with a unique name for new users or ESP RainMaker migration
  * (user exists but has no valid home). Uses getUniqueDefaultHomeName to avoid conflicts.
- *
  * @param user The user to create the group for
  * @param nodeIds Unassigned node IDs to include in the home
  * @param existingGroups All existing groups (to compute unique name)
@@ -367,7 +364,6 @@ export const ensureDefaultHomeForNewOrMigratedUser = async (
  * - Type: "home"
  * - MutuallyExclusive: true
  * - Includes all specified node IDs
- *
  * @param user The user object to create the group with
  * @param nodeIds Array of node IDs to include in the home
  * @param withRandomSuffix Whether to append a random 4-digit suffix to avoid name collisions
@@ -391,15 +387,11 @@ export const createDefaultHomeGroup = async (
  * This utility function ensures that groups have their nodes loaded before use.
  * When getNodes() is called, the groupStore's handleGroupOperation callback
  * automatically updates the group's nodes array in the store via MobX observables.
- *
  * @param group - The group (ESPCDFGroup) to fetch nodes for
  * @returns Promise that resolves when nodes are fetched (or if already present)
  *
- * @remarks
- * - Checks if nodes array is empty or undefined before fetching
- * - Uses group.getNodes() which triggers the store's callback to update nodes
- * - The callback in groupStore.handleGroupOperation updates the group's nodes array
- * - This ensures nodes persist across navigation and component re-renders
+ * Checks nodes before fetching; uses group.getNodes() so groupStore.handleGroupOperation
+ * updates the group's nodes array and keeps nodes across navigation.
  */
 export const fetchNodesIfEmpty = async (
   group: ESPCDFGroup | null
@@ -426,15 +418,10 @@ export const fetchNodesIfEmpty = async (
  * All fetches are done in parallel for optimal performance.
  * The groupStore's handleGroupOperation callback automatically updates
  * each group's nodes array via MobX observables.
- *
  * @param home - The home group to fetch nodes for
  * @returns Promise that resolves when all nodes are fetched
  *
- * @remarks
- * - Fetches nodes for the home group if its nodes array is empty
- * - Fetches nodes for all rooms (subGroups) if their nodes arrays are empty
- * - Uses Promise.allSettled to handle partial failures gracefully
- * - All nodes are automatically added to nodeStore via the callback mechanism
+ * Fetches home and room subGroups when empty; uses Promise.allSettled; nodeStore updates via callbacks.
  */
 export const fetchNodesForHomeAndRooms = async (
   home: ESPCDFGroup | null
@@ -475,15 +462,10 @@ export const fetchNodesForHomeAndRooms = async (
  * All fetches are done in parallel for optimal performance.
  * This ensures nodes are available throughout the app without needing
  * to fetch them on-demand when navigating to different screens.
- *
  * @param validHomes - Array of valid home groups to fetch nodes for
  * @returns Promise that resolves when all nodes are fetched
  *
- * @remarks
- * - Uses Promise.allSettled to handle partial failures gracefully
- * - Each home and its rooms are fetched in parallel
- * - All nodes are automatically added to nodeStore via the callback mechanism
- * - This should be called once during app initialization (e.g., in Home.tsx)
+ * Parallel allSettled fetches; nodeStore updated via callbacks. Call once during app init (e.g. Home).
  */
 export const fetchNodesForAllValidHomes = async (
   validHomes: ESPCDFGroup[]

@@ -24,6 +24,9 @@ import {
 import { ConsentCheckbox, AppVersionText } from "@features/auth/components";
 import { testProps } from "@shared/utils/testProps";
 
+/**
+ * Renders the signup screen UI section.
+ */
 export function SignupScreen() {
   const { t } = useTranslation();
   const router = useRouter();

@@ -17,10 +17,9 @@ import ESPProvModule from "../interfaces/ESPProvInterface";
 export const provisionAdapter: ESPProvisionAdapterInterface = {
   /**
    * Searches for ESP devices using the specified device prefix and transport type.
-   *
-   * @param {string} devicePrefix - The prefix to filter ESP devices.
-   * @param {ESPTransport} transport - The transport type (BLE or Wi-Fi).
-   * @returns {Promise<ESPDeviceInterface[]>} - A promise that resolves to a list of discovered devices.
+   * @param devicePrefix - The prefix to filter ESP devices.
+   * @param transport - The transport type (BLE or Wi-Fi).
+   * @returns - A promise that resolves to a list of discovered devices.
    */
   searchESPDevices: async (
     devicePrefix: string,
@@ -39,9 +38,8 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Connects to the specified ESP device.
-   *
-   * @param {string} deviceName - The name of the ESP device.
-   * @returns {Promise<ESPConnectStatus>} - A promise that resolves to the connection status.
+   * @param deviceName - The name of the ESP device.
+   * @returns - A promise that resolves to the connection status.
    */
   connect: async (deviceName: string): Promise<ESPConnectStatus> => {
     try {
@@ -54,11 +52,10 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Sends data to the ESP device on a specified endpoint.
-   *
-   * @param {string} deviceName - The name of the ESP device.
-   * @param {string} endPoint - The endpoint on the device to send data.
-   * @param {string} data - The data to send.
-   * @returns {Promise<string>} - A promise that resolves to the response from the device.
+   * @param deviceName - The name of the ESP device.
+   * @param endPoint - The endpoint on the device to send data.
+   * @param data - The data to send.
+   * @returns - A promise that resolves to the response from the device.
    */
   sendData: async (
     deviceName: string,
@@ -75,9 +72,8 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Scans for available Wi-Fi networks.
-   *
-   * @param {string} deviceName - The name of the ESP device.
-   * @returns {Promise<ESPWifiList[]>} - A promise that resolves to a list of available Wi-Fi networks.
+   * @param deviceName - The name of the ESP device.
+   * @returns - A promise that resolves to a list of available Wi-Fi networks.
    */
   scanWifiList: async (deviceName: string): Promise<ESPWifiList[]> => {
     try {
@@ -90,11 +86,10 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Provisions the ESP device with the specified Wi-Fi credentials.
-   *
-   * @param {string} deviceName - The name of the ESP device.
-   * @param {string} ssid - The SSID of the Wi-Fi network.
-   * @param {string} passphrase - The Wi-Fi password.
-   * @returns {Promise<ESPProvisionStatus>} - A promise that resolves to the provisioning status.
+   * @param deviceName - The name of the ESP device.
+   * @param ssid - The SSID of the Wi-Fi network.
+   * @param passphrase - The Wi-Fi password.
+   * @returns - A promise that resolves to the provisioning status.
    */
   provision: async (
     deviceName: string,
@@ -115,10 +110,9 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Sets the Proof of Possession (POP) for the ESP device.
-   *
-   * @param {string} deviceName - The name of the ESP device.
-   * @param {string} proofOfPossession - The Proof of Possession.
-   * @returns {Promise<boolean>} - A promise that resolves to whether the operation was successful.
+   * @param deviceName - The name of the ESP device.
+   * @param proofOfPossession - The Proof of Possession.
+   * @returns - A promise that resolves to whether the operation was successful.
    */
   setProofOfPossession: async (
     deviceName: string,
@@ -137,9 +131,8 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Initializes a session with the ESP device.
-   *
-   * @param {string} deviceName - The name of the ESP device.
-   * @returns {Promise<boolean>} - A promise that resolves to whether the session initialization was successful.
+   * @param deviceName - The name of the ESP device.
+   * @returns - A promise that resolves to whether the session initialization was successful.
    */
   initializeSession: async (deviceName: string): Promise<boolean> => {
     try {
@@ -152,14 +145,13 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Creates an ESP device instance with the specified parameters.
-   *
-   * @param {string} deviceName - The name of the ESP device.
-   * @param {string} transport - The transport type (BLE or Wi-Fi).
-   * @param {number} [security] - The security level.
-   * @param {string} [proofOfPossession] - The Proof of Possession.
-   * @param {string} [softAPPassword] - The password for SoftAP.
-   * @param {string} [username] - The username for the device.
-   * @returns {Promise<ESPDeviceInterface>} - A promise that resolves to the created ESP device instance.
+   * @param deviceName - The name of the ESP device.
+   * @param transport - The transport type (BLE or Wi-Fi).
+   * @param [security] - The security level.
+   * @param [proofOfPossession] - The Proof of Possession.
+   * @param [softAPPassword] - The password for SoftAP.
+   * @param [username] - The username for the device.
+   * @returns - A promise that resolves to the created ESP device instance.
    */
   createESPDevice: async (
     deviceName: string,
@@ -186,9 +178,8 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Retrieves the capabilities of the specified ESP device.
-   *
-   * @param {string} deviceName - The name of the ESP device.
-   * @returns {Promise<string[]>} - A promise that resolves to a list of device capabilities.
+   * @param deviceName - The name of the ESP device.
+   * @returns - A promise that resolves to a list of device capabilities.
    */
   getDeviceCapabilities: async (deviceName: string): Promise<string[]> => {
     try {
@@ -210,8 +201,7 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Disconnects the specified ESP device.
-   *
-   * @param {string} deviceName - The name of the ESP device to disconnect.
+   * @param deviceName - The name of the ESP device to disconnect.
    */
   disconnect: async (deviceName: string) => {
     try {
@@ -223,9 +213,8 @@ export const provisionAdapter: ESPProvisionAdapterInterface = {
 
   /**
    * Retrieves the version information of the specified ESP device.
-   *
-   * @param {string} deviceName - The name of the ESP device.
-   * @returns {Promise<{ [key: string]: any }>} - A promise that resolves to the version information.
+   * @param deviceName - The name of the ESP device.
+   * @returns - A promise that resolves to the version information.
    */
   getDeviceVersionInfo: async (
     deviceName: string

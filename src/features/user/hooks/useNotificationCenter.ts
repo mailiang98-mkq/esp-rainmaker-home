@@ -23,6 +23,9 @@ function stableRequestId(item: { id: string }): string {
   return item.id;
 }
 
+/**
+ * Manages notification center state and related actions.
+ */
 export const useNotificationCenter = () => {
   const { store, syncHomeWithNodes } = useCDF();
   const toast = useToast();
@@ -37,6 +40,7 @@ export const useNotificationCenter = () => {
 
   useEffect(() => {
     loadSharingRequests();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   const mapGroupSharingRequestToSharingItem = (

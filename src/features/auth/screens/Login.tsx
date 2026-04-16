@@ -22,7 +22,7 @@ import { useLogin } from "@features/auth/hooks";
 import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 import { getEnabledOAuthProviders } from "@/config/features.config";
 import { runtimeConfigManager } from "@config/runtime.config";
-import { cdfBootstrap } from "@integrations/";
+import { cdfBootstrap } from "@integrations";
 import asyncStorageAdapter from "@native-adaptors/implementations/ESPAsyncStorage";
 import { AppRestartContext } from "@context/appRestart.context";
 
@@ -44,6 +44,9 @@ const OAUTH_PROVIDER_IMAGES: Record<string, ImageSourcePropType> = {
   signinwithapple,
 };
 
+/**
+ * Renders the login screen UI section.
+ */
 export function LoginScreen() {
   const { t } = useTranslation();
   const router = useRouter();

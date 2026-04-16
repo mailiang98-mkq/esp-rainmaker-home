@@ -19,13 +19,12 @@ import { observer } from "mobx-react-lite";
  *
  * A button component that activates while pressed and deactivates when released.
  * Displays current state and provides press-and-hold functionality.
- *
  * @param param - The parameter object containing value and setValue function
  * @param disabled - Optional flag to disable the control
- * @returns JSX component
+ * @returns Press-in / press-out control that writes true while held and false on release
  */
 const TriggerButton = observer(
-  ({ label, value, onValueChange, disabled, meta }: ParamControlChildProps) => {
+  ({ label, value, onValueChange, disabled, meta: _meta }: ParamControlChildProps) => {
     // State
     const [isActive, setIsActive] = useState(Boolean(value));
 

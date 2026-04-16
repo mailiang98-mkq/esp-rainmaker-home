@@ -14,16 +14,20 @@ import {
   ScreenWrapper,
   Button,
   ConfirmationDialog,
-  AgentTermsBottomSheet,
 } from "@shared/components";
 import {
   AddAgentBottomSheet,
   AgentSettingsSection,
   AgentSettingsEmptyState,
   AgentSettingsHeaderRight,
+  AgentTermsBottomSheet,
 } from "@features/agent/components";
 import { useAgentSettings } from "@features/agent/hooks";
 
+/**
+ * SettingsScreen component
+ * @returns Agent settings screen UI
+ */
 export function SettingsScreen() {
   const { t } = useTranslation();
   const {

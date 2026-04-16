@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useState, useEffect } from "react";
 import { TouchableOpacity, Text, View } from "react-native";
 
@@ -18,10 +19,9 @@ import { ParamControlChildProps } from "./lib/types";
  *
  * A button component that toggles between ON/OFF states.
  * Displays current state and provides visual feedback on interaction.
- *
  * @param param - The parameter object containing value and setValue function
  * @param disabled - Optional flag to disable the control
- * @returns JSX component
+ * @returns Touchable on/off control that mirrors the bound param value
  */
 const PushButton: React.FC<ParamControlChildProps> = ({
   label,

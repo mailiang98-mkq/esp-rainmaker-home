@@ -30,7 +30,6 @@ const RMAKER_CAP = {
 
 /**
  * Parses RainMaker capabilities from device version info and prov capabilities.
- *
  * @param versionInfo - The version info object from device (contains rmaker.cap)
  * @param provCapabilities - The prov capabilities array from device (contains no_pop, etc.)
  * @returns Parsed RMakerCapabilities object

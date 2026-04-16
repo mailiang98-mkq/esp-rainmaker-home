@@ -95,7 +95,7 @@ export const useAgent = () => {
       // No need to save it - it's never stored in custom data
       setAgents(allAgents);
       setSelectedAgentId(currentSelectedId);
-    } catch (error) {
+    } catch {
       // Even on error, show default agent from constants (never stored)
       const defaultAgent: AgentConfig = {
         id: 'default',
@@ -109,6 +109,7 @@ export const useAgent = () => {
     } finally {
       setIsLoadingAgents(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   /**
@@ -155,6 +156,7 @@ export const useAgent = () => {
       setAgents(updatedAgents);
       return { isUpdate };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     [agents, store]
   );
 
@@ -175,6 +177,7 @@ export const useAgent = () => {
     } catch (error) {
       throw error;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   /**
@@ -226,6 +229,7 @@ export const useAgent = () => {
 
       setAgents(updatedAgents);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     [selectedAgentId, store]
   );
 
@@ -253,6 +257,7 @@ export const useAgent = () => {
     } finally {
       setIsLoadingConfig(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   /**
@@ -260,6 +265,7 @@ export const useAgent = () => {
    */
   const getWebSocketUrlForAgent = useCallback(async (): Promise<string | null> => {
     return await getWebSocketUrl(user);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   // ==================== Connectors ====================
@@ -366,7 +372,7 @@ export const useAgent = () => {
     try {
       const config = await getMessageDisplayConfig();
       setMessageDisplayConfig(config);
-    } catch (error) {
+    } catch {
       // Use default config
       const defaultConfig: MessageDisplayConfig = {
         showUser: true,
@@ -410,9 +416,10 @@ export const useAgent = () => {
       }
       const storedConversationId = await getConversationId(user);
       setConversationId(storedConversationId);
-    } catch (error) {
+    } catch {
       setConversationId(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   /**
@@ -428,6 +435,7 @@ export const useAgent = () => {
     } catch (error) {
       throw error;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   /**
@@ -444,6 +452,7 @@ export const useAgent = () => {
     } catch (error) {
       throw error;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   /**

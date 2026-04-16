@@ -172,11 +172,12 @@ export function getUnassignedNodes(
   groups: ESPCDFGroup[]
 ): string[] {
   const assigned = new Set(groups.flatMap((g) => g.nodeIds ?? []));
-  const exclude = [NODE_TYPE.PURE_MATTER, NODE_TYPE.RAINMAKER_MATTER];
   return allNodes
-    .filter(
-      (n) => !assigned.has(n.id) && !exclude.includes(n.type ?? "")
-    )
+    .filter((n) => {
+      if (assigned.has(n.id)) return false;
+      const t = n.type;
+      return t !== NODE_TYPE.PURE_MATTER && t !== NODE_TYPE.RAINMAKER_MATTER;
+    })
     .map((n) => n.id);
 }
 

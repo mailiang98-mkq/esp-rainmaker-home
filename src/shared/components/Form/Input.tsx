@@ -56,7 +56,7 @@ interface InputProps extends Omit<TextInputProps, "onChangeText"> {
   /** Initial value */
   initialValue?: string;
   /** Additional style overrides */
-  style?: Object;
+  style?: object;
   /** Whether to show bottom border */
   border?: boolean;
   /** Whether to add horizontal padding */

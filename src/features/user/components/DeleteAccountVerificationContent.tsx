@@ -33,6 +33,9 @@ type DeleteAccountVerificationContentProps = {
   countdown: number;
 };
 
+/**
+ * Renders the delete account verification content UI section.
+ */
 const DeleteAccountVerificationContent: React.FC<
   DeleteAccountVerificationContentProps
 > = ({

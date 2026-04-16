@@ -4,7 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ESPCDFProvisioningDevice, ESPCDFProvisioningDeviceInterface, ESPCDFProvisioningDeviceOperations, } from "@store";
+import {
+    ESPCDFChallengeResponseVerificationRequest,
+    ESPCDFProvisioningDevice,
+    ESPCDFProvisioningDeviceInterface,
+    ESPCDFProvisioningDeviceOperations,
+} from "@store";
 import { ChallengeResponseHelper } from "@espressif/rainmaker-base-sdk";
 import { ESPDevice } from "@espressif/rmng-base-sdk";
 
@@ -29,9 +34,6 @@ export interface AdapterDeviceDescriptor {
 export function createCDFProvisioningDeviceFromAdapterDescriptor(
     device: ESPDevice
 ): ESPCDFProvisioningDevice {
-    const name = device.name;
-    // const adapter = provisionAdapter
-
     const operations: ESPCDFProvisioningDeviceOperations = {
         async connect(): Promise<boolean> {
             const response = await device.connect();
@@ -75,9 +77,11 @@ export function createCDFProvisioningDeviceFromAdapterDescriptor(
 
             if (supportsChalResp && groupId) {
                 console.log(`${LOG} Running challenge-response flow for group=${groupId}`);
-                await  device.provision(ssid, password, onProgress, groupId);
-                console.log(`${LOG} WiFi provision OK`);
             }
+            const progress = onProgress ?? (() => {});
+            const gid = groupId ?? "";
+            await device.provision(ssid, password, progress, gid);
+            console.log(`${LOG} WiFi provision OK`);
         },
         async initiateUserNodeMapping(_params?: Record<string, any>): Promise<any> {
             throw new Error(
@@ -93,7 +97,7 @@ export function createCDFProvisioningDeviceFromAdapterDescriptor(
             throw new Error("RMNG adapter-created device does not support setNetworkCredentials.");
         },
         async sendData(endPoint: string, data: string): Promise<string> {
-            return adapter.sendData(name, endPoint, data);
+            return device.sendData(endPoint, data);
         },
         async startAssistedClaiming(_onProgress?: (response: any) => void, _claimCapability?: string): Promise<void> {
             throw new Error("RMNG adapter-created device does not support startAssistedClaiming.");
@@ -122,12 +126,11 @@ export function createCDFProvisioningDeviceFromAdapterDescriptor(
 
 /**
  * Transforms ESPDevice from the RainMaker SDK to ESPCDFProvisioningDevice format.
- * 
+ *
  * This utility converts the SDK device object to the CDF provisioning device format with:
  * - Device properties (name, transport, security, etc.)
  * - Operations wrapper that delegates to ESPDevice methods
  * - Raw reference to the original ESPDevice
- * 
  * @param espDevice - The ESPDevice instance from the SDK
  * @returns ESPCDFProvisioningDevice instance with all required operations
  */
@@ -154,7 +157,7 @@ export function transformToESPCDFProvisioningDevice(
         },
 
         async getDeviceVersionInfo(): Promise<Record<string, any>> {
-            return await espDevice.getDeviceVersionInfo();
+            return await espDevice.getDeviceVersion();
         },
 
         async setProofOfPossession(pop: string): Promise<boolean> {
@@ -175,15 +178,30 @@ export function transformToESPCDFProvisioningDevice(
             onProgress?: (response: any) => void,
             homeId?: string
         ): Promise<void> {
-            await espDevice.provision(ssid, password, onProgress, homeId);
+            await espDevice.provision(
+                ssid,
+                password,
+                onProgress ?? (() => {}),
+                homeId ?? ""
+            );
         },
 
         async initiateUserNodeMapping(params?: Record<string, any>): Promise<any> {
-            return await espDevice.initiateUserNodeMapping(params || {});
+            const groupId = String(
+                params?.groupId ?? params?.group_id ?? ""
+            );
+            return await espDevice.initiateUserNodeMapping(groupId, params);
         },
 
-        async verifyUserNodeMapping(params: any): Promise<any> {
-            return await espDevice.verifyUserNodeMapping(params);
+        async verifyUserNodeMapping(
+            params: ESPCDFChallengeResponseVerificationRequest
+        ): Promise<any> {
+            const groupId = String(params.group_id ?? "");
+            return await espDevice.verifyUserNodeMapping(
+                groupId,
+                params.request_id,
+                params
+            );
         },
 
         async setNetworkCredentials(ssid: string, password: string): Promise<number> {
@@ -203,16 +221,18 @@ export function transformToESPCDFProvisioningDevice(
         },
     };
 
+    const descriptor = espDevice as unknown as AdapterDeviceDescriptor;
+
     // Create device interface
     const deviceData: ESPCDFProvisioningDeviceInterface = {
         name: espDevice.name,
         transport: espDevice.transport,
         security: espDevice.security,
-        connected: espDevice.connected,
-        username: espDevice.username,
-        versionInfo: espDevice.versionInfo,
-        capabilities: espDevice.capabilities,
-        advertisementData: (espDevice as any).advertisementData,
+        connected: descriptor.connected ?? false,
+        username: descriptor.username ?? "",
+        versionInfo: (descriptor.versionInfo as { [key: string]: any }[] | undefined) ?? [],
+        capabilities: descriptor.capabilities ?? [],
+        advertisementData: descriptor.advertisementData ?? [],
         operations: operations,
         _raw: espDevice,
     };

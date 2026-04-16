@@ -6,8 +6,11 @@
 
 import { tokens } from "@shared/theme/tokens";
 
-// Chat Markdown Styles Helper
-// Returns markdown styles configurable by user type and font sizes
+
+/**
+ * Chat Markdown Styles Helper 
+ * Returns markdown styles configurable by user type and font sizes
+ */
 export const getChatMarkdownStyles = (
   isUser: boolean,
   fontSizes: {

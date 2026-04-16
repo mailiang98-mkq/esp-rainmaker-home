@@ -17,6 +17,9 @@ import {
   isUsernameAllowedForAuth,
 } from "@features/auth/utils/authHelper";
 
+/**
+ * Manages signup state and related actions.
+ */
 export function useSignup() {
   const { store } = useCDF();
   const { t } = useTranslation();

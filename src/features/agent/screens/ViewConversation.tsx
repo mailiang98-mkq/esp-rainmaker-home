@@ -26,6 +26,10 @@ import type {
   ConversationMessage,
 } from "@src/types/global";
 
+/**
+ * ViewConversationScreen component
+ * @returns Conversation viewer screen UI
+ */
 export function ViewConversationScreen() {
   const { t } = useTranslation();
   const { agentId, conversationId, title } = useLocalSearchParams<{

@@ -37,6 +37,9 @@ export function validateRmngUserCode(value: string): boolean {
   return new RegExp(`^[A-Za-z0-9]{${RMNG_USER_CODE_LENGTH}}$`).test(v);
 }
 
+/**
+ * Checks whether group sharing invite allowed matches the expected condition.
+ */
 export function isGroupSharingInviteAllowed(
   value: string,
   allowed: readonly GroupSharingInviteType[]

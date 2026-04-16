@@ -137,6 +137,9 @@ const themes = {
 let currentThemeName: keyof typeof themes = "light";
 
 // Function to set the current theme
+/**
+ * Updates current theme with the provided input.
+ */
 export function setCurrentTheme(name: keyof typeof themes) {
   if (themes[name]) {
     currentThemeName = name;
@@ -146,6 +149,9 @@ export function setCurrentTheme(name: keyof typeof themes) {
 }
 
 // Get current theme name
+/**
+ * Retrieves current theme for downstream consumers.
+ */
 export function getCurrentTheme(): keyof typeof themes {
   return currentThemeName;
 }

@@ -26,10 +26,9 @@ import { observer } from "mobx-react-lite";
  *
  * A temperature display component that shows the temperature value.
  * On click, opens the chart for time series visualization.
- *
  * @param param - The parameter object containing value and setValue function
  * @param disabled - Optional flag to disable the control
- * @returns JSX component
+ * @returns Temperature readout that invokes `onOpenChart` when charts are enabled
  */
 const Temperature = observer(
   ({ label, value, onOpenChart, disabled }: ParamControlChildProps) => {

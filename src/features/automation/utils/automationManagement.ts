@@ -25,7 +25,6 @@ export interface CreateAutomationActionCard {
 /**
  * Filters automations to only those whose event nodeId is present in the current home's node list.
  * Pure function; no side effects.
- *
  * @param automationsList - Full list of automations
  * @param nodeIds - Current home's node IDs
  * @returns Filtered list of automations visible in current home
@@ -56,7 +55,6 @@ export interface ValidateAutomationNameResult {
 /**
  * Validates automation name for creation (e.g. non-empty after trim).
  * Pure; no side effects.
- *
  * @param name - Raw input name
  * @returns Validation result with optional error key for i18n
  */
@@ -120,7 +118,7 @@ export function isCreateAutomationValid(
 
 /** Minimal node shape for building action cards (avoids CDF dependency in util) */
 export interface NodeForActionCard {
-  devices?: Array<{ name: string; displayName?: string; type?: string }>;
+  devices?: { name: string; displayName?: string; type?: string }[];
 }
 
 /**

@@ -113,7 +113,7 @@ export const usePOP = (): UsePOPReturn => {
       } else {
         toast.showError(t("device.errors.deviceNotConnected"));
       }
-    } catch (e) {
+    } catch {
       toast.showError(t("device.errors.failedToVerifyCode"));
     } finally {
       setIsLoading(false);

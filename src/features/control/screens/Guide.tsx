@@ -18,6 +18,9 @@ import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { useGuide } from "@features/control/hooks";
 
+/**
+ * Renders the guide UI section.
+ */
 export default function Guide() {
   const params = useLocalSearchParams<{
     url: string;

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useMemo } from "react";
 import {
   View,
@@ -39,7 +40,6 @@ import { getFeatures } from "@config/features.config";
  * - Input validation
  * - Loading state
  * - Success/error handling
- *
  * @param props - Component properties for add user modal
  */
 const AddUserModal: React.FC<AddUserModalProps> = ({

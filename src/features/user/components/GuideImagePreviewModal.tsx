@@ -26,6 +26,9 @@ type GuideImagePreviewModalProps = {
   onClose: () => void;
 };
 
+/**
+ * Renders the guide image preview modal UI section.
+ */
 const GuideImagePreviewModal: React.FC<GuideImagePreviewModalProps> = ({
   visible,
   images,

@@ -15,7 +15,7 @@ import { testProps } from "@shared/utils/testProps";
  * ScanningAnimation
  *
  * Displays an animated loading indicator while scanning for devices
- * @returns JSX component
+ * @returns Spinner and rotating graphic with translated status text
  */
 export const ScanningAnimation: React.FC = () => {
   const { t } = useTranslation();
@@ -31,6 +31,7 @@ export const ScanningAnimation: React.FC = () => {
         }),
       ])
     ).start();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   const spin = rotateAnim.interpolate({

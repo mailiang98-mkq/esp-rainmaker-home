@@ -31,10 +31,16 @@ export function setPendingPostSignupLogin(
   pendingPostSignupLogin = creds;
 }
 
+/**
+ * Handles peek pending post signup login logic for this module.
+ */
 export function peekPendingPostSignupLogin(): PostSignupLoginCredentials | null {
   return pendingPostSignupLogin;
 }
 
+/**
+ * Handles consume pending post signup login logic for this module.
+ */
 export function consumePendingPostSignupLogin(): PostSignupLoginCredentials | null {
   const next = pendingPostSignupLogin;
   pendingPostSignupLogin = null;
@@ -45,12 +51,15 @@ export type PipelineProgress = {
   currentStep: string;
   completed: number;
   total: number;
-  steps: Array<{
+  steps: {
     name: string;
     status: "pending" | "running" | "completed" | "failed";
-  }>;
+  }[];
 };
 
+/**
+ * Manages login state and related actions.
+ */
 export function useLogin() {
   const { store, syncHomeWithNodes, initUserCustomData, setESPCDFUser } =
     useCDF();

@@ -121,16 +121,12 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
           false,
       );
 
-      if (extractDeviceType(device.type) === "temperature") {
-      }
     }
   }, [device]);
 
   /**
    * Handle device control
    * Navigates to the control screen for the device
-   *
-   * @returns {void}
    */
   const handleDeviceControl = () => {
     router.push({
@@ -152,10 +148,8 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
   /**
    * Handle device power control
    * Sets the power state of the device
-   *
-   * @param {ESPRMDevice} device - The device to control
-   * @param {boolean} value - The power state to set
-   * @returns {void}
+   * @param device - The device to control
+   * @param value - The power state to set
    */
   const handleDevicePowerControl = (device: ESPCDFDevice, value: boolean) => {
     const powerParam: ESPCDFDeviceParam | undefined = device?.params?.find(
@@ -228,7 +222,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
       return isConnected;
     }
 
-    if (extractDeviceType(device.type) == "ai assistant") {
+    if (extractDeviceType(device.type) === "ai assistant") {
       return isConnected;
     }
     return paramTypeMap[ESPRM_POWER_PARAM_TYPE]?.value;

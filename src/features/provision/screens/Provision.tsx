@@ -27,7 +27,7 @@ import { testProps } from "@shared/utils/testProps";
  *
  * Main component for handling device provisioning process
  * Shows progress steps and handles Node provisioning steps
- * @returns JSX component
+ * @returns Full-screen flow with header, scrollable step list, and continue when complete
  */
 const Provision = () => {
   const { t } = useTranslation();

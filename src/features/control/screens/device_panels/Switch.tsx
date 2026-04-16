@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useState } from "react";
 import {
   View,
@@ -46,10 +47,9 @@ import {
  * - Power toggle (ON/OFF)
  * - Simple and clean interface
  * - Refresh functionality
- *
  * @param node - The ESPRMNode representing the switch device
  * @param device - The ESPRMDevice representing the switch device
- * @returns JSX component for switch control
+ * @returns Simple scroll view with power/toggle param and refresh
  */
 const Switch: React.FC<ControlPanelProps> = ({ node, device }) => {
   // Hooks

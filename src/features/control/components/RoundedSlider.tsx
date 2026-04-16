@@ -58,6 +58,9 @@ interface RoundedSliderProps {
   qaId?: string;
 }
 
+/**
+ * Renders the rounded slider UI section.
+ */
 export function RoundedSlider({
   progress = 0,
   progressLabel = "",

@@ -15,7 +15,6 @@ export const ESPNotificationAdapter = {
   /**
    * Adds a notification listener to handle incoming notifications.
    * Supports multiple listeners (e.g. SDK subscription channel + app) so the last caller does not replace the previous one.
-   *
    * @param callback - The callback function to handle notifications.
    * @returns A cleanup function to remove this listener.
    */
@@ -50,7 +49,7 @@ export const ESPNotificationAdapter = {
           emitterSubscription = null;
         }
       };
-    } catch (error) {
+    } catch {
       return () => { };
     }
   },

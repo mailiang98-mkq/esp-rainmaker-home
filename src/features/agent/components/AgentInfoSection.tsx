@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import { View } from "react-native";
 import { InfoRow } from "@shared/components";
@@ -11,6 +12,9 @@ import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { useTranslation } from "react-i18next";
 import { AgentInfoSectionProps } from "@src/types/global";
 
+/**
+ * Read-only info rows for chat settings: agent id, display name, creator, model IDs, and conversation id.
+ */
 export const AgentInfoSection: React.FC<AgentInfoSectionProps> = ({
   agentId,
   name,

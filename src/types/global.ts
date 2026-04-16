@@ -77,15 +77,16 @@ export interface ParamControlProps {
 }
 
 export interface ParamControlChildProps {
-  label: string;
-  value: any;
-  onValueChange: (
+  label?: string;
+  value?: any;
+  onValueChange?: (
     event: GestureResponderEvent | null,
     newValue: any,
     validate?: boolean
   ) => void;
-  disabled: boolean;
-  meta: any;
+  disabled?: boolean;
+  meta?: any;
+  onOpenChart?: (() => void) | null;
 }
 
 export interface FooterButtonProps {
@@ -104,8 +105,7 @@ export interface ProvisionStep {
   timestamp: number;
 }
 
-export interface ProvisioningStepProps
-  extends Omit<ProvisionStep, "timestamp"> { }
+export type ProvisioningStepProps = Omit<ProvisionStep, "timestamp">;
 
 export interface DeviceTypeProps {
   label: string;
@@ -280,31 +280,37 @@ export interface InputDialogProps extends DialogProps {
 // ============================================================================
 // Helper Functions
 // ============================================================================
+/**
+ * Clamp value between a minimum and maximum
+ * @param value - The value to clamp
+ * @param min - The minimum value
+ * @param max - The maximum value
+ * @returns The clamped value
+ */
 export const clampValue = (value: number, min: number, max: number): number => {
   return Math.min(Math.max(value, min), max);
 };
 
+/**
+ * Safe value to string
+ * @param value - The value to convert to string
+ * @returns The string value
+ */
 export const safeValueToString = (value: any): string => {
   if (value === null || value === undefined) return "";
   return String(value);
 };
 
+/**
+ * Get parameter bounds
+ * @param param - The parameter to get bounds for
+ * @returns The parameter bounds (spread from `param.bounds` when present)
+ */
 export const getParamBounds = (param: ESPCDFDeviceParam) => {
   return {
     ...param?.bounds,
   };
 };
-
-// ============================================================================
-// Personal Info Types
-// ============================================================================
-
-export interface PersonalInfoField {
-  id: string;
-  title: string;
-  placeholder: string;
-  maxLength: number;
-}
 
 // ============================================================================
 // User Settings Types
@@ -324,8 +330,6 @@ export type ActionHandler = (() => void) | ((checked: boolean) => void);
 export interface ActionHandlers {
   [key: string]: ActionHandler | undefined;
 }
-
-export interface UserProps { }
 
 export interface DebugInfo {
   isDevelopment: boolean;
@@ -404,13 +408,6 @@ export interface ScheduleCardProps {
   onToggle?: (value: boolean) => void;
   deleteLoading?: boolean;
   toggleLoading?: boolean;
-}
-
-export interface ScheduleActionProps {
-  device: ESPCDFDevice;
-  displayDeviceName: string;
-  action: Record<string, any>;
-  onActionPress: () => void;
 }
 
 export interface ScheduleDeviceSelectionData {
@@ -577,55 +574,12 @@ export interface ScheduleState {
   isSyncing: boolean;
 }
 
-export interface ScheduleNode {
-  id: string;
-  action: Record<string, any>;
-  actionDevices: Record<string, any>;
-}
-
 export interface ScheduleActionMap {
   [nodeId: string]: {
     [deviceName: string]: {
       [paramName: string]: any;
     };
   };
-}
-
-export interface ScheduleAction {
-  nodeId: string;
-  action: Record<string, any>;
-  device: ESPCDFDevice;
-  displayDeviceName: string;
-}
-
-export interface ScheduleCardProps {
-  name: string;
-  triggers: ScheduleTrigger[];
-  deviceCount: number;
-  enabled: boolean;
-  isEditing?: boolean;
-  onPress?: () => void;
-  onDelete?: () => void;
-  onToggle?: (value: boolean) => void;
-  deleteLoading?: boolean;
-  toggleLoading?: boolean;
-}
-
-export interface ScheduleDeviceSelectionData {
-  node: ESPCDFNode;
-  device: ESPCDFDevice;
-  isSelected: boolean;
-  isMaxScheduleReached: boolean;
-}
-
-export interface ScheduleDaysProps {
-  selectedDays: number[];
-  onDayPress: (index: number) => void;
-}
-
-export interface ScheduleTimeProps {
-  minutes?: number;
-  onTimePress: () => void;
 }
 
 export interface IntegrationConfig {
@@ -1116,6 +1070,10 @@ export type AggregationIntervalType = "minute" | "hour" | "day" | "week" | "mont
  * Validation error class for time series operations
  */
 export class TimeSeriesValidationError extends Error {
+  /**
+   * TimeSeriesValidationError constructor
+   * @param message - The error message
+   */
   constructor(message: string) {
     super(message);
     this.name = "TimeSeriesValidationError";

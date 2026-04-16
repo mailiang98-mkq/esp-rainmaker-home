@@ -15,6 +15,7 @@
       "@context/*": ["./src/context/*"],
       "@config/*": ["./config/*"],
       "@assets/*": ["./src/assets/*"],
+      "@integrations": ["./src/integrations"],
       "@integrations/*": ["./src/integrations/*"],
     },
     "noUnusedParameters": true,

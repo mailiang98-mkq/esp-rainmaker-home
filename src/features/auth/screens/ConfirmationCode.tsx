@@ -16,6 +16,9 @@ import { ScreenWrapper, Header, Input, Button } from "@shared/components";
 import { ResendCodeButton, AppVersionText } from "@features/auth/components";
 import { testProps } from "@shared/utils/testProps";
 
+/**
+ * Renders the confirmation code screen UI section.
+ */
 export function ConfirmationCodeScreen() {
   const { t } = useTranslation();
   const { email } = useLocalSearchParams();

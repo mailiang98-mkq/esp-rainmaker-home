@@ -23,15 +23,14 @@ import { observer } from "mobx-react-lite";
  *
  * A component that renders a light bulb control with on/off functionality.
  * Displays the current state and allows toggling through touch interaction.
- *
  * @param param - The parameter object containing value and setValue function
  * @param disabled - Optional flag to disable the control
- * @returns JSX component
+ * @returns Bulb icon, ON/OFF label, and touch target wired to `onValueChange`
  */
 const DeviceLightBulb = observer(
   ({ label, value, onValueChange, disabled }: ParamControlChildProps) => {
     // State
-    const [isOn, _] = useState(Boolean(value));
+    const [isOn] = useState(Boolean(value));
     const size = 60; // Default size for light bulb
 
     // Handlers

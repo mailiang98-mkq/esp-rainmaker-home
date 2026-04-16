@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -66,7 +67,7 @@ interface ScannedDeviceProps {
  *
  * Displays a card for a scanned SoftAP device with its name, icon, and selection state
  * @param props - Device information, onPress handler, and selection state
- * @returns JSX component
+ * @returns Tappable row with device icon, name, and checkmark when selected
  */
 const ScannedDeviceCard: React.FC<ScannedDeviceProps> = ({
   name,
@@ -114,7 +115,7 @@ const ScannedDeviceCard: React.FC<ScannedDeviceProps> = ({
  * ScanningAnimation
  *
  * Displays an animated loading indicator while scanning for SoftAP devices
- * @returns JSX component
+ * @returns Centered rotating graphic and translated status label
  */
 const ScanningAnimation = () => {
   // Hooks
@@ -134,6 +135,7 @@ const ScanningAnimation = () => {
         }),
       ]),
     ).start();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   const spin = rotateAnim.interpolate({
@@ -249,7 +251,7 @@ const PermissionScreen = ({
  *
  * Displays a message when no SoftAP devices are found with option to scan again
  * @param props - onScanAgain handler
- * @returns JSX component
+ * @returns Empty-state panel with title and circular rescan button
  */
 const NoDevicesFound = ({ onScanAgain }: { onScanAgain: () => void }) => {
   const { t } = useTranslation();
@@ -549,6 +551,7 @@ const AndroidScanSoftAP = () => {
     if (hasRequiredPermissions && user) {
       handleSoftAPDeviceScan();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [hasRequiredPermissions, store]);
 
   /**

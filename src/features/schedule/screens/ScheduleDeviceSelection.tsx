@@ -16,12 +16,13 @@ import { useCDF } from "@shared/hooks/useCDF";
 import { ESPRMNGBaseAdaptorIdentifier } from "@config/sdk.identifiers";
 
 // Components
-import { Header, ScreenWrapper } from "@shared/components";
+import { DeviceSelectionList, Header, ScreenWrapper } from "@shared/components";
 import {
+  ScheduleDeviceItem,
   ScheduleDeviceSelectionEmptyState,
   ScheduleDeviceSelectionFooter,
 } from "@features/schedule/components";
-import DeviceSelectionList from "@shared/components/DeviceSelectionList";
+import { DEVICE_SELECTION_LIST_VARIANT_SCHEDULE } from "@shared/utils/constants";
 
 /**
  * ScheduleDeviceSelectionScreen
@@ -66,16 +67,27 @@ export const ScheduleDeviceSelectionScreen = observer(() => {
         ) : (
           <>
             <DeviceSelectionList
-              identifier="schedule"
+              variant={DEVICE_SELECTION_LIST_VARIANT_SCHEDULE}
               selectedDevices={selectedDevices as ScheduleDeviceSelectionData[]}
               nonSelectedDevices={
                 nonSelectedDevices as ScheduleDeviceSelectionData[]
               }
-              isDeviceDisabled={isDeviceDisabled}
-              getDeviceActionValues={getDeviceActionValues}
-              onDeviceSelect={handleDeviceSelect}
-              onDeviceDelete={handleDeviceDelete}
-              treatOfflineAsOnline={allowOfflineForSchedule}
+              translationKeySelectedSection="schedule.deviceSelection.selectedDevices"
+              translationKeySelectDevices="schedule.deviceSelection.selectDevices"
+              translationKeySelectMore="schedule.deviceSelection.selectMore"
+              renderDeviceItem={(device, index) => (
+                <ScheduleDeviceItem
+                  key={`${device.node.id}-${index}`}
+                  device={device}
+                  deviceIndex={index}
+                  isDeviceDisabled={isDeviceDisabled}
+                  getDeviceActionValues={getDeviceActionValues}
+                  onDeviceSelect={handleDeviceSelect}
+                  onDeviceDelete={handleDeviceDelete}
+                  treatOfflineAsOnline={allowOfflineForSchedule}
+                  qaId="schedule_device_selection_item"
+                />
+              )}
             />
 
             {/* Footer Actions */}

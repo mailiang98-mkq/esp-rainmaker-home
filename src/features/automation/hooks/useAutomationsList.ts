@@ -88,13 +88,13 @@ export interface UseAutomationsListResult {
   ) => Promise<void>;
   handleAutomationNameConfirm?: (name: string) => void;
   /** Menu option config (labelKey, action, loading, destructive); screen adds label, icon, onPress */
-  automationMenuOptions?: Array<{
+  automationMenuOptions?: {
     id: string;
     labelKey: string;
     action: string;
     loading: boolean;
     destructive?: boolean;
-  }>;
+  }[];
 }
 
 export interface UseAutomationsListOptions {

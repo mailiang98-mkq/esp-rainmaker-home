@@ -194,7 +194,7 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
         setSharedUsers(acceptedUsers);
         setSharedByUser(null);
       }
-    } catch (err: any) {
+    } catch {
       toast.showError(t("group.errors.errorGettingSharedUsers"));
     }
   }, [home, user, t, toast]);
@@ -206,6 +206,7 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
   // recursive calls (getSharedUsers changes when t/toast identity changes).
   useEffect(() => {
     if (home) getSharedUsersRef.current();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [home?.id]);
 
   useEffect(() => {

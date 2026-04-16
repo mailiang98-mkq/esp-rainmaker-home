@@ -99,11 +99,11 @@ const InnerLayout = () => {
       label: t("layout.navigation.footer.user"),
       Icon: User,
     },
-  ].filter(Boolean) as Array<{
+  ].filter(Boolean) as {
     route: RelativePathString;
     label: string;
     Icon: any;
-  }>;
+  }[];
 
   const isUserRoute = [
     "/Home",

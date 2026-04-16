@@ -19,9 +19,6 @@ import { SceneStoreSynchronizer } from "./sync/SceneStoreSynchronizer";
  * - Scene activation and synchronization
  * - Payload generation for scene operations
  * - Interceptor patterns for scene actions
- *
- * @class SceneStore
- * @implements {MobX Observable Store}
  */
 class SceneStore {
   #synchronizer: SceneStoreSynchronizer;
@@ -34,7 +31,7 @@ class SceneStore {
 
   /**
    * Creates a new SceneStore instance
-   * @param {ESPCDF} [rootStore] - Optional reference to the root CDF store
+   * @param [rootStore] - Optional reference to the root CDF store
    */
   constructor(rootStore?: ESPCDF) {
     this.#synchronizer = new SceneStoreSynchronizer(this, rootStore || null);
@@ -42,7 +39,7 @@ class SceneStore {
 
   /**
    * Getter for scenes indexed by ID
-   * @returns {Object.<string, ESPCDFScene>} Map of scenes indexed by scene ID
+   * @returns Map of scenes indexed by scene ID
    */
   public get scenesByID(): { [key: string]: ESPCDFScene } {
     return this._scenesByID;
@@ -50,7 +47,7 @@ class SceneStore {
 
   /**
    * Setter for scenes indexed by ID
-   * @param {Object.<string, ESPCDFScene>} value - Map of scenes to set
+   * @param value - Map of scenes to set
    */
   public set scenesByID(value: { [key: string]: ESPCDFScene }) {
     this._scenesByID = value;
@@ -58,7 +55,7 @@ class SceneStore {
 
   /**
    * Computed property that returns an array of all scenes
-   * @returns {ESPCDFScene[]} Array of all scenes in the store
+   * @returns Array of all scenes in the store
    */
   @computed get sceneList(): ESPCDFScene[] {
     return Object.values(this._scenesByID);
@@ -66,10 +63,8 @@ class SceneStore {
 
   /**
    * Retrieves a scene by its ID
-   *
-   * @param {string} sceneId - The ID of the scene to retrieve
-   * @returns {ESPCDFScene | null} The scene object or null if not found
-   *
+   * @param sceneId - The ID of the scene to retrieve
+   * @returns The scene object or null if not found
    * @example
    * const scene = sceneStore.getScene('scene123');
    */
@@ -82,9 +77,7 @@ class SceneStore {
    *
    * This method replaces all scenes in the store with the provided array.
    * Each scene is made observable and has interceptors set up.
-   *
-   * @param {ESPCDFScene[]} scenes - Array of scenes to set
-   *
+   * @param scenes - Array of scenes to set
    * @example
    * sceneStore.setSceneList([
    *   { id: 'scene1', name: 'Scene 1', nodes: [], actions: {} },
@@ -98,10 +91,8 @@ class SceneStore {
 
   /**
    * Adds a single scene to the store
-   *
-   * @param {ESPCDFScene} scene - The scene to add
-   * @returns {ESPCDFScene} The observable scene object
-   *
+   * @param scene - The scene to add
+   * @returns The observable scene object
    * @example
    * const scene = sceneStore.addScene(sceneEntity);
    */
@@ -122,10 +113,8 @@ class SceneStore {
 
   /**
    * Updates a scene by ID without making it observable
-   *
-   * @param {string} id - The scene ID
-   * @param {ESPCDFScene} scene - The scene object to set
-   *
+   * @param id - The scene ID
+   * @param scene - The scene object to set
    * @example
    * sceneStore.updateSceneByID('scene123', updatedScene);
    */
@@ -135,9 +124,7 @@ class SceneStore {
 
   /**
    * Deletes multiple scenes by their IDs
-   *
-   * @param {string[]} ids - Array of scene IDs to delete
-   *
+   * @param ids - Array of scene IDs to delete
    * @example
    * sceneStore.deleteScenes(['scene1', 'scene2', 'scene3']);
    */
@@ -154,11 +141,9 @@ class SceneStore {
    *
    * This method finds the scene by ID and calls its trigger method, which
    * will activate the scene across all its associated nodes.
-   *
-   * @param {string} sceneId - The ID of the scene to activate
-   * @returns {Promise<void>}
+   * @param sceneId - The ID of the scene to activate
+   * @returns Resolves when `scene.activate()` completes for that scene
    * @throws {Error} If scene is not found or activation fails
-   *
    * @example
    * await sceneStore.activateScene('scene123');
    */
@@ -179,11 +164,9 @@ class SceneStore {
    * Activates multiple scenes concurrently
    *
    * This method activates multiple scenes in parallel using Promise.all.
-   *
-   * @param {string[]} sceneIds - Array of scene IDs to activate
-   * @returns {Promise<void>}
+   * @param sceneIds - Array of scene IDs to activate
+   * @returns Resolves when every scene in the list has been activated
    * @throws {Error} If any scene activation fails
-   *
    * @example
    * await sceneStore.activateMultipleScenes(['scene1', 'scene2', 'scene3']);
    */
@@ -206,10 +189,8 @@ class SceneStore {
    * This method adds a new observable property to the store and automatically
    * creates getter and setter methods for it. The property name is capitalized
    * for the getter/setter methods.
-   *
-   * @param {string} propertyName - The name of the property to add
-   * @param {any} initialValue - The initial value for the property
-   *
+   * @param propertyName - The name of the property to add
+   * @param initialValue - The initial value for the property
    * @example
    * sceneStore.addProperty('customField', 'initial value');
    * sceneStore.setCustomField('new value');
@@ -245,7 +226,6 @@ class SceneStore {
    *
    * This method removes all scenes from the store and resets the
    * beforeSetSceneListHook and afterSetSceneListHook to empty functions.
-   *
    * @example
    * sceneStore.clear();
    */

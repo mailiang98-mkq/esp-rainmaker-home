@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Check } from "lucide-react-native";
@@ -13,6 +14,10 @@ import { useTranslation } from "react-i18next";
 import { canDeleteAgentBySource } from "@features/agent/utils/aggregation";
 import { AgentCardProps } from "@src/types/global";
 
+/**
+ * Tappable row for one configured agent: shows name and ID, highlights when selected,
+ * and shows a remove control in edit mode when deletion is allowed for the agent source.
+ */
 export const AgentCard: React.FC<AgentCardProps> = ({
   agent,
   isSelected,
