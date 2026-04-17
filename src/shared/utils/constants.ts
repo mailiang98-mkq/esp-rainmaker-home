@@ -48,6 +48,15 @@ export const FORBIDDEN = 6;
 
 // SDK ERRORS
 export const ESP_TOKEN_ERROR = "ESPTokenError";
+export const OAUTH_CANCELLED_ERROR_TAG = "OAUTH_CANCELLED";
+export const OAUTH_NO_BROWSER_FOUND_ERROR_TAG = "NO_BROWSER_FOUND";
+
+// APP LIFECYCLE
+export const APP_STATE_ACTIVE = "active";
+export const APP_STATE_INACTIVE = "inactive";
+export const APP_STATE_BACKGROUND = "background";
+export const OAUTH_APP_RESUME_CHECK_DELAY_MS = 1000;
+export const OAUTH_APP_RESUME_CANCEL_GRACE_PERIOD_MS = 4000;
 
 // DATA TYPES
 export const DATA_TYPE_ALL = "all";

@@ -62,6 +62,7 @@ export function LoginScreen() {
     isPasswordValid,
     isLoading,
     isOAuthLoading,
+    monitorOAuthAppLifecycle,
     showConfigResetDialog,
     isConfigResetting,
     setShowConfigResetDialog,
@@ -73,6 +74,7 @@ export function LoginScreen() {
     login,
     forgotPwd,
     oauthLogin,
+    handleOAuthAppBecameActive,
     handleCancelOAuth,
     handleConfigReset,
     getCurrentFriendlyMessage,
@@ -108,6 +110,8 @@ export function LoginScreen() {
           onClose={handleCancelOAuth}
           message={t("auth.login.settingUpAccount")}
           progressMessage={getCurrentFriendlyMessage()}
+          monitorAppLifecycle={monitorOAuthAppLifecycle}
+          onAppBecameActive={handleOAuthAppBecameActive}
         />
       ) : (
         <View
