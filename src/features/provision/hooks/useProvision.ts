@@ -439,7 +439,7 @@ export const useProvision = (): UseProvisionReturn => {
             url: readmeUrl,
             title: headerName,
             deviceName: deviceDisplayName,
-            fromProvision: "true",
+            fromProvisionFlow: "true",
           },
         });
         return;

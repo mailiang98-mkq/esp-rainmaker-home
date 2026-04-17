@@ -26,6 +26,7 @@ interface UseGuideReturn {
   systemFonts: string[];
   screenWidth: number;
   handleBackPress: () => void;
+  fromProvisionFlow: boolean;
 }
 
 /**
@@ -38,7 +39,7 @@ export const useGuide = (): UseGuideReturn => {
     url: string;
     title?: string;
     deviceName?: string;
-    fromProvision?: string;
+    fromProvisionFlow?: string;
   }>();
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
@@ -132,12 +133,12 @@ export const useGuide = (): UseGuideReturn => {
   );
 
   const handleBackPress = useCallback(() => {
-    if (params.fromProvision === "true") {
+    if (params.fromProvisionFlow === "true") {
       router.dismissTo("/(group)/Home" as any);
     } else {
       router.back();
     }
-  }, [params.fromProvision, router]);
+  }, [params.fromProvisionFlow, router]);
 
   return {
     markdownContent,
@@ -150,5 +151,6 @@ export const useGuide = (): UseGuideReturn => {
     systemFonts,
     screenWidth,
     handleBackPress,
+    fromProvisionFlow: params.fromProvisionFlow === "true",
   };
 };
