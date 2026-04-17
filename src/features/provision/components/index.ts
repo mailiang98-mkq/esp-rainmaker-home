@@ -18,3 +18,4 @@ export { NonPrimaryUserCard } from "./NonPrimaryUserCard";
 export { WifiPasswordInput } from "./WifiPasswordInput";
 export { default as BluetoothDisabledScreen } from "./BluetoothDisabledScreen";
 export { default as BLEPermissionScreen } from "./BLEPermissionScreen";
+export { JoinOtherNetworkModal } from "./JoinOtherNetworkModal";

@@ -609,6 +609,11 @@
       "password": "Password",
       "connect": "Connect",
       "saveNetwork": "Save Wi-Fi",
+      "joinOtherNetworkLink": "Join Other Network",
+      "joinOtherNetworkModal": {
+        "title": "Enter Network Information",
+        "ssidInputPlaceholder": "Network Name"
+      },
       "signalStrength": {
         "excellent": "Excellent",
         "good": "Good",
