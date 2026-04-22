@@ -1,0 +1,130 @@
+name: Build Android APK
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  # Bump this to reset cache manually if needed
+  CACHE_VERSION: v1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node (for Expo/React Native deps)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Cache node_modules (helps in release-only pipelines)
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ env.CACHE_VERSION }}
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Environment + native config (syncs google-services.json, gradle, etc. from .env)
+      - name: Copy .env from example
+        run: cp .env.example .env
+
+      # 4b. Release signing + Firebase config from GitHub Secrets (base64-encoded files)
+      #     Create repo secrets: FS_KEYSTORE_FILE, FS_KEY_PROPERTIES_FILE, FS_GOOGLE_SERVICES_JSON
+      #     (see scripts/secrets_to_base64.sh). keystore.properties must use e.g.
+      #     storeFile=app/release.keystore when the keystore is under android/app/.
+      - name: Extract signing files from secrets
+        env:
+          FS_KEYSTORE_FILE: ${{ secrets.FS_KEYSTORE_FILE }}
+          FS_KEY_PROPERTIES_FILE: ${{ secrets.FS_KEY_PROPERTIES_FILE }}
+          FS_GOOGLE_SERVICES_JSON: ${{ secrets.FS_GOOGLE_SERVICES_JSON }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [ -n "${FS_KEYSTORE_FILE:-}" ] && [ -n "${FS_KEY_PROPERTIES_FILE:-}" ] && [ -n "${FS_GOOGLE_SERVICES_JSON:-}" ] || exit 1
+          mkdir -p android/app
+          printf '%s' "$FS_KEYSTORE_FILE" | base64 -d > android/app/release.keystore
+          printf '%s' "$FS_KEY_PROPERTIES_FILE" | base64 -d > android/keystore.properties
+          printf '%s' "$FS_GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json
+          test -s android/app/release.keystore
+          test -s android/keystore.properties
+          test -s android/app/google-services.json
+        shell: bash
+        continue-on-error: false
+
+      - name: Prebuild (sync env to Android/iOS)
+        run: npm run prebuild
+
+      # 5. Setup Java (required for Android build)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      # 6. Setup Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Cache Gradle dependencies (main speed boost across releases)
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ env.CACHE_VERSION }}
+          restore-keys: |
+            gradle-
+
+      # 7. Make Gradle executable
+      - name: Grant execute permission
+        run: chmod +x android/gradlew
+
+      # 8. Build APK (Release)
+      - name: Build APK
+        run: |
+          cd android
+          ./gradlew assembleRelease \
+            --build-cache \
+            -x lint -x test \
+            --no-daemon \
+            --console=plain \
+            --stacktrace
+
+      # 8b. Copy to versioned filename (Gradle output stays app-release.apk)
+      - name: Copy APK with versioned name
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk \
+            "esp-rainmaker-home-${{ github.ref_name }}.apk"
+
+      # 9. Upload APK as artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp-rainmaker-home-${{ github.ref_name }}.apk
+          path: esp-rainmaker-home-${{ github.ref_name }}.apk
+
+      # 10. Attach APK to GitHub Release
+      - name: Create Release & Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "ESP Rainmaker Home ${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          files: esp-rainmaker-home-${{ github.ref_name }}.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

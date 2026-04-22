@@ -29,6 +29,13 @@ def getProp = { key ->
     return value
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -166,7 +173,18 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+
+        release {
+            def storeFilePath = keystoreProperties['storeFile']
+            if (storeFilePath) {
+                storeFile file(storeFilePath)
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
     }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -176,9 +194,7 @@ android {
             crunchPngs true
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
@@ -192,6 +208,10 @@ android {
     }
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+    aaptOptions {
+        // Global AAPT2 PNG crunch.
+        cruncherEnabled (findProperty('android.enableAaptPngCrunch')?.toBoolean() ?: false)
     }
 }
 
@@ -278,3 +298,7 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+project.ext.react = [
+  enableHermes: true
+]
