@@ -50,7 +50,7 @@ const themes = {
   light: {
     colors: {
       white: "#ffffff",
-      black: "#2c3e50",
+      black: "#000000",
       bluetooth: "#2c5aa0",
       gray: "#7f8c8d",
       lightGray: "#bdc3c7",

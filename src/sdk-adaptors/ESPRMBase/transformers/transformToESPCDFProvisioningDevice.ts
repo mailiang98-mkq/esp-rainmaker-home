@@ -5,7 +5,7 @@
  */
 
 import { ESPCDFProvisioningDevice, ESPCDFProvisioningDeviceInterface, ESPCDFProvisioningDeviceOperations, } from "@store";
-import { ESPDevice, ChallengeResponseHelper } from "@espressif/rainmaker-base-sdk";
+import { ESPDevice, ChallengeResponseHelper, ClaimCapabilities } from "@espressif/rainmaker-base-sdk";
 
 /**
  * Transforms ESPDevice from the RainMaker SDK to ESPCDFProvisioningDevice format.
@@ -86,8 +86,8 @@ export function transformToESPCDFProvisioningDevice(
             return await espDevice.sendData(endPoint, data);
         },
 
-        async startAssistedClaiming(onProgress?: (response: any) => void): Promise<void> {
-            await espDevice.startAssistedClaiming(onProgress);
+        async startAssistedClaiming(onProgress?: (response: any) => void, claimCapability?: string): Promise<void> {
+            await espDevice.startAssistedClaiming(onProgress, claimCapability as ClaimCapabilities);
         },
 
         async checkChallengeResponseSupport(): Promise<boolean> {

@@ -5,7 +5,22 @@
  */
 
 
-import { ESPCDFCreateGroupRequest, ESPCDFGroup, ESPCDFUser, ESPCDFUserInfo, ESPCDFGroupSharingRequest, ESPCDFProvisioningDevice, ESPCDFAPIDataResponse, ESPCDFPaginatedAPIResponse, ESPCDFNode, ESPCDFUserOperation, ESPCDFAPIResponse, ESPCDFSubscribeToNodeUpdatesRequestParams } from "@store";
+import {
+    ESPCDFCreateGroupRequest,
+    ESPCDFGroup,
+    ESPCDFUser,
+    ESPCDFUserInfo,
+    ESPCDFGroupSharingRequest,
+    ESPCDFProvisioningDevice,
+    ESPCDFAPIDataResponse,
+    ESPCDFPaginatedAPIResponse,
+    ESPCDFNode,
+    ESPCDFUserOperation,
+    ESPCDFAPIResponse,
+    ESPCDFSubscribeToNodeUpdatesRequestParams,
+    ESPCDFAssumeRoleRequest,
+    ESPCDFAssumeRoleResponse,
+} from "@store";
 import { mapNodeUpdateDataToEvent } from "@shared/utils/subscriptionHelper";
 import { ESPRMUser, ESPSecurity, ESPTransport, ESPRMEventType, UserCustomDataRequest, ESPGroupSharingRequest, ESPRMGroup, ESPRMBase, ESPNodeUpdateData, ESPRMNode } from "@espressif/rainmaker-base-sdk";
 import { ESPRMBaseAdaptorIdentifier } from "../constants";
@@ -348,6 +363,10 @@ export function transformToESPCDFUser(
                 await ESPRMBase.subscriptionManager.unsubscribeFromNode(nodeId);
             }
             subscribedNodeIdList.length = 0;
+        },
+
+        async assumeRole(request: ESPCDFAssumeRoleRequest): Promise<ESPCDFAssumeRoleResponse> {
+            return await esprmUser.assumeRole(request);
         },
     };
 

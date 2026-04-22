@@ -19,6 +19,8 @@ import {
     ESPCDFUserOperation,
     DEFAULT_HOME_GROUP_NAME,
     ESPCDFAPIResponse,
+    ESPCDFAssumeRoleRequest,
+    ESPCDFAssumeRoleResponse,
 } from "@store";
 import {
     ESPDevice,
@@ -384,6 +386,10 @@ export function transformToESPCDFUser(
                 status: "success",
                 description: "Notification endpoint unregistered successfully",
             };
+        },
+
+        async assumeRole(_request: ESPCDFAssumeRoleRequest): Promise<ESPCDFAssumeRoleResponse> {
+            throw new Error("ESPRMNGBase SDK assume role has different implementation which not assume role for particluar nodeId's or groupId's");
         },
     };
 

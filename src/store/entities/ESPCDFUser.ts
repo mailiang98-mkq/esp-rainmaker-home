@@ -21,6 +21,8 @@ import {
   AddDeviceParams,
   ESPCDFSubscribeToNodeUpdatesRequestParams,
   ESPCDFMatterPrecommissionInfo,
+  ESPCDFAssumeRoleRequest,
+  ESPCDFAssumeRoleResponse,
 } from "../types";
 import {
   ESPCDFOperationEventEmitter,
@@ -359,6 +361,17 @@ export class ESPCDFUser implements ESPCDFUserInterface {
       return;
     }
     return this.operations.unsubscribeFromNodeUpdates();
+  }
+
+  /**
+   * Obtain short-lived AWS credentials scoped to the requested role/resources.
+   * Throws if the active adaptor does not support this operation.
+   */
+  async assumeRole(request: ESPCDFAssumeRoleRequest): Promise<ESPCDFAssumeRoleResponse> {
+    if (!this.operations.assumeRole) {
+      throw new Error("assumeRole is not available on the current adaptor");
+    }
+    return this.operations.assumeRole(request);
   }
 
   // Matter commissioning operations (available when ESPRMMatterBase adaptor is active)

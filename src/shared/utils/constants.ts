@@ -75,6 +75,17 @@ export const ESPRM_DIRECTION_PARAM_TYPE = "esp.param.direction";
 export const ESPRM_REFRESH_TOKEN_PARAM_TYPE = "esp.param.refresh-token";
 export const ESPRM_USER_TOKEN_PARAM_TYPE = "esp.param.user-token";
 export const ESPRM_BASE_URL_PARAM_TYPE = "esp.param.base-url";
+export const ESPRM_CHANNEL_PARAM_TYPE = "esp.param.channel";
+
+/**
+ * `extractDeviceType` values with no meaningful power param for card UI: DeviceCard uses node
+ * connectivity (`isConnected`) for `getDeviceImage` instead of `ESPRM_POWER_PARAM_TYPE`.
+ */
+export const POWER_PARAM_UNSUPPORTED_DEVICE_TYPES = new Set<string>([
+  "temperature-sensor",
+  "ai assistant",
+  "camera",
+]);
 
 // PARAM NAMES
 export const VOLUME_PARAM_NAME = "Volume";
@@ -351,3 +362,33 @@ export const TIME_SERIES_LABELS = {
   CURRENT_PERIOD: "Current Period"
 } as const;
 
+
+// WebRTC Connection State constants
+export const WEBRTC_CONNECTION_STATE = {
+  CONNECTED: "connected",
+  CONNECTING: "connecting",
+  DISCONNECTED: "disconnected",
+  CLOSED: "closed",
+  FAILED: "failed",
+} as const;
+
+// WebRTC Signaling Client Event Names
+export const WEBRTC_SIGNALING_EVENTS = {
+  OPEN: "open",
+  SDP_ANSWER: "sdpAnswer",
+  ICE_CANDIDATE: "iceCandidate",
+  CLOSE: "close",
+  ERROR: "error",
+} as const;
+
+// WebRTC Translation Keys
+export const WEBRTC_TRANSLATION_KEYS = {
+  ERROR_HEADER: "layout.shared.errorHeader",
+  CONNECTION_FAILED: "device.camera.errors.connectionFailed",
+} as const;
+
+// WebRTC Default Messages
+export const WEBRTC_DEFAULT_MESSAGES = {
+  ERROR: "Error",
+  CONNECTION_FAILED: "Connection failed",
+} as const;

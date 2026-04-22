@@ -72,3 +72,9 @@ export { default as ColorTemperatureSlider } from "./ParamControls/ColorTemperat
 // param controls
 export { default as ParamWrap } from "./ParamControls/ParamWrap";
 export { default as DeviceAction } from "./ParamControls/DeviceAction";
+
+// Video Player (camera / WebRTC)
+export * from "./VideoPlayer";
+
+// Device params (generic renderer)
+export { DeviceParamsRenderer } from "./DeviceParams/DeviceParamsRenderer";

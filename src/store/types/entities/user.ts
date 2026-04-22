@@ -134,6 +134,12 @@ export interface ESPCDFUserOperation {
    */
   unsubscribeFromNodeUpdates?(): Promise<void>;
 
+  /**
+   * Obtain short-lived AWS credentials scoped to the requested role/resources.
+   * Optional: adaptors that do not support this operation may omit it.
+   */
+  assumeRole?(request: ESPCDFAssumeRoleRequest): Promise<ESPCDFAssumeRoleResponse>;
+
   // Optional Matter commissioning operations
   getGroupsAndFabrics?(): Promise<ESPCDFGroup[]>;
   prepareFabricForMatterCommissioning?(
@@ -172,6 +178,30 @@ export interface AddDeviceParams {
   ssid: string;
   password: string;
   onProgress?: (response: ESPCDFProvisionResponse) => void;
+}
+
+/**
+ * SDK-agnostic request payload for the assume-role operation.
+ */
+export interface ESPCDFAssumeRoleRequest {
+  /** The role to assume */
+  userRole?: string;
+  /** The group IDs to assume the role for */
+  groupIds?: string[];
+  /** The node IDs to assume the role for */
+  nodeIds?: string[];
+  /** Extra payload to include in the assume-role request */
+  extraPayload?: Record<string, any>;
+}
+
+/**
+ * SDK-agnostic response returned by the assume-role operation.
+ * Contains short-lived AWS credentials for accessing cloud resources.
+ */
+export interface ESPCDFAssumeRoleResponse {
+  accessKey: string;
+  secretKey: string;
+  sessionToken: string;
 }
 
 export interface ESPCDFUserInterface {

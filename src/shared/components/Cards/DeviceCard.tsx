@@ -32,6 +32,7 @@ import { getDeviceImage, extractDeviceType } from "@shared/utils/device";
 
 // Constants
 import {
+  POWER_PARAM_UNSUPPORTED_DEVICE_TYPES,
   ESPRM_NAME_PARAM_TYPE,
   ESPRM_POWER_PARAM_TYPE,
   ERROR_CODES,
@@ -120,7 +121,6 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
         device.params?.some((param) => param.type === ESPRM_POWER_PARAM_TYPE) ||
           false,
       );
-
     }
   }, [device]);
 
@@ -218,11 +218,8 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
   }
 
   const getOnValue = () => {
-    if (extractDeviceType(device.type) === "temperature-sensor") {
-      return isConnected;
-    }
-
-    if (extractDeviceType(device.type) === "ai assistant") {
+    const extractedDeviceType = extractDeviceType(device.type);
+    if (POWER_PARAM_UNSUPPORTED_DEVICE_TYPES.has(extractedDeviceType)) {
       return isConnected;
     }
     return paramTypeMap[ESPRM_POWER_PARAM_TYPE]?.value;

@@ -42,6 +42,8 @@
     "Skia",
     "mqtt",
     "MQTT",
+    "WEBRTC",
+    "WebRTC",
     "proto",
     "protobuf",
     "Protobuf",
