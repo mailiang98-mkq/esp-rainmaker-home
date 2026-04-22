@@ -339,6 +339,7 @@ export const useProvision = (): UseProvisionReturn => {
         updateStageStatus(message, true, message);
         break;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [updateChallengeResponseStage, updateStageStatus, markStage3AsComplete, scrollToBottom]);
 
   // Mark current stage as error

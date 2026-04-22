@@ -38,6 +38,9 @@ export interface UseHomeScreenResult {
   handleMigrationPromptUnderstood: () => Promise<void>;
 }
 
+/**
+ * Manages home screen state and related actions.
+ */
 export function useHomeScreen(): UseHomeScreenResult {
   const { t } = useTranslation();
   const { store, isInitialized: isStoreInitialized } = useCDF();
@@ -94,6 +97,7 @@ export function useHomeScreen(): UseHomeScreenResult {
     } finally {
       setIsLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [isStoreInitialized, unifiedGroupStore, unifiedUser, toast, t]);
 
   initializeHomeRef.current = initializeHome;
@@ -151,7 +155,7 @@ export function useHomeScreen(): UseHomeScreenResult {
   useFocusEffect(
     useCallback(() => {
       setTooltipVisible(false);
-    }, [selectedHome])
+    }, [])
   );
 
   return {

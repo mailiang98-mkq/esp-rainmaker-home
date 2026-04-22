@@ -16,6 +16,9 @@ export interface ToastOptions {
   persistent?: boolean;
 }
 
+/**
+ * Manages toast state and related actions.
+ */
 export const useToast = () => {
   const toast = useToastController();
 

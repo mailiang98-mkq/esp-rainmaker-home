@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -26,7 +27,6 @@ import { HomeRemoveProps } from "@src/types/global";
  * - Loading states
  * - Different actions for primary (remove) vs secondary (leave) users
  * - Error handling
- *
  * @param props - Component properties for home removal/leave functionality
  */
 const HomeRemove: React.FC<HomeRemoveProps> = ({

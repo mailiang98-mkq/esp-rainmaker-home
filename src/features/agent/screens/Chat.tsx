@@ -20,13 +20,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
-import {
-  ScreenWrapper,
-  ConfirmationDialog,
-  AgentTermsBottomSheet,
-} from "@shared/components";
+import { ScreenWrapper, ConfirmationDialog } from "@shared/components";
 import {
   AgentConversationsBottomSheet,
+  AgentTermsBottomSheet,
   ChatErrorState,
   ChatHeader,
   ChatInput,
@@ -42,6 +39,10 @@ import { getFontSizes } from "@features/agent/utils/chat/fontSizes";
 import { getSelectedAgentId, deleteConversationId } from "@features/agent/utils";
 import { ChatMessage as ChatMessageType } from "@src/types/global";
 
+/**
+ * ChatScreen component
+ * @returns Chat screen UI
+ */
 export function ChatScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -116,6 +117,7 @@ export function ChatScreen() {
     return () => {
       disconnect();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   // Reload config when screen comes into focus
@@ -141,9 +143,11 @@ export function ChatScreen() {
       } else {
         hasInitializedRef.current = true;
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     }, [loadMessageDisplayConfig, loadFontSize, disconnect, clearMessages]),
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   const initializeChat = async () => {
     await initializeAgent(async () => {
       // Step 1: Determine current agent and store it
@@ -225,6 +229,7 @@ export function ChatScreen() {
       // Still reinitialize even if deletion fails
       await initializeChat();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [disconnect, clearMessages, store, initializeChat]);
 
   const handleSelectConversation = useCallback(async () => {

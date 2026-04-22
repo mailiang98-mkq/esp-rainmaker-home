@@ -27,10 +27,9 @@ import { paramControlStyles as styles } from "./lib/styles";
  * A slider component for controlling color saturation.
  * Features a gradient background representing saturation levels
  * and displays the current value as a percentage.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for saturation control
+ * @returns Saturation slider with HSL preview and clamped commits
  */
 const SaturationSlider = observer(
   ({
@@ -55,10 +54,8 @@ const SaturationSlider = observer(
 
     /**
      * This function is used to handle the value change
-     *
      * @param event - The event object
      * @param newValue - The new value
-     * @returns void
      */
     const commitValue = (
       event: GestureResponderEvent | null,

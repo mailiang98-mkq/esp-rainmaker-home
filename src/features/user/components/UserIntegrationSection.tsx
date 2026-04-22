@@ -20,6 +20,9 @@ type UserIntegrationSectionProps = {
   onIntegrationPress: (action: string) => void;
 };
 
+/**
+ * Renders the user integration section UI section.
+ */
 const UserIntegrationSection: React.FC<UserIntegrationSectionProps> = ({
   title,
   integrations,

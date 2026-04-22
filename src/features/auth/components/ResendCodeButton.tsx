@@ -16,6 +16,9 @@ interface ResendCodeButtonProps {
   testId?: string;
 }
 
+/**
+ * Renders the resend code button UI section.
+ */
 export function ResendCodeButton({
   countdown,
   onPress,

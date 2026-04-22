@@ -11,6 +11,9 @@ import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { ScheduleActionsHeaderProps } from "@src/types/global";
 
+/**
+ * Renders the schedule actions header UI section.
+ */
 const ScheduleActionsHeader = ({ onAddPress }: ScheduleActionsHeaderProps) => {
   const { t } = useTranslation();
 

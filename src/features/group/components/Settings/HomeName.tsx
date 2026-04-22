@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useRef } from "react";
 import {
   Pressable,
@@ -37,7 +38,6 @@ import { testProps } from "@shared/utils/testProps";
  * - Input validation
  * - Save state handling
  * - Primary user permissions
- *
  * @param props - Component properties for home name management
  */
 const HomeName: React.FC<HomeNameProps> = ({

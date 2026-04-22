@@ -27,6 +27,9 @@ export interface UseCustomizeControlGroupNameResult {
   handleGroupNameChange: (value: string) => void;
 }
 
+/**
+ * Manages customize control group name state and related actions.
+ */
 export function useCustomizeControlGroupName(
   options: UseCustomizeControlGroupNameOptions
 ): UseCustomizeControlGroupNameResult {

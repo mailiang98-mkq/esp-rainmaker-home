@@ -54,7 +54,7 @@ export function useControlGroups(
   const deviceGroups = useMemo(() => {
     const subGroups = (home?.subGroups as ESPCDFGroup[]) || [];
     return getDeviceGroupSubGroups(subGroups);
-  }, [home?.subGroups, home?.id]);
+  }, [home?.subGroups]);
 
   const load = useCallback(async () => {
     if (!homeId) return;
@@ -152,6 +152,9 @@ function mapNodeToDisplay(node: any): Node {
   };
 }
 
+/**
+ * Manages create group state and related actions.
+ */
 export function useCreateGroup(
   options: UseCreateGroupOptions
 ): UseCreateGroupResult {
@@ -250,6 +253,7 @@ export function useCreateGroup(
     } else if (deviceGroup) {
       setGroupName(stripGroupControlSubgroupDisplayName(deviceGroup.name));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [roomNameParam, deviceGroup?.id, deviceGroup?.name]);
 
   const handleCustomizeName = useCallback(() => {

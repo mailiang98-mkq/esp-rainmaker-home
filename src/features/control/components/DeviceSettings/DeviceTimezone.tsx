@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
@@ -50,7 +51,6 @@ interface DeviceTimezoneProps {
  * - Updates timezone on device
  * - Loading state during update
  * - Cached and filtered timezone list
- *
  * @param props - Component properties for timezone management
  */
 const DeviceTimezone: React.FC<DeviceTimezoneProps> = ({ node, disabled }) => {
@@ -69,11 +69,6 @@ const DeviceTimezone: React.FC<DeviceTimezoneProps> = ({ node, disabled }) => {
     [node],
   );
 
-  // Don't render if service or param doesn't exist or doesn't have read permission
-  if (!timeService || !timezoneParam) {
-    return null;
-  }
-
   // Memoize whether timezone is editable to avoid unnecessary recalculations
   const isEditable = useMemo(
     () => hasWritePermission && !disabled,
@@ -86,6 +81,23 @@ const DeviceTimezone: React.FC<DeviceTimezoneProps> = ({ node, disabled }) => {
       setCurrentTimezone(timezoneParam.value as string);
     }
   }, [timezoneParam?.value]);
+
+  /**
+   * Cache and filter timezone list based on search query
+   * useMemo ensures the filtered list is only recalculated when searchQuery changes
+   */
+  const filteredTimezones = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return TIMEZONE_LIST;
+    }
+    const query = searchQuery.toLowerCase();
+    return TIMEZONE_LIST.filter((tz) => tz.toLowerCase().includes(query));
+  }, [searchQuery]);
+
+  // Don't render if service or param doesn't exist or doesn't have read permission
+  if (!timeService || !timezoneParam) {
+    return null;
+  }
 
   /**
    * Handles modal close and resets search
@@ -115,24 +127,12 @@ const DeviceTimezone: React.FC<DeviceTimezoneProps> = ({ node, disabled }) => {
       timezoneParam.value = timezone;
       setCurrentTimezone(timezone);
       toast.showSuccess(t("device.settings.timezoneUpdatedSuccess"));
-    } catch (error) {
+    } catch {
       toast.showError(t("device.errors.failedToUpdateTimezone"));
     } finally {
       setIsUpdating(false);
     }
   };
-
-  /**
-   * Cache and filter timezone list based on search query
-   * useMemo ensures the filtered list is only recalculated when searchQuery changes
-   */
-  const filteredTimezones = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return TIMEZONE_LIST;
-    }
-    const query = searchQuery.toLowerCase();
-    return TIMEZONE_LIST.filter((tz) => tz.toLowerCase().includes(query));
-  }, [searchQuery]);
 
   /**
    * Renders individual timezone option in dropdown

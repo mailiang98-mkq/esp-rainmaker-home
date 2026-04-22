@@ -18,6 +18,9 @@ type UseGuideStepsParams = {
   imageMap: Record<string, number>;
 };
 
+/**
+ * Manages guide steps state and related actions.
+ */
 export const useGuideSteps = ({ steps, imageMap }: UseGuideStepsParams) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [title, setTitle] = useState("");

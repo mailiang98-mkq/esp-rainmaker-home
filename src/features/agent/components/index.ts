@@ -29,3 +29,4 @@ export {
   ChatMessage,
   ChatQuestionSuggestions,
 } from "./Chat";
+export { default as AgentTermsBottomSheet } from "./Modals/AgentTermsBottomSheet";

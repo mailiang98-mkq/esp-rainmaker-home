@@ -24,6 +24,9 @@ export interface CreateAutomationActionsSectionProps {
   onAddAction: () => void;
 }
 
+/**
+ * Renders the create automation actions section UI section.
+ */
 export const CreateAutomationActionsSection: React.FC<
   CreateAutomationActionsSectionProps
 > = ({

@@ -11,7 +11,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, type Edge } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
 // Styles
@@ -55,7 +55,7 @@ const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
     }
   };
 
-  const safeAreaEdges = excludeTop
+  const safeAreaEdges: Edge[] = excludeTop
     ? ["left", "right", "bottom"]
     : ["top", "left", "right", "bottom"];
 

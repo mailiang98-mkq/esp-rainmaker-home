@@ -24,10 +24,9 @@ import { paramControlStyles as styles } from "./lib/styles";
  * A slider component for controlling temperature settings.
  * Features a gradient background representing temperature levels from cold to hot
  * and displays the current value in Celsius.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for temperature control
+ * @returns Climate temperature slider respecting `meta` min/max/step
  */
 const TemperatureSlider = observer(
   ({
@@ -42,10 +41,8 @@ const TemperatureSlider = observer(
 
     /**
      * This function is used to handle the value change
-     *
      * @param event - The event object
      * @param newValue - The new value
-     * @returns void
      */
     const commitValue = (
       event: GestureResponderEvent | null,

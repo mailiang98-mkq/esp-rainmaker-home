@@ -68,6 +68,9 @@ export interface ActionDeviceSelectionEventSummaryProps {
   whenLabel: string;
 }
 
+/**
+ * Renders the action device selection event summary UI section.
+ */
 export const ActionDeviceSelectionEventSummary: React.FC<
   ActionDeviceSelectionEventSummaryProps
 > = ({

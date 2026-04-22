@@ -8,13 +8,11 @@ import {
   ESPCDFAPIResponse,
   ESPCDFPaginatedAPIResponse,
   ESPCDFAPIDataResponse,
-  ESPCDFGroupInterface,
 } from "../../types";
 import type { GroupStoreCallbacks } from "../callbacks";
 import type {
   ESPCDFProvisionResponse
 } from "../provision";
-import type { ESPCDFNodeUpdateSubscriptionContext } from "../subscription";
 import { ESPCDFGroup } from "../../entities/ESPCDFGroup";
 import { ESPCDFGroupSharingRequest } from "../../entities/ESPCDFGroupSharingRequest";
 import { ESPCDFNode } from "../../entities/ESPCDFNode";
@@ -104,7 +102,7 @@ export interface ESPCDFUserOperation {
     callback: (data: any) => void
   ): Promise<any>;
   setMultipleNodesParams(
-    payload: Array<{ nodeId: string; payload: any }>
+    payload: { nodeId: string; payload: any }[]
   ): Promise<ESPCDFAPIResponse>;
   getNodeDetails(nodeId: string): Promise<ESPCDFNode>;
   getAccessToken(): Promise<string>;

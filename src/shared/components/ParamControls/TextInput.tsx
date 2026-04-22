@@ -29,10 +29,9 @@ import { observer } from "mobx-react-lite";
  *
  * A text input component with modal editing interface.
  * Allows users to view and edit text values with character limit support.
- *
  * @param param - The parameter object containing value, bounds, and setValue function
  * @param disabled - Optional flag to disable the control
- * @returns JSX component
+ * @returns Read-only row that opens a modal editor with save/cancel and max length
  */
 const TextInput = observer(
   ({ label, value, onValueChange, disabled, meta }: ParamControlChildProps) => {

@@ -17,6 +17,9 @@ export interface ConfigScanErrorViewProps {
   onCancel: () => void;
 }
 
+/**
+ * Renders the config scan error view UI section.
+ */
 export function ConfigScanErrorView({
   title,
   errorMessage,

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { ESPCDFSchedule } from "../../entities/ESPCDFSchedule";
 import { ESPCDFService } from "../../entities/ESPCDFService";
 import { ESPCDFScheduleOperationType } from "../../types";
@@ -112,14 +113,14 @@ export class ScheduleStoreSynchronizer {
       name?: string;
       info?: string;
       id: string;
-      triggers?: Array<{
+      triggers?: {
         m?: number;
         d?: number;
         dd?: number;
         mm?: number;
         yy?: number;
         rsec?: number;
-      }>;
+      }[];
       enabled?: boolean;
       validity?: {
         start?: number;

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import { View, Text } from "react-native";
 
@@ -28,7 +29,6 @@ import { BLEPermissionScreenProps } from "@src/types/global";
  *
  * Reusable component that displays a permission request screen when BLE or Location permissions are missing.
  * Used in device scanning screens (BLE, QR).
- *
  * @param status - The permission status ("requesting" or "denied")
  * @param missingPermission - Which permission is missing ("ble", "location", "both", or "none")
  * @param testIdPrefix - Optional prefix for test IDs (default: "scan")

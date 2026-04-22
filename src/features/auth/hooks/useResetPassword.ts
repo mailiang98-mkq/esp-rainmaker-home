@@ -17,6 +17,9 @@ import {
 } from "@features/auth/utils/authHelper";
 import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 
+/**
+ * Manages reset password state and related actions.
+ */
 export function useResetPassword() {
   const { t } = useTranslation();
   const { store } = useCDF();
@@ -36,6 +39,7 @@ export function useResetPassword() {
 
   const codeValidator = createCodeValidator(t("auth.validation.invalidCode"));
   const passwordValidator = createPasswordValidator(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   const confirmPasswordValidator = useCallback(
     createConfirmPasswordValidator(() => newPassword, t),
     [newPassword, t]

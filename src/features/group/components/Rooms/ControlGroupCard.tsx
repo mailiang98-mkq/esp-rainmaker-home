@@ -45,11 +45,11 @@ export interface ControlGroupCardProps {
 function buildGroupDevices(
   group: ESPCDFGroup,
   nodesList: ESPCDFNode[]
-): Array<{ node: ESPCDFNode; device: ESPCDFDevice }> {
+): { node: ESPCDFNode; device: ESPCDFDevice }[] {
   const map = new Map(nodesList.map((n) => [n.id, n] as const));
   const dtype = resolveHomogeneousDeviceType(group, map);
   if (!dtype) return [];
-  const out: Array<{ node: ESPCDFNode; device: ESPCDFDevice }> = [];
+  const out: { node: ESPCDFNode; device: ESPCDFDevice }[] = [];
   for (const nid of group.nodeIds ?? []) {
     const node = map.get(nid);
     if (!node) continue;
@@ -70,6 +70,7 @@ const ControlGroupCard = observer(
     const toast = useToast();
     const { width } = useWindowDimensions();
     const { store } = useCDF();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     const nodesList = store?.nodeStore?.nodesList ?? [];
 
     let cardWidth = 180;

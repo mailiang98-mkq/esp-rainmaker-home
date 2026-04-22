@@ -20,6 +20,9 @@ import {
 } from "@shared/components";
 import { testProps } from "@shared/utils/testProps";
 
+/**
+ * Renders the change password screen UI section.
+ */
 export function ChangePasswordScreen() {
   const { t } = useTranslation();
   const {

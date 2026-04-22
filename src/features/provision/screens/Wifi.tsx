@@ -23,12 +23,8 @@ import { useTranslation } from "react-i18next";
 import { useWifi } from "@features/provision/hooks";
 
 // Components
-import {
-  Header,
-  ScreenWrapper,
-  Button,
-  AgentTermsBottomSheet,
-} from "@shared/components";
+import { Header, ScreenWrapper, Button } from "@shared/components";
+import { AgentTermsBottomSheet } from "@features/agent/components";
 import {
   NetworkListModal,
   WifiNetworkSelection,

@@ -12,7 +12,7 @@ import { getDeviceImage } from "@shared/utils/device";
 import {
   getConditionLabel,
   getValueDisplay,
-} from "@features/automation/utils/automationConditionUtils";
+} from "@shared/utils/automationConditionUtils";
 
 // Hooks
 import { useTranslation } from "react-i18next";

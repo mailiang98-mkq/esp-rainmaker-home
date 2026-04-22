@@ -27,10 +27,9 @@ import { paramControlStyles as styles } from "./lib/styles";
  * A slider component for controlling device speed parameter.
  * Features a multi-color gradient background representing speed levels
  * and displays the current value as a percentage.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for speed control
+ * @returns Fan speed slider with optional numeric bounds from `meta`
  */
 const SpeedSlider = observer(
   ({
@@ -45,10 +44,8 @@ const SpeedSlider = observer(
 
     /**
      * This function is used to handle the value change
-     *
      * @param event - The event object
      * @param newValue - The new value
-     * @returns void
      */
     const commitValue = (
       event: GestureResponderEvent | null,

@@ -36,21 +36,21 @@ export interface AgentConfigResponse {
     displayName: string;
     description: string;
   };
-  requiredConnectors?: Array<{
+  requiredConnectors?: {
     connectorUrl: string;
     description: string;
     type: string;
     authType: string;
     oauthMetadata?: OAuthMetadata;
-  }>;
-  tools?: Array<{
+  }[];
+  tools?: {
     type: string;
     name: string;
     url: string;
     timeout: number;
     authType: string;
     oauthMetadata?: OAuthMetadata;
-  }>;
+  }[];
   createdByName?: string;
 }
 
@@ -224,15 +224,15 @@ export interface ConversationMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
-  toolCalls?: Array<{
+  toolCalls?: {
     name: string;
     input: Record<string, any>;
     toolUseId: string;
-  }>;
-  toolResults?: Array<{
+  }[];
+  toolResults?: {
     toolUseId: string;
     result: any;
-  }>;
+  }[];
 }
 
 /**

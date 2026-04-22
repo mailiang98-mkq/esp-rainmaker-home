@@ -107,8 +107,8 @@ export interface ESPCDFMetadataChangedEvent {
  */
 export interface ESPCDFAvailableTransportsChangedEvent {
   type: "availableTransportsChanged";
-  availableTransports: Partial<Record<string, ESPCDFTransportConfig>> | {};
-  oldAvailableTransports?: Partial<Record<string, ESPCDFTransportConfig>> | {};
+  availableTransports: Partial<Record<string, ESPCDFTransportConfig>>;
+  oldAvailableTransports?: Partial<Record<string, ESPCDFTransportConfig>>;
   entity: ESPCDFNodeInterface;
 }
 
@@ -215,7 +215,7 @@ export interface ESPCDFNodeInterface {
   /** Transport order - priority queue of transport modes */
   transportOrder?: string[];
   /** Available transports with their configurations */
-  availableTransports?: Partial<Record<ESPCDFNodeTransportType, ESPCDFTransportConfig>> | {};
+  availableTransports?: Partial<Record<ESPCDFNodeTransportType, ESPCDFTransportConfig>>;
   operations: ESPCDFNodeOperation;
   _raw: any;
   [key: string]: any;

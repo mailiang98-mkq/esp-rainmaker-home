@@ -1,4 +1,4 @@
-import { ESPCDFDeviceParam, ESPCDFServiceParam, ESPCDFServiceParamOperation } from "@store";
+import { ESPCDFServiceParam, ESPCDFServiceParamOperation } from "@store";
 import { ESPRMNGServiceParam } from "@espressif/rmng-base-sdk";
 
 export function transformToESPCDFServiceParam(

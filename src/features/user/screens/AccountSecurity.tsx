@@ -18,6 +18,9 @@ import { SettingsItem, SettingsSection } from "@features/user/components";
 import { testProps } from "@shared/utils/testProps";
 import { CDF_EXTERNAL_PROPERTIES } from "@shared/utils/constants";
 
+/**
+ * Renders the account security UI section.
+ */
 const AccountSecurity: React.FC = () => {
   const router = useRouter();
   const { store } = useCDF();

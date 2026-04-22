@@ -101,11 +101,11 @@ export interface ESPCDFGroupOperation {
 export interface ESPCDFIssueUserNoCResponse {
   status: string;
   description: string;
-  certificates?: Array<{
+  certificates?: {
     groupId: string;
     matterUserId: string;
     userNoC: string;
-  }>;
+  }[];
 }
 
 export interface ESPCDFCommissioningProgress {

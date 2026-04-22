@@ -130,6 +130,7 @@ export const useDevicePermissions = (): UseDevicePermissionsReturn => {
   // Check permissions on mount
   useEffect(() => {
     checkPermissions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   // Determine if all required permissions are granted

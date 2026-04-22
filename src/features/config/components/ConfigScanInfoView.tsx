@@ -27,6 +27,9 @@ export interface ConfigScanInfoViewProps {
   onCancel: () => void;
 }
 
+/**
+ * Renders the config scan info view UI section.
+ */
 export function ConfigScanInfoView({
   title,
   onUpdateConfig,

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -24,7 +25,7 @@ interface NoDevicesFoundProps {
  *
  * Displays a message when no devices are found with refresh icon to rescan
  * @param props - onScanAgain handler, device prefix, and optional style
- * @returns JSX component
+ * @returns Content wrapper with title, prefix line, and rescan affordance
  */
 export const NoDevicesFound: React.FC<NoDevicesFoundProps> = ({
   onScanAgain,

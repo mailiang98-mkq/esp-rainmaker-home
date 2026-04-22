@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useState, useMemo } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -46,7 +47,6 @@ interface DeviceOperationsProps {
  * - Confirmation dialogs for destructive operations
  * - Updates device via setMultipleParams API
  * - Loading state during operations
- *
  * @param props - Component properties for operations management
  */
 const DeviceOperations: React.FC<DeviceOperationsProps> = ({
@@ -72,26 +72,20 @@ const DeviceOperations: React.FC<DeviceOperationsProps> = ({
     [node],
   );
 
-  // Don't render if service doesn't exist or no params available
-  if (!systemService || !availableParams || availableParams.length === 0) {
-    return null;
-  }
-
-  if (!node.isPrimaryUser) {
-    return null;
-  }
-
   /**
    * Sorts parameters in the desired order: Reboot, Wi-Fi Reset, Factory Reset
    */
   const sortedParams = useMemo(() => {
+    if (!availableParams?.length) {
+      return [];
+    }
     const order = [
       SYSTEM_PARAM_TYPES.REBOOT,
       SYSTEM_PARAM_TYPES.WIFI_RESET,
       SYSTEM_PARAM_TYPES.FACTORY_RESET,
     ];
 
-    return availableParams.sort((a, b) => {
+    return [...availableParams].sort((a, b) => {
       const indexA = order.indexOf(a.type as (typeof order)[number]);
       const indexB = order.indexOf(b.type as (typeof order)[number]);
       /* If type not found in order, put it at the end */
@@ -100,6 +94,15 @@ const DeviceOperations: React.FC<DeviceOperationsProps> = ({
       return indexA - indexB;
     });
   }, [availableParams]);
+
+  // Don't render if service doesn't exist or no params available
+  if (!systemService || !availableParams || availableParams.length === 0) {
+    return null;
+  }
+
+  if (!node.isPrimaryUser) {
+    return null;
+  }
 
   /**
    * Handles system operation execution

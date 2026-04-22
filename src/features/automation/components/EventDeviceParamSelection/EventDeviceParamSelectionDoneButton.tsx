@@ -17,6 +17,9 @@ export interface EventDeviceParamSelectionDoneButtonProps {
   onPress: () => void;
 }
 
+/**
+ * Renders the event device param selection done button UI section.
+ */
 export const EventDeviceParamSelectionDoneButton: React.FC<
   EventDeviceParamSelectionDoneButtonProps
 > = ({ disabled, label, onPress }) => {

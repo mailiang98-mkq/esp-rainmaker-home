@@ -31,10 +31,9 @@ import {
  * ParamControlWrap
  *
  * A wrapper component for controlling device parameter.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for brightness control
+ * @returns Shell around a numeric param child with bounds, throttled `setValue`, and optional chart entry
  */
 const ParamControlWrap = observer(
   ({
@@ -46,7 +45,7 @@ const ParamControlWrap = observer(
     style,
   }: ParamControlProps) => {
     // 1. Computed Values
-    const { min, max, step = 1, ...rest } = getParamBounds(param);
+    const { min, max } = getParamBounds(param);
     const hasFiniteBounds =
       typeof min === "number" &&
       Number.isFinite(min) &&
@@ -71,11 +70,12 @@ const ParamControlWrap = observer(
 
     useEffect(() => {
       state.value = normalizeNumericParamValue(param.value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     }, [param.value]);
 
     // 2. Handlers
     const handleValueChange = async (
-      event: GestureResponderEvent | null,
+      _event: GestureResponderEvent | null,
       newValue: any,
       validate: boolean = true,
     ) => {

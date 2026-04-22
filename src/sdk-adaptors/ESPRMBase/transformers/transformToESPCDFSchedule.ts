@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { ESPCDFSchedule, ESPSDKAdaptorAPIResponse } from "@store";
 import { ESPRMUser } from "@espressif/rainmaker-base-sdk";
 
@@ -18,10 +19,9 @@ enum ScheduleOperation {
 
 /**
  * Transforms schedule data to ESPCDFSchedule entity with operations
- * 
+ *
  * Creates an ESPCDFSchedule entity with add, edit, remove, enable, and disable operations
  * that use the ESPRMUser's setMultipleNodesParams method to perform schedule operations.
- * 
  * @param schedule - Schedule data object containing schedule information
  * @param user - ESPRMUser instance for performing schedule operations
  * @param identifier - Adaptor identifier for the schedule
@@ -33,14 +33,14 @@ export function transformToESPCDFSchedule(
         name: string;
         info?: string;
         nodes?: string[];
-        triggers: Array<{
+        triggers: {
             m?: number;
             d?: number;
             dd?: number;
             mm?: number;
             yy?: number;
             rsec?: number;
-        }>;
+        }[];
         action: {
             [key: string]: {
                 [key: string]: any;
@@ -64,7 +64,6 @@ export function transformToESPCDFSchedule(
 
     /**
      * Generates payload for schedule operations based on the ESP Rainmaker API format
-     * 
      * @param action - Schedule action configuration object containing device actions
      * @param nodeId - ID of the target node
      * @param type - Operation type (ADD, EDIT, REMOVE, ENABLE, DISABLE)
@@ -82,14 +81,14 @@ export function transformToESPCDFSchedule(
         type: ScheduleOperation,
         scheduleName?: string,
         scheduleId?: string,
-        triggers?: Array<{
+        triggers?: {
             m?: number;
             d?: number;
             dd?: number;
             mm?: number;
             yy?: number;
             rsec?: number;
-        }>,
+        }[],
         info?: string,
         flags?: number,
         validity?: {
@@ -155,7 +154,6 @@ export function transformToESPCDFSchedule(
 
     /**
      * Determines the appropriate operation type for editing a schedule based on action existence
-     * 
      * @param nodeId - The node identifier
      * @param oldActions - The existing actions
      * @param newActions - The new actions to be applied
@@ -183,7 +181,6 @@ export function transformToESPCDFSchedule(
 
     /**
      * Internal method to perform schedule operations
-     * 
      * @param type - Operation type
      * @param scheduleName - Schedule name
      * @param triggers - Schedule triggers
@@ -197,14 +194,14 @@ export function transformToESPCDFSchedule(
     const performOperation = async (
         type: ScheduleOperation,
         scheduleName: string = schedule.name,
-        triggers: Array<{
+        triggers: {
             m?: number;
             d?: number;
             dd?: number;
             mm?: number;
             yy?: number;
             rsec?: number;
-        }> = schedule.triggers,
+        }[] = schedule.triggers,
         action: any = schedule.action,
         nodes: string[] = scheduleNodes,
         info: string = schedule.info || "",
@@ -259,14 +256,14 @@ export function transformToESPCDFSchedule(
         },
         async edit(data: {
             name?: string;
-            triggers?: Array<{
+            triggers?: {
                 m?: number;
                 d?: number;
                 dd?: number;
                 mm?: number;
                 yy?: number;
                 rsec?: number;
-            }>;
+            }[];
             action?: {
                 [key: string]: {
                     [key: string]: any;

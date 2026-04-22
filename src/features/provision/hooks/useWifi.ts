@@ -81,6 +81,7 @@ export const useWifi = (): UseWifiReturn => {
         setShowAgentTerms(true);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   // Only load/clear password when user selects a *different* network.
@@ -104,6 +105,7 @@ export const useWifi = (): UseWifiReturn => {
       setPassword("");
       setShouldSave(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [selectedWifi]);
 
   /**

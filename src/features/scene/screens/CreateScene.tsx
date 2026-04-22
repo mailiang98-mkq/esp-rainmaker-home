@@ -77,12 +77,14 @@ const CreateScene = () => {
     if (!state.isEditing) {
       setSceneId(generateRandomId());
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   useEffect(() => {
     if (sceneName) {
       setSceneName(sceneName as string);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [sceneName]);
 
   const disableActionButton = useMemo(() => {
@@ -91,6 +93,7 @@ const CreateScene = () => {
       state.sceneName,
       getSceneActions().length,
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [loading.save, state.sceneName, getSceneActions().length]);
 
   const warning: string = useMemo(() => {

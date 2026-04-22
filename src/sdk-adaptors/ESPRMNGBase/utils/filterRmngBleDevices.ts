@@ -8,7 +8,6 @@
  * RMNG BLE manufacturer advertisement layout matches RainMaker base SDK
  * `SearchESPBLEDevices` (product signature at offset 0 or 2, 16-bit customer id at off+4 / off+5),
  * but uses the 4-byte ASCII "RMNG" signature instead of "Nov".
- *
  * @see node_modules/@espressif/rainmaker-base-sdk/dist/esm/methods/ESPRMUser/SearchESPBLEDevices.js
  */
 

@@ -31,7 +31,7 @@ export function safelyParsePayload(payload: any): any {
   return payload;
 }
 
-type ParamHolder = { params?: Array<{ name: string; value?: unknown }> };
+type ParamHolder = { params?: { name: string; value?: unknown }[] };
 
 function applyNamedEntityParamUpdates(
   node: ESPCDFNode,
@@ -258,7 +258,6 @@ export function handleNodeUpdateEvent(event: any, rootStore: ESPCDF | null) {
 /**
  * Handles adding a transport to a node.
  * Updates the node's available transports and emits property change events.
- *
  * @param rootStore - The root CDF store instance
  * @param nodeId - The ID of the node to update
  * @param transportDetails - The transport configuration to add
@@ -290,7 +289,6 @@ export const handleAddNodeTransport = action(
 /**
  * Handles removing a transport from a node.
  * Updates the node's available transports and emits property change events.
- *
  * @param rootStore - The root CDF store instance
  * @param nodeId - The ID of the node to update
  * @param transportDetails - The transport configuration to remove
@@ -323,7 +321,6 @@ export const handleRemoveNodeTransport = action(
 /**
  * Handles updating node transport (add or remove).
  * Routes to the appropriate handler based on the operation type.
- *
  * @param rootStore - The root CDF store instance
  * @param nodeId - The ID of the node to update
  * @param transportDetails - The transport configuration

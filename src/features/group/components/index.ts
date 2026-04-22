@@ -30,7 +30,6 @@ export {
 export {
   HomeItem,
   type HomeItemProps,
-  type HomeItemOwnershipType,
 } from "./HomeManagement/HomeItem";
 export {
   HomeManagementHeader,
@@ -102,10 +101,3 @@ export { default as HomeName } from "./Settings/HomeName";
 export { default as GroupSharing } from "./Settings/GroupSharing";
 export { default as HomeRemove } from "./Settings/HomeRemove";
 export { default as AddUserModal } from "./Settings/AddUserModal";
-
-// DeviceSettings (device-level settings; used by group Settings and control)
-export { default as DeviceName } from "./DeviceSettings/DeviceName";
-export { default as DeviceInfo } from "./DeviceSettings/DeviceInfo";
-export { default as OTA } from "./DeviceSettings/OTA";
-export { default as DeviceOperations } from "./DeviceSettings/DeviceOperations";
-export { default as DeviceTimezone } from "./DeviceSettings/DeviceTimezone";

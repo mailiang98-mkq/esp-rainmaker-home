@@ -78,11 +78,11 @@ export function transformToESPCDFGroup(
                 throw error;
             }
         },
-        async getSceneCapableDevices(espcdfGroup: ESPCDFGroup): Promise<Array<{
+        async getSceneCapableDevices(espcdfGroup: ESPCDFGroup): Promise<{
             node: ESPCDFNode;
             device: ESPCDFDevice;
             isMaxSceneReached: boolean;
-        }>> {
+        }[]> {
             try {
                 // Use nodeDetails from ESPCDFGroup instance to get latest data
                 const nodeDetails = espcdfGroup.nodeDetails || [];
@@ -95,11 +95,11 @@ export function transformToESPCDFGroup(
                 );
 
                 // One row per device (with params) for scene selection UIs
-                const allDevices: Array<{
+                const allDevices: {
                     node: ESPCDFNode;
                     device: ESPCDFDevice;
                     isMaxSceneReached: boolean;
-                }> = [];
+                }[] = [];
 
                 nodesWithScenesService.forEach((node) => {
                     const devices = node.devices ?? [];
@@ -108,7 +108,7 @@ export function transformToESPCDFGroup(
                     )?.params?.[0] as any;
 
                     const isMaxSceneReached =
-                        scene && scene.bounds?.max && scene.bounds.max == scene.value.length;
+                        scene && scene.bounds?.max && scene.bounds.max === scene.value.length;
 
                     devices
                         .filter((device) => device.params && device.params.length > 0)
@@ -126,11 +126,11 @@ export function transformToESPCDFGroup(
                 throw error;
             }
         },
-        async getScheduleCapableDevices(espcdfGroup: ESPCDFGroup): Promise<Array<{
+        async getScheduleCapableDevices(espcdfGroup: ESPCDFGroup): Promise<{
             node: ESPCDFNode;
             device: ESPCDFDevice;
             isMaxSceneReached: boolean;
-        }>> {
+        }[]> {
             try {
                 // Use nodeDetails from ESPCDFGroup instance to get latest data
                 const nodeDetails = espcdfGroup.nodeDetails || [];
@@ -143,11 +143,11 @@ export function transformToESPCDFGroup(
                 );
 
                 // One row per device (with params) for schedule selection UIs
-                const allDevices: Array<{
+                const allDevices: {
                     node: ESPCDFNode;
                     device: ESPCDFDevice;
                     isMaxSceneReached: boolean;
-                }> = [];
+                }[] = [];
 
                 nodesWithSchedulesService.forEach((node) => {
                     const devices = node.devices ?? [];
@@ -156,7 +156,7 @@ export function transformToESPCDFGroup(
                     )?.params?.[0] as any;
 
                     const isMaxSceneReached =
-                        schedule && schedule.bounds?.max && schedule.bounds.max == schedule.value.length;
+                        schedule && schedule.bounds?.max && schedule.bounds.max === schedule.value.length;
 
                     devices
                         .filter((device) => device.params && device.params.length > 0)
@@ -285,14 +285,14 @@ export function transformToESPCDFGroup(
             name: string;
             info?: string;
             nodes?: string[];
-            triggers: Array<{
+            triggers: {
                 m?: number;
                 d?: number;
                 dd?: number;
                 mm?: number;
                 yy?: number;
                 rsec?: number;
-            }>;
+            }[];
             action: {
                 [key: string]: {
                     [key: string]: any;
@@ -339,14 +339,14 @@ export function transformToESPCDFGroup(
                     name: string;
                     info?: string;
                     nodes: string[];
-                    triggers: Array<{
+                    triggers: {
                         m?: number;
                         d?: number;
                         dd?: number;
                         mm?: number;
                         yy?: number;
                         rsec?: number;
-                    }>;
+                    }[];
                     action: { [key: string]: { [key: string]: any } };
                     enabled?: boolean;
                     validity?: {
@@ -546,7 +546,7 @@ export function transformToESPCDFGroup(
         nodeIds: group.nodes || [],
         nodeDetails: group.nodeDetails?.map((node: ESPRMNode) => transformToESPCDFNode(node)) || [],
         subGroups: group.subGroups?.map((subGroup: ESPRMGroup) => transformToESPCDFGroup(subGroup, user, identifier)) || [],
-        parentId: group.parentId,
+        parentId: group.parentGroupId || '',
         isPrimaryUser: group.isPrimaryUser || false,
         description: group.description || '',
         customData: group.customData || {},

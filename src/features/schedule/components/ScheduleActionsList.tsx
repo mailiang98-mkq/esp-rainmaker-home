@@ -12,12 +12,11 @@ import { globalStyles } from "@shared/theme/globalStyleSheet";
 import ScheduleActions from "./ScheduleActions";
 import ScheduleActionsHeader from "./ScheduleActionsHeader";
 import { testProps } from "@shared/utils/testProps";
+import type { ESPCDFDevice } from "@store";
 
 interface ScheduleAction {
   nodeId: string;
-  device: {
-    name: string;
-  };
+  device: ESPCDFDevice;
   displayDeviceName: string;
   action: any;
 }

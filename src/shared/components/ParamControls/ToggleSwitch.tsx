@@ -22,13 +22,12 @@ import { observer } from "mobx-react-lite";
  *
  * A switch component that toggles between ON/OFF states.
  * Displays a title and a toggle switch control.
- *
  * @param param - The parameter object containing value, properties, and setValue function
  * @param disabled - Optional flag to disable the control
- * @returns JSX component
+ * @returns Labeled Tamagui switch bound to the param boolean
  */
 const ToggleSwitch = observer(
-  ({ label, value, onValueChange, disabled, meta }: ParamControlChildProps) => {
+  ({ label, value, onValueChange, disabled, meta: _meta }: ParamControlChildProps) => {
     // State
     const [isChecked, setIsChecked] = useState(Boolean(value));
 

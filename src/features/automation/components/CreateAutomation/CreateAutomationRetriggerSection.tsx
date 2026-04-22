@@ -20,6 +20,9 @@ export interface CreateAutomationRetriggerSectionProps {
   onCheckedChange: (value: boolean) => void;
 }
 
+/**
+ * Renders the create automation retrigger section UI section.
+ */
 export const CreateAutomationRetriggerSection: React.FC<
   CreateAutomationRetriggerSectionProps
 > = ({ label, description, checked, disabled = false, onCheckedChange }) => {

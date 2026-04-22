@@ -124,6 +124,18 @@ export const GROUP_TYPE_HOME = "home";
 export const GROUP_TYPE_GROUP = "group";
 export const GROUP_TYPE_SUBGROUP = "subgroup";
 
+// DEVICE SELECTION LIST (layout variant; not i18n)
+export const DEVICE_SELECTION_LIST_VARIANT_SCENE = "scene";
+export const DEVICE_SELECTION_LIST_VARIANT_SCHEDULE = "schedule";
+
+// DEVICE SELECTION LIST — QA / test ids
+export const QA_DEVICE_SELECTION_SCROLL_SCENE = "scroll_scene_devices";
+export const QA_DEVICE_SELECTION_SCROLL_SCHEDULE = "scroll_schedule_devices";
+export const QA_DEVICE_SELECTION_VIEW_SELECTED_DEVICES = "view_selected_devices";
+export const QA_DEVICE_SELECTION_TEXT_SELECTED_DEVICES = "text_selected_devices";
+export const QA_DEVICE_SELECTION_VIEW_NON_SELECTED_DEVICES = "view_non_selected_devices";
+export const QA_DEVICE_SELECTION_TEXT_SELECT_DEVICES = "text_select_devices";
+
 // LIGHT CONTROL SCREEN
 export const COLOR_TAB = "Colour";
 export const WHITE_TAB = "White";

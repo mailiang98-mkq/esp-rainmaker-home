@@ -583,8 +583,8 @@ class GroupStore {
 
   /**
    * Dynamically adds an observable property to the store.
-   * @param {string} propertyName - The name of the property to add.
-   * @param {any} initialValue - The initial value of the property.
+   * @param propertyName - The name of the property to add.
+   * @param initialValue - The initial value of the property.
    */
   @action addProperty(propertyName: string, initialValue: any) {
     // Add the observable property

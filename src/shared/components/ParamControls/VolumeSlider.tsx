@@ -23,10 +23,9 @@ import { tokens } from "@shared/theme/tokens";
  *
  * A slider component for controlling volume levels.
  * Displays current volume value and allows adjustment through a slider.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for volume control
+ * @returns Volume slider with percent label and clamped writes
  */
 const VolumeSlider = observer(
   ({

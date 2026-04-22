@@ -347,12 +347,3 @@ export const ESPCDFProvProgressMessages = {
   /** Message indicating the successful node timeZone setup. */
   NODE_TIMEZONE_SETUP_SUCCEED: "Node timezone setup succeed",
 } as const;
-
-/**
- * Represents the types of security mechanisms available.
- */
-export declare enum ESPCDFSecurity {
-  security_0 = 0,
-  security_1 = 1,
-  security_2 = 2,
-}

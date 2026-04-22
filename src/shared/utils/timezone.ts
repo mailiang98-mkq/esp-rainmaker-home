@@ -449,10 +449,8 @@ export const TIMEZONE_LIST = [
 
 /**
  * Gets the timezone service and parameter from a node's configuration
- *
  * @param node - The ESP Rainmaker node to check for timezone support
  * @returns Object containing the time service, timezone param, and permission flags
- *
  * @example
  * const { timeService, timezoneParam, hasReadPermission, hasWritePermission } = getNodeTimezoneConfig(node);
  * if (hasReadPermission && timezoneParam?.value) {
@@ -632,9 +630,9 @@ async function resolveTimeZoneStringForProvision(
 }
 
 /**
-* After provisioning, refetches the node until Time/TZ has write permission (or attempts exhausted),
-* then retries setNodeTimeZone. Ensures addDevice can await this before returning so UI can enable Continue.
-*/
+ * After provisioning, refetches the node until Time/TZ has write permission (or attempts exhausted),
+ * then retries setNodeTimeZone. Ensures addDevice can await this before returning so UI can enable Continue.
+ */
 async function safeGetNodeDetails(
   nodeId: string,
   getNodeDetails: (id: string) => Promise<ESPCDFNode | null | undefined>
@@ -653,6 +651,9 @@ async function safeGetNodeDetails(
   }
 }
 
+/**
+ * Handles apply provision node timezone with retries logic for this module.
+ */
 export async function applyProvisionNodeTimezoneWithRetries(
   user: ESPCDFUser,
   nodeId: string,

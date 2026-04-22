@@ -17,12 +17,8 @@ import { getMissingPermission, getProvisionBleIconName } from "@shared/utils/dev
 import { Bluetooth } from "lucide-react-native";
 
 // Components
-import {
-  Header,
-  ScreenWrapper,
-  ContentWrapper,
-  AgentTermsBottomSheet,
-} from "@shared/components";
+import { Header, ScreenWrapper, ContentWrapper } from "@shared/components";
+import { AgentTermsBottomSheet } from "@features/agent/components";
 import {
   BLEPermissionScreen,
   BluetoothDisabledScreen,
@@ -40,7 +36,7 @@ import { testProps } from "@shared/utils/testProps";
  *
  * Main component for device scanning functionality
  * Handles BLE device discovery and connection
- * @returns JSX component
+ * @returns Screen that switches between permission, scan list, loading, and empty states
  */
 const ScanBLE = () => {
   const { t } = useTranslation();

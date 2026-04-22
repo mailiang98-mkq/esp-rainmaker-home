@@ -23,10 +23,9 @@ import { testProps } from "@shared/utils/testProps";
  *
  * A realistic circular power button component that toggles between on/off states.
  * Provides visual feedback through color, shadows, and style changes to mimic real hardware.
- *
  * @param param - The parameter object containing value and setValue function
  * @param disabled - Optional flag to disable the control
- * @returns JSX component
+ * @returns Large circular power affordance with on/off styling and icon
  */
 const PowerButton = observer(
   ({ value, onValueChange, disabled }: ParamControlChildProps) => {

@@ -13,6 +13,9 @@ import { createCodeValidator } from "@features/auth/utils/authHelper";
 import { setPendingPostSignupLogin } from "@features/auth/hooks/useLogin";
 import { router } from "expo-router";
 
+/**
+ * Manages confirmation code state and related actions.
+ */
 export function useConfirmationCode() {
   const { t } = useTranslation();
   const { store } = useCDF();

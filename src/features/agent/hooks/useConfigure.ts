@@ -17,6 +17,10 @@ import {
 } from "@features/agent/utils";
 import { getAgentTermsAccepted } from "@features/agent/utils/storage";
 
+/**
+ * useConfigure hook
+ * @returns Configure flow state and handler functions
+ */
 export function useConfigure() {
   const { t } = useTranslation();
   const router = useRouter();

@@ -27,10 +27,9 @@ import { paramControlStyles as styles } from "./lib/styles";
  * A slider component for controlling color hue.
  * Features a rainbow gradient background representing the full color spectrum
  * and displays the current value in degrees.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for hue control
+ * @returns Horizontal hue slider with label, clamped to meta min/max/step
  */
 const HueSlider = observer(
   ({
@@ -45,10 +44,8 @@ const HueSlider = observer(
 
     /**
      * This function is used to handle the value change
-     *
      * @param event - The event object
      * @param newValue - The new value
-     * @returns void
      */
     const commitValue = (
       event: GestureResponderEvent | null,

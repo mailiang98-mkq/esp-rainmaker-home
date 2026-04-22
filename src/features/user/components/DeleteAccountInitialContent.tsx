@@ -20,6 +20,9 @@ type DeleteAccountInitialContentProps = {
   isLoading: boolean;
 };
 
+/**
+ * Renders the delete account initial content UI section.
+ */
 const DeleteAccountInitialContent: React.FC<
   DeleteAccountInitialContentProps
 > = ({ noticeText, descriptionText, buttonLabel, onProceed, isLoading }) => (

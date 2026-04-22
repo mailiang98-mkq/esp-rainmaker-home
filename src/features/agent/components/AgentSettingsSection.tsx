@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { View, Text } from "react-native";
 import { agentSelectionSheetStyles } from "@features/agent/theme";
 import { AgentCard } from "./AgentCard";
@@ -19,6 +20,9 @@ interface AgentSettingsSectionProps {
   onDeleteAgent: (agent: AgentConfig) => void;
 }
 
+/**
+ * Titled block that lists agents as selectable cards with loading state per agent and delete in edit mode.
+ */
 export function AgentSettingsSection({
   title,
   agents,

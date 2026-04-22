@@ -27,12 +27,12 @@ import { ESPRMNGAutomation, ESPRMNGNode } from "@espressif/rmng-base-sdk";
 import { targetsToCdfActions, cdfActionsToTargets, cdfEventsToTriggerItems, parseTriggerId } from "../utils/automation";
 
 /** Resolved event objects for UI (deviceName, param, check, value). Used when trigger details are resolved in getAutomations. */
-export type ResolvedAutomationEvents = Array<{
+export type ResolvedAutomationEvents = {
     deviceName?: string;
     param?: string;
     check?: string;
     value?: unknown;
-}>;
+}[];
 
 /** Options for transformToESPCDFAutomation. getNode is required for automation update (events/conditions) to sync node triggers. */
 export interface TransformToESPCDFAutomationOptions {

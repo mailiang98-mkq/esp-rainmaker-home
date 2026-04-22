@@ -15,6 +15,9 @@ import {
 } from "@features/config/components";
 import { useConfigScan } from "@features/config/hooks";
 
+/**
+ * Renders the config scan screen UI section.
+ */
 export function ConfigScanScreen() {
   const { t } = useTranslation();
   const title = t("config.scan.title");

@@ -9,6 +9,9 @@ import { VoiceAssistantGuide } from "@features/user/components";
 import { useTranslation } from "react-i18next";
 import { GOOGLE_IMAGES } from "@features/user/constants/voiceAssistantImages";
 
+/**
+ * Renders the google assistant guide UI section.
+ */
 const GoogleAssistantGuide: React.FC = () => {
   const { t } = useTranslation();
 

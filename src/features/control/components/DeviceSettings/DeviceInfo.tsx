@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import { View, Text } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -29,7 +30,6 @@ import { DeviceInfoProps } from "@src/types/global";
  *
  * Displays device information in a collapsible card format.
  * Shows device ID, version, and timezone (if available).
- *
  * @param props - Component properties containing device information
  */
 const DeviceInfo: React.FC<DeviceInfoProps> = ({

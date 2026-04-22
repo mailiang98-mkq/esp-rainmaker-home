@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -78,10 +79,9 @@ const aiAnimationGif = require("@assets/images/devices/ai-anitmation.gif");
  * A control panel for AI Assistant devices that supports:
  * - Agent ID selection and update
  * - Refresh token functionality
- *
  * @param node - The ESPRMNode representing the AI assistant device
  * @param device - The ESPRMDevice representing the AI assistant device
- * @returns JSX component for AI assistant control
+ * @returns Agent branding, agent-id editor, and entry points to chat/configure
  */
 const AiAgent: React.FC<ControlPanelProps> = ({ node, device }) => {
   // Hooks

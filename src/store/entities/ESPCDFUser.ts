@@ -267,7 +267,7 @@ export class ESPCDFUser implements ESPCDFUserInterface {
   }
 
   async setMultipleNodesParams(
-    payload: Array<{ nodeId: string; payload: any }>
+    payload: { nodeId: string; payload: any }[]
   ): Promise<any> {
     return this.operations.setMultipleNodesParams(payload);
   }
@@ -276,13 +276,9 @@ export class ESPCDFUser implements ESPCDFUserInterface {
    * Fetches groups from all registered SDKs that support group fetching.
    * This method mirrors the functionality of groupStore.syncGroupsList() but is
    * accessible through the user entity and works through callback operations.
-   *
+   * Calls operations.getGroups() (implemented with access to rootStore), updates groupStore
+   * reactively through callbacks, and stores pagination context for on-demand loading.
    * @returns Promise resolving to batch operation result with successful and failed group fetches
-   *
-   * @remarks
-   * - Calls operations.getGroups() which should be implemented with access to rootStore
-   * - Updates groupStore reactively through callbacks
-   * - Stores pagination context for on-demand loading of additional pages
    */
   async getGroups(): Promise<ESPCDFPaginatedAPIResponse<ESPCDFGroup[]>> {
     return this.runAndEmit(

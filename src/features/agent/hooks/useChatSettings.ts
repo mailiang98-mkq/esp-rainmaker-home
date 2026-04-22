@@ -20,6 +20,10 @@ type AgentConfigTool = NonNullable<AgentConfigResponse["tools"]>[number];
 
 const RAINMAKER_MCP_CONNECTOR_URL = "https://mcp.rainmaker.espressif.com/api/mcp";
 
+/**
+ * useChatSettings hook
+ * @returns Chat settings state and handler functions
+ */
 export function useChatSettings() {
   const { t } = useTranslation();
   const toast = useToast();

@@ -16,6 +16,9 @@ import { useToast } from "@shared/hooks/useToast";
 // Utils
 import { createCodeValidator } from "@features/auth/utils/authHelper";
 
+/**
+ * Manages delete account state and related actions.
+ */
 export const useDeleteAccount = () => {
   const { t } = useTranslation();
   const router = useRouter();

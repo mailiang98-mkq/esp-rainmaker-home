@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { useState, useMemo, useEffect } from "react";
 import { View } from "react-native";
 import {
@@ -54,7 +55,6 @@ import {
 /**
  * GenericChart - A versatile chart component for rendering time series data as line charts or bar charts.
  * Features dynamic X-axis label formatting, adaptive styling, and tooltips.
- *
  * @param data - Array of data points with timestamp and value properties
  * @param startTime - Optional start time for chart domain (Unix timestamp in milliseconds)
  * @param endTime - Optional end time for chart domain (Unix timestamp in milliseconds)
@@ -90,8 +90,16 @@ export default function GenericChart({
     const yMin = Math.min(...yValues);
     const yMax = Math.max(...yValues);
 
-    const dataStartTime = startTime;
-    const dataEndTime = endTime;
+    const timestamps = data
+      .map((d: any) => d.timestamp as number)
+      .filter((t: number) => typeof t === "number" && Number.isFinite(t));
+    const fallbackStart =
+      timestamps.length > 0 ? Math.min(...timestamps) : 0;
+    const fallbackEnd =
+      timestamps.length > 0 ? Math.max(...timestamps) : 0;
+
+    const dataStartTime = startTime ?? fallbackStart;
+    const dataEndTime = endTime ?? fallbackEnd;
 
     return {
       yMin,
@@ -114,12 +122,14 @@ export default function GenericChart({
   /**
    * Dynamic X-axis label formatter function based on visible time range.
    * Automatically selects appropriate format (time, date, datetime) based on time span.
-   *
    * @returns A formatting function that converts Unix timestamps to formatted strings
    */
   const formatXLabel = useMemo(() => {
     const start = visibleStartTime ?? dataStartTime;
     const end = visibleEndTime ?? dataEndTime;
+    if (start == null || end == null) {
+      return (timestamp: number) => new Date(timestamp).toISOString();
+    }
     return getDynamicXLabelFormatter(start, end);
   }, [visibleStartTime, visibleEndTime, dataStartTime, dataEndTime]);
 
@@ -129,7 +139,6 @@ export default function GenericChart({
   /**
    * Normalized chart data with typed timestamp and value.
    * Transforms input data to ensure consistent typing for chart rendering.
-   *
    * @returns Array of normalized data points
    */
   const chartData = useMemo(() => {
@@ -142,7 +151,6 @@ export default function GenericChart({
   /**
    * X-axis tick values filtered to visible range.
    * Returns maximum 5 evenly spaced timestamps for axis labels.
-   *
    * @returns Array of timestamp values for X-axis ticks
    */
   const tickValues = useMemo(() => {
@@ -158,12 +166,19 @@ export default function GenericChart({
   /**
    * Chart visual configuration based on visible range.
    * Calculates adaptive styling values for points, lines, and bars.
-   *
    * @returns Object containing numVisiblePoints, pointRadius, lineStrokeWidth, barWidth, and innerPadding
    */
   const { pointRadius, lineStrokeWidth, barWidth, innerPadding } = useMemo(() => {
     const visibleStart = visibleStartTime ?? dataStartTime;
     const visibleEnd = visibleEndTime ?? dataEndTime;
+    if (visibleStart == null || visibleEnd == null) {
+      return {
+        pointRadius: 2,
+        lineStrokeWidth: 1,
+        barWidth: 8,
+        innerPadding: 0,
+      };
+    }
 
     // Count data points within the visible time range
     const numVisiblePoints = chartData.filter((item) => {
@@ -194,7 +209,6 @@ export default function GenericChart({
   /**
    * CartesianChart configuration object.
    * Contains domain, axis options, and styling configuration for the chart.
-   *
    * @returns Configuration object for CartesianChart component
    */
   const cartesianChartConfig = useMemo(
@@ -231,7 +245,7 @@ export default function GenericChart({
         linePathEffect: <DashPathEffect intervals={[4, 4]} />
       },
     }),
-    [dataStartTime, dataEndTime, yMin, yMax, font, formatXLabel, tickValues],
+    [yMin, yMax, font, formatXLabel, tickValues],
   );
 
   return (

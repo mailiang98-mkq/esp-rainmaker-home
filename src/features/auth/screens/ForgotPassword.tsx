@@ -23,6 +23,9 @@ import {
 import { AppVersionText } from "@features/auth/components";
 import { testProps } from "@shared/utils/testProps";
 
+/**
+ * Renders the forgot password screen UI section.
+ */
 export function ForgotPasswordScreen() {
   const { t } = useTranslation();
   const {

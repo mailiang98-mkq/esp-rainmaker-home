@@ -49,6 +49,9 @@ interface ConfirmationDialogProps {
   qaId?: string;
 }
 
+/**
+ * Renders the confirmation dialog UI section.
+ */
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   trigger,
   open,

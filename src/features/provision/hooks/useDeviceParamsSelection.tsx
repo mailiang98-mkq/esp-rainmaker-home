@@ -24,7 +24,6 @@ type ParamWithValue = ESPCDFDeviceParam & { value: any };
 
 /**
  * Hook for managing device parameters selection logic
- *
  * @param identifier - "scene" or "schedule" to determine which context to use
  * @returns View model containing device data, handlers, and computed values
  */
@@ -86,7 +85,6 @@ export const useDeviceParamsSelection = (
     }
   }, [
     state.selectedDevice,
-    state.actions,
     store.nodeStore.nodesByIDMap,
     store.nodeStore._nodesByIDMap,
     getActionValue,
@@ -95,18 +93,19 @@ export const useDeviceParamsSelection = (
 
   const selectedDevice = deviceData.selectedDevice ?? null;
   const nodeId = deviceData.nodeId ?? "";
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   const rawParams = deviceData.params ?? [];
 
   // Filtered parameters
   const filteredParams = useMemo<
-    Array<ESPCDFDeviceParam & { value: any }>
+    (ESPCDFDeviceParam & { value: any })[]
   >(() => {
     // If using schedule params function, params are already filtered and have values
     if (identifier === "schedule") {
-      return rawParams as Array<ESPCDFDeviceParam & { value: any }>;
+      return rawParams as (ESPCDFDeviceParam & { value: any })[];
     }
     const filtered = filterExcludedParamTypes(rawParams) ?? [];
-    return filtered as Array<ESPCDFDeviceParam & { value: any }>;
+    return filtered as (ESPCDFDeviceParam & { value: any })[];
   }, [rawParams, identifier]);
 
   // Handlers

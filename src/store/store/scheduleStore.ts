@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { observable, action } from "mobx";
 import { ESPCDF } from "./index";
 import { ESPCDFSchedule } from "../entities/ESPCDFSchedule";
@@ -21,7 +22,7 @@ class ScheduleStore {
 
   /**
    * Getter for schedules indexed by ID
-   * @returns {Object.<string, ESPCDFSchedule>} Map of schedules indexed by schedule ID
+   * @returns Map of schedules indexed by schedule ID
    */
   public get schedulesByID(): { [key: string]: ESPCDFSchedule } {
     return this._schedulesByID;
@@ -29,7 +30,7 @@ class ScheduleStore {
 
   /**
    * Get the list of schedules from the store
-   * @returns {ESPCDFSchedule[]} The list of schedules
+   * @returns The list of schedules
    */
   get schedulesList(): ESPCDFSchedule[] {
     return Object.values(this._schedulesByID) as ESPCDFSchedule[];
@@ -37,7 +38,7 @@ class ScheduleStore {
 
   /**
    * Setter for schedules indexed by ID
-   * @param {Object.<string, ESPCDFSchedule>} value - Map of schedules to set
+   * @param value - Map of schedules to set
    */
   public set schedulesByID(value: { [key: string]: ESPCDFSchedule }) {
     this._schedulesByID = value;
@@ -45,7 +46,7 @@ class ScheduleStore {
 
   /**
    * Set the list of schedules in the store
-   * @param {ESPCDFSchedule[]} schedulesList The list of schedules to set
+   * @param schedulesList The list of schedules to set
    */
   @action setScheduleList(schedules: ESPCDFSchedule[]) {
     this.clear();
@@ -54,8 +55,8 @@ class ScheduleStore {
 
   /**
    * Add a schedule to the store
-   * @param {ESPCDFSchedule} schedule The schedule to add
-   * @returns {ESPCDFSchedule} The added schedule
+   * @param schedule The schedule to add
+   * @returns The added schedule
    */
   @action addSchedule(schedule: ESPCDFSchedule): ESPCDFSchedule {
     // Make schedule and all nested properties observable recursively
@@ -74,8 +75,8 @@ class ScheduleStore {
 
   /**
    * Update a schedule in the store
-   * @param {string} scheduleId The ID of the schedule to update
-   * @param {Partial<ESPCDFSchedule>} update The update data
+   * @param scheduleId The ID of the schedule to update
+   * @param update The update data
    */
   @action updateSchedule(scheduleId: string, update: Partial<ESPCDFSchedule>) {
     if (!this._schedulesByID[scheduleId]) {
@@ -86,7 +87,7 @@ class ScheduleStore {
 
   /**
    * Remove a schedule from the store
-   * @param {string} scheduleId The ID of the schedule to remove
+   * @param scheduleId The ID of the schedule to remove
    */
   @action removeSchedule(scheduleId: string) {
     if (!this._schedulesByID[scheduleId]) {
@@ -99,8 +100,8 @@ class ScheduleStore {
 
   /**
    * Get a schedule by ID
-   * @param {string} scheduleId The ID of the schedule
-   * @returns {ESPCDFSchedule | undefined} The schedule or undefined if not found
+   * @param scheduleId The ID of the schedule
+   * @returns The schedule or undefined if not found
    */
   getScheduleById(scheduleId: string): ESPCDFSchedule | undefined {
     return this._schedulesByID[scheduleId] as ESPCDFSchedule | undefined;
@@ -108,8 +109,8 @@ class ScheduleStore {
 
   /**
    * Get schedules for a specific node
-   * @param {string} nodeId The node ID
-   * @returns {ESPCDFSchedule[]} The schedules for the node
+   * @param nodeId The node ID
+   * @returns The schedules for the node
    */
   getSchedulesForNode(nodeId: string): ESPCDFSchedule[] {
     return this.schedulesList.filter((schedule) =>
@@ -121,7 +122,6 @@ class ScheduleStore {
    *
    * This method removes all schedules from the store and resets the
    * beforeSetScheduleListHook and afterSetScheduleListHook to empty functions.
-   *
    * @example
    * scheduleStore.clear();
    */

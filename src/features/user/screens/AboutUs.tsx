@@ -21,6 +21,9 @@ import {
 import { InfoItem } from "@features/user/components";
 import Constants from "expo-constants";
 
+/**
+ * Renders the about us UI section.
+ */
 const AboutUs: React.FC = () => {
   const { t } = useTranslation();
   const appVersion = Constants.expoConfig?.version;

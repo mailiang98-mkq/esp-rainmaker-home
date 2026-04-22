@@ -17,6 +17,9 @@ export interface ConfigScanScannerViewProps {
   onBack: () => void;
 }
 
+/**
+ * Renders the config scan scanner view UI section.
+ */
 export function ConfigScanScannerView({
   title,
   onScan,

@@ -92,7 +92,7 @@ export function useEventDeviceSelection(
       allDevices,
       (d) => d.node.connectivityStatus?.isConnected ?? false
     );
-  }, [store, state.forceUpdateUI, currentEventInfo, state.nodeId]);
+  }, [store, currentEventInfo, state.nodeId]);
 
   const currentEventDevice = useMemo(() => {
     if (!currentEventInfo) return null;

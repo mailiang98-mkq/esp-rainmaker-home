@@ -20,12 +20,10 @@ import { ESPCDFBatchOperationResult } from "../types";
  * This function traverses an object and makes every property observable,
  * including nested objects and arrays of objects. If a property is already
  * observable, it will not be modified.
- *
- * @param {any} obj - The object to be made observable.
- * @param {Set<string>} excludeKeys - Keys to exclude from being made observable (e.g., '_raw', 'operations')
- * @param {WeakSet<object>} visited - Set of already visited objects to prevent circular references
- * @returns {any} - The observable version of the input object.
- *
+ * @param obj - The object to be made observable.
+ * @param excludeKeys - Keys to exclude from being made observable (e.g., '_raw', 'operations')
+ * @param visited - Set of already visited objects to prevent circular references
+ * @returns - The observable version of the input object.
  * @example
  * const obj = { a: 1, b: { c: 2 }, _raw: sdkObject };
  * const observableObj = makeEverythingObservable(obj, new Set(['_raw']));
@@ -33,11 +31,8 @@ import { ESPCDFBatchOperationResult } from "../types";
  * console.log(isObservable(observableObj.b)); // true
  * console.log(isObservable(observableObj._raw)); // false (excluded)
  *
- * @remarks
- * This function is useful in scenarios where you need to ensure that all parts
- * of an object, including deeply nested properties, are observable by Mobx.
- * This is particularly useful in state management for reactive programming.
- * Exclude keys like '_raw' and 'operations' that are SDK-specific and don't need reactivity.
+ * Useful when nested properties must be observable in MobX; exclude keys like '_raw' and
+ * 'operations' that are SDK-specific and don't need reactivity.
  */
 export const makeEverythingObservable = <T extends object>(
   obj: T,
@@ -107,7 +102,6 @@ export const makeEverythingObservable = <T extends object>(
 
 /**
  * Deeply merges two objects, recursively merging nested objects.
- *
  * @param target - The target object to merge into
  * @param source - The source object to merge from
  * @returns A new object with merged properties
@@ -150,7 +144,6 @@ export const ERROR_MESSAGE_MAP = {
 
 /**
  * Checks if an object is empty (null, undefined, or has no keys).
- *
  * @param obj - The object to check
  * @returns True if the object is null, undefined, or has no enumerable keys
  */
@@ -163,7 +156,6 @@ export function isEmptyObject(obj: any): boolean {
  *
  * Used for batch operations where multiple promises are settled and need to be
  * categorized into successful and failed results.
- *
  * @param results - Array of PromiseSettledResult containing arrays of results
  * @returns Object with successfulResults and failedResults arrays
  */
@@ -188,12 +180,10 @@ export function partitionBatchArrayResults<TSuccess, TError = unknown>(
 
 /**
  * Compares two arrays of objects and checks if all objects in array1 exist in array2
- *
  * @param array1 First array to compare
  * @param array2 Second array to compare against
  * @param key Optional key to use for faster comparison instead of full object comparison
  * @returns True if all objects in array1 exist in array2, false otherwise
- *
  * @example
  * // With key comparison
  * compareArrays([{id: 1}, {id: 2}], [{id: 1}, {id: 2}, {id: 3}], 'id') // true

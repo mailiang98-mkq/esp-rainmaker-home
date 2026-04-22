@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import {
     ESPCDFCreateGroupRequest,
     ESPCDFGroup,
@@ -47,12 +48,11 @@ const RMNG_REGISTER_CLIENT_TOKEN_PLACEHOLDER = "TOKEN";
 
 /**
  * Transforms ESPRMNGUser from the RainMaker SDK to ESPCDFUser format.
- * 
+ *
  * This utility converts the SDK user object to the CDF user format with:
  * - User info (id, name, email, nickname, phone)
  * - Operations wrapper that delegates to ESPRMNGUser methods
  * - Raw reference to the original ESPRMNGUser
- * 
  * @param esprmngUser - The ESPRMNGUser instance from the SDK
  * @param identifier - The adaptor identifier
  * @param cdfContext - Optional CDF context for operations
@@ -132,7 +132,7 @@ export function transformToESPCDFUser(
                 data: userInfo,
             };
         },
-        async updateUserInfo(userInfo: Partial<ESPCDFUserInfo>): Promise<ESPCDFAPIResponse<any>> {
+        async updateUserInfo(_userInfo: Partial<ESPCDFUserInfo>): Promise<ESPCDFAPIResponse<any>> {
             throw new Error("RMNGBase SDK does not support updateUserInfo");
         },
         async getCustomData(): Promise<any> {
@@ -168,7 +168,7 @@ export function transformToESPCDFUser(
             }
 
         },
-        async updateName(name: string): Promise<ESPCDFAPIResponse<any>> {
+        async updateName(_name: string): Promise<ESPCDFAPIResponse<any>> {
             console.warn("[transformToESPCDFUser] updateName is not supported by RMNGBase SDK");
             throw new Error("RMNGBase SDK does not support updateName")
         },
@@ -176,7 +176,7 @@ export function transformToESPCDFUser(
             console.warn("[transformToESPCDFUser] requestAccountDeletion is not supported by RMNGBase SDK");
             throw new Error("RMNGBase SDK does not support requestAccountDeletion")
         },
-        async confirmAccountDeletion(code: string): Promise<ESPCDFAPIResponse<any>> {
+        async confirmAccountDeletion(_code: string): Promise<ESPCDFAPIResponse<any>> {
             console.warn("[transformToESPCDFUser] confirmAccountDeletion is not supported by RMNGBase SDK");
             throw new Error("RMNGBase SDK does not support confirmAccountDeletion")
         },
@@ -255,16 +255,16 @@ export function transformToESPCDFUser(
             );
             return createCDFProvisioningDeviceFromAdapterDescriptor(descriptor as any);
         },
-        async getGroupById(groupId: string, options: Record<string, any>): Promise<any> {
+        async getGroupById(_groupId: string, _options: Record<string, any>): Promise<any> {
             throw new Error("RMNGBase SDK does not support getGroupById");
         },
-        async subscribeToEvent(event: string, callback: (event: any) => void): Promise<void> {
+        async subscribeToEvent(_event: string, _callback: (event: any) => void): Promise<void> {
             throw new Error("RMNGBase SDK does not support subscribeToEvent");
         },
-        async unsubscribeFromEvent(event: string, callback: (event: any) => void): Promise<void> {
+        async unsubscribeFromEvent(_event: string, _callback: (event: any) => void): Promise<void> {
             throw new Error("RMNGBase SDK does not support unsubscribeFromEvent");
         },
-        async setMultipleNodesParams(payload: Array<{ nodeId: string; payload: any }>): Promise<any> {
+        async setMultipleNodesParams(_payload: { nodeId: string; payload: any }[]): Promise<any> {
             throw new Error("RMNGBase SDK does not support setMultipleNodesParams");
         },
         async getGroups(): Promise<ESPCDFPaginatedAPIResponse<ESPCDFGroup[]>> {

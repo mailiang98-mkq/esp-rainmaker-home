@@ -9,6 +9,9 @@ import { POLLING, USER_PERMISSION } from "./constants";
 import { PollOptions, PollResult } from "@src/types/global";
 import { ESPCDFUser, ESPCDFUserCustomDataRequest } from "@store";
 
+/**
+ * Handles open url logic for this module.
+ */
 export const openUrl = (url: string) => {
   WebBrowser.openBrowserAsync(url);
 };
@@ -37,7 +40,7 @@ export const deepClone = <T>(obj: T): T => {
 /**
  * Generates a 4-character random ID
  * Uses uppercase letters and replaces numbers with 'X'
- * @returns {string} 4-character identifier
+ * @returns 4-character identifier
  */
 export const generateRandomId = () => {
   const randomStr = Math.random().toString(36).substring(2, 15);
@@ -94,7 +97,7 @@ export const getScheduleTimeText = (trigger: any): string => {
  * @param NUM_CARDS_3 - Number of cards per row when 3 cards fit
  * @param NUM_CARDS_2 - Number of cards per row when 2 cards fit
  * @param screenWidth - Width of the screen
- * @returns {Object} Object containing card dimensions and number of cards per row
+ * @returns {object} Object containing card dimensions and number of cards per row
  */
 /**
  * Helper functions for time picker
@@ -178,6 +181,9 @@ export const dateToMinutes = (date: Date): number => {
   return date.getHours() * 60 + date.getMinutes();
 };
 
+/**
+ * Retrieves scene card dimensions for downstream consumers.
+ */
 export const getSceneCardDimensions = ({
   SIDE_PADDING,
   CARD_MARGIN_RIGHT,
@@ -221,6 +227,9 @@ export const getSceneCardDimensions = ({
 };
 
 
+/**
+ * Handles update last selected home logic for this module.
+ */
 export const updateLastSelectedHome = async (user: ESPCDFUser, lastSelectedHomeId: string) => {
   try {
     if (user) {
@@ -247,7 +256,7 @@ export const updateLastSelectedHome = async (user: ESPCDFUser, lastSelectedHomeI
 /**
  * Generates a 4-character random ID
  * Uses numbers and pads with '0' to make it 4 characters
- * @returns {string} 4-character identifier [0000-9999]
+ * @returns 4-character identifier [0000-9999]
  */
 export const getRandom4DigitString = () => {
   return Math.floor(Math.random() * 10000)
@@ -267,11 +276,9 @@ export const DEFAULT_POLLING_OPTIONS: Required<Omit<PollOptions, "label">> & {
 
 /**
  * Generic polling function that retries an async operation until success or max attempts.
- *
  * @param pollFn - Async function that returns the result or null/undefined if not ready
  * @param options - Polling configuration options
  * @returns PollResult with success status and data
- *
  * @example
  * ```typescript
  * const result = await pollUntilReady(
@@ -342,7 +349,6 @@ export async function pollUntilReady<T>(
 /**
  * Extracts a human-readable message from various error formats.
  * Handles Error instances, strings, and objects with message/code/toString.
- *
  * @param error - Unknown error value (Error, string, or object)
  * @returns Extracted error message string
  */
@@ -397,9 +403,8 @@ export const formatConfigKey = (key: string): string => {
 
 /**
  * Converts a Uint8Array to a Base64 encoded string.
- *
- * @param {Uint8Array} uint8Array - The Uint8Array to convert.
- * @returns {string} The Base64 encoded string.
+ * @param uint8Array - The Uint8Array to convert.
+ * @returns The Base64 encoded string.
  */
 export const uint8ArrayToBase64 = (uint8Array: Uint8Array): string => {
   let binaryString = "";
@@ -412,9 +417,8 @@ export const uint8ArrayToBase64 = (uint8Array: Uint8Array): string => {
 
 /**
  * Converts a Base64 encoded string to a Uint8Array.
- *
- * @param {string} base64 - The Base64 encoded string to convert.
- * @returns {Uint8Array} The resulting Uint8Array.
+ * @param base64 - The Base64 encoded string to convert.
+ * @returns The resulting Uint8Array.
  */
 export const base64ToUint8Array = (base64: string): Uint8Array => {
   const binaryString = atob(base64);

@@ -12,6 +12,9 @@ import { ScreenWrapper } from "@shared/components";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 
+/**
+ * Renders the config scan success view UI section.
+ */
 export function ConfigScanSuccessView() {
   const { t } = useTranslation();
 

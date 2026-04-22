@@ -39,6 +39,9 @@ export interface UseGroupControlResult {
   handleEditGroup: () => void;
 }
 
+/**
+ * Manages group control state and related actions.
+ */
 export function useGroupControl(
   options: UseGroupControlOptions
 ): UseGroupControlResult {

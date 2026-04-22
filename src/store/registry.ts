@@ -24,7 +24,6 @@ export class AdaptorRegistry {
 
   /**
    * Gets the singleton instance of the AdaptorRegistry.
-   *
    * @returns The singleton AdaptorRegistry instance
    */
   public static getInstance(): AdaptorRegistry {
@@ -100,7 +99,6 @@ export class AdaptorRegistry {
 
   /**
    * Gets all registered adaptor identifiers.
-   *
    * @returns Array of adaptor identifiers
    */
   public getRegisteredAdaptorIdentifiers(): string[] {
@@ -109,7 +107,6 @@ export class AdaptorRegistry {
 
   /**
    * Removes an adaptor from the registry.
-   *
    * @param adaptorIdentifier - The identifier of the adaptor to remove
    * @throws Error if the adaptor is not found
    */
@@ -132,7 +129,6 @@ export class AdaptorRegistry {
    * Sets the active SDK adaptor by identifier.
    * The active adaptor is used as the default when no adaptorIdentifier is
    * explicitly provided (e.g. in userStore.auth methods or syncGroupsList).
-   *
    * @param adaptorIdentifier - The identifier of the adaptor to set as active
    * @throws ESPCDFRegistryError if the adaptor is not registered
    */
@@ -149,7 +145,6 @@ export class AdaptorRegistry {
 
   /**
    * Returns the identifier of the currently active SDK adaptor, or null if none is set.
-   *
    * @returns The active adaptor identifier, or null
    */
   public getActiveAdaptorIdentifier(): string | null {
@@ -158,7 +153,6 @@ export class AdaptorRegistry {
 
   /**
    * Returns the currently active SDK adaptor instance.
-   *
    * @returns The active SDK adaptor
    * @throws ESPCDFRegistryError if no active adaptor has been set
    */

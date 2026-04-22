@@ -6,6 +6,9 @@
 
 import { Stack } from "expo-router";
 
+/**
+ * Renders the config layout UI section.
+ */
 export default function ConfigLayout() {
   return (
     <Stack

@@ -156,8 +156,7 @@ export class ESPCDFAutomation implements ESPCDFAutomationInterface {
 
   /**
    * Checks if the automation is enabled
-   *
-   * @returns {boolean} True if the automation is enabled, false otherwise
+   * @returns True if the automation is enabled, false otherwise
    */
   isEnabled(): boolean {
     return this.enabled || false;

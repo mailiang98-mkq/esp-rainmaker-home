@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Modal,
@@ -27,6 +28,9 @@ import type {
 import { tokens } from "@shared/theme/tokens";
 import { agentConversationsSheetStyles } from "@features/agent/theme";
 
+/**
+ * Modal sheet listing past conversations for an agent: load/delete items, show which is active, and pick one to continue.
+ */
 export const AgentConversationsBottomSheet: React.FC<
   AgentConversationsBottomSheetProps
 > = ({
@@ -55,9 +59,9 @@ export const AgentConversationsBottomSheet: React.FC<
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadActiveConversationId = useCallback(async () => {
-    if (!store?.userStore) return;
+    if (!store?.userStore?.user) return;
     try {
-      const id = await getConversationId(store.userStore);
+      const id = await getConversationId(store.userStore.user);
       setActiveConversationId(id || null);
     } catch {
       setActiveConversationId(null);
@@ -96,8 +100,8 @@ export const AgentConversationsBottomSheet: React.FC<
     try {
       setIsSelecting(true);
       // If activation is allowed, mark this conversation as active in user data
-      if (allowActivation && store?.userStore) {
-        await saveConversationId(item.conversationId, store.userStore);
+      if (allowActivation && store?.userStore?.user) {
+        await saveConversationId(item.conversationId, store.userStore.user);
         setActiveConversationId(item.conversationId);
       }
 

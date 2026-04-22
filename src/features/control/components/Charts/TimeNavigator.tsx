@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { useMemo } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
@@ -15,8 +16,6 @@ import type { TimeNavigatorProps } from "@src/types/global";
 /**
  * Component for navigating between time periods in a chart.
  * Displays the current time range and provides buttons to navigate to previous/next periods.
- *
- * @component
  * @param props - TimeNavigatorProps containing navigation configuration
  * @returns Rendered TimeNavigator component
  */

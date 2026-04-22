@@ -45,14 +45,14 @@ export const useScenes = (): {
   favoriteScenes: ESPCDFScene[];
   allScenes: ESPCDFScene[];
   sceneCardDimensions: { width: number; height: number; cardsPerRow: number };
-  getSceneMenuOptions: Array<{
+  getSceneMenuOptions: {
     id: string;
     label: string;
     icon: JSX.Element;
     onPress: () => void;
     loading: boolean;
     destructive?: boolean;
-  }>;
+  }[];
   getConnectionWarning: string | undefined;
   fetchScenes: () => Promise<void>;
   handleAddScene: () => void;
@@ -133,6 +133,7 @@ export const useScenes = (): {
       isFetchingRef.current = false;
       setIsLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []); // Empty deps - MobX stores are stable and accessed via closure
 
   // Update refs when values change (after fetchScenes is defined)
@@ -148,6 +149,7 @@ export const useScenes = (): {
   useFocusEffect(
     useCallback(() => {
       fetchScenes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     }, []), // Empty deps - only run on focus change
   );
 
@@ -163,6 +165,7 @@ export const useScenes = (): {
 
   useEffect(() => {
     fetchUserCustomData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [user]);
 
   /**
@@ -199,6 +202,7 @@ export const useScenes = (): {
   /**
    * Handles scene actions (activate, edit, delete)
    */
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   const handleSceneAction = async (sceneId: string, action: SceneAction) => {
     const selectedScene = sceneStore.scenesByID[sceneId];
     if (!selectedScene) return;

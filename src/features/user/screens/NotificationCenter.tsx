@@ -15,6 +15,9 @@ import { Header, ScreenWrapper, EmptyState } from "@shared/components";
 import { NotificationItem } from "@features/user/components";
 import { SharingItem } from "@src/types/global";
 
+/**
+ * Renders the notification center UI section.
+ */
 const NotificationCenter: React.FC = () => {
   const { t } = useTranslation();
   const {
@@ -30,11 +33,7 @@ const NotificationCenter: React.FC = () => {
     return (
       <NotificationItem
         key={item.id}
-        title={
-          item.type === "node"
-            ? t("user.notifications.deviceSharingInvitation")
-            : t("user.notifications.groupSharingInvitation")
-        }
+        title={t("user.notifications.groupSharingInvitation")}
         description={
           item.primaryUsername
             ? t("user.notifications.invitationFrom", {
