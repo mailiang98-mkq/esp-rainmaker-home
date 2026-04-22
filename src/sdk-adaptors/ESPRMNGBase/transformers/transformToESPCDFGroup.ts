@@ -184,9 +184,12 @@ export function transformToESPCDFGroup(
 
                 const existing = schedulesMapById.get(scheduleId);
                 if (existing) {
-                    if (!existing.nodes.includes(nodeId)) existing.nodes.push(nodeId);
+                    const isNewNode = !existing.nodes.includes(nodeId);
+                    if (isNewNode) {
+                        existing.nodes.push(nodeId);
+                        existing.devicesCount += devicesCount;
+                    }
                     existing.action[nodeId] = { ...(existing.action[nodeId] ?? {}), ...deviceAction };
-                    existing.devicesCount += devicesCount;
                 } else {
                     schedulesMapById.set(scheduleId, {
                         id: scheduleId,

@@ -231,11 +231,12 @@ export function transformToESPCDFGroup(
                         if (scenesMap.has(sceneId)) {
                             // Merge with existing scene
                             const existingScene = scenesMap.get(sceneId)!;
-                            if (!existingScene.nodes.includes(node.id)) {
+                            const isNewNode = !existingScene.nodes.includes(node.id);
+                            if (isNewNode) {
                                 existingScene.nodes.push(node.id);
+                                existingScene.devicesCount += Object.keys(sceneData.action || {}).length;
                             }
                             existingScene.actions[node.id] = sceneData.action || {};
-                            existingScene.devicesCount += Object.keys(sceneData.action || {}).length;
                         } else {
                             // Create new scene entry
                             scenesMap.set(sceneId, {
@@ -390,11 +391,12 @@ export function transformToESPCDFGroup(
                         if (schedulesMap.has(scheduleId)) {
                             // Merge with existing schedule
                             const existingSchedule = schedulesMap.get(scheduleId)!;
-                            if (!existingSchedule.nodes.includes(node.id)) {
+                            const isNewNode = !existingSchedule.nodes.includes(node.id);
+                            if (isNewNode) {
                                 existingSchedule.nodes.push(node.id);
+                                existingSchedule.devicesCount += Object.keys(scheduleData.action || {}).length;
                             }
                             existingSchedule.action[node.id] = scheduleData.action || {};
-                            existingSchedule.devicesCount += Object.keys(scheduleData.action || {}).length;
                         } else {
                             // Create new schedule entry
                             schedulesMap.set(scheduleId, {
