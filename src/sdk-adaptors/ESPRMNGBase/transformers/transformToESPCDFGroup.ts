@@ -323,6 +323,11 @@ export function transformToESPCDFGroup(
                 throw error;
             }
         },
+        async setParams(
+            payload: Record<string, Record<string, unknown>>,
+        ): Promise<unknown> {
+            return group.setParams(payload);
+        },
     };
 
     const rawGroup = group as { nodeIds?: string[]; node_ids?: string[] };

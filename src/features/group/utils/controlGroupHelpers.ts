@@ -146,3 +146,41 @@ export function resolveHomogeneousDeviceType(
   const node = nodesById.get(firstId);
   return node ? getPrimaryHomogeneousDeviceType(node) : null;
 }
+
+/** One logical device row for group-level param broadcast (e.g. list card power, panel sliders). */
+export interface ParamBroadcastTarget {
+  param: ESPCDFDeviceParam;
+  /** Logical RainMaker device name for group-level payload keys. */
+  deviceName: string;
+}
+
+export interface BroadcastGroupParamOptions {
+  /** Invoked when {@link ESPCDFGroup.setParams} rejects (e.g. transport / API error). */
+  onSetParamsError?: (err: unknown) => void;
+}
+
+/**
+ * Sends one logical param value to all targets: {@link ESPCDFGroup.setParams} when `deviceGroup` is
+ * defined, otherwise per-target {@link ESPCDFDeviceParam.setValue}.
+ */
+export function broadcastGroupParam(
+  deviceGroup: ESPCDFGroup | undefined,
+  refParam: ESPCDFDeviceParam,
+  targets: ParamBroadcastTarget[],
+  value: unknown,
+  options?: BroadcastGroupParamOptions
+): void {
+  if (!deviceGroup) {
+    void Promise.allSettled(targets.map((t) => t.param.setValue(value)));
+    return;
+  }
+  const payload: Record<string, Record<string, unknown>> = {};
+  for (const { deviceName } of targets) {
+    if (!payload[deviceName]) payload[deviceName] = {};
+    payload[deviceName][refParam.name] = value;
+  }
+  void deviceGroup.setParams(payload).catch((err: unknown) => {
+    console.error("[broadcastGroupParam] group setParams failed:", err);
+    options?.onSetParamsError?.(err);
+  });
+}

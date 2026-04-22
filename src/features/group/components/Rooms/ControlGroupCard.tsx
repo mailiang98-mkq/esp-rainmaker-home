@@ -22,9 +22,11 @@ import { useCDF } from "@shared/hooks/useCDF";
 import { useToast } from "@shared/hooks/useToast";
 import { getDeviceImage } from "@shared/utils/device";
 import {
+  broadcastGroupParam,
   findDeviceOfType,
   resolveHomogeneousDeviceType,
   stripGroupControlSubgroupDisplayName,
+  type ParamBroadcastTarget,
 } from "@features/group/utils/controlGroupHelpers";
 import { ESPRM_POWER_PARAM_TYPE, ERROR_CODES } from "@shared/utils/constants";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
@@ -129,18 +131,28 @@ const ControlGroupCard = observer(
       } as any);
     };
 
+    /**
+     * Toggles power for all members via {@link broadcastGroupParam} (same transport as ControlGroupPanel).
+     */
     const handleGroupPower = (value: boolean) => {
-      entriesWithPower.forEach(({ device }) => {
+      const powerRef = entriesWithPower[0]?.device.params?.find(
+        (pr) => pr.type === ESPRM_POWER_PARAM_TYPE
+      );
+      if (!powerRef) return;
+      const targets: ParamBroadcastTarget[] = [];
+      for (const { device } of entriesWithPower) {
         const p = device.params?.find(
           (pr) => pr.type === ESPRM_POWER_PARAM_TYPE
         );
-        if (p) {
-          p.setValue(value).catch((err: { code?: string }) => {
-            const key =
-              err.code && ERROR_CODES[err.code as keyof typeof ERROR_CODES];
-            toast.showError(key ? t(key) : t("group.errors.fallback"));
-          });
-        }
+        if (p) targets.push({ param: p, deviceName: device.name });
+      }
+      broadcastGroupParam(group, powerRef, targets, value, {
+        onSetParamsError: (err: unknown) => {
+          const code = (err as { code?: string })?.code;
+          const key =
+            code && ERROR_CODES[code as keyof typeof ERROR_CODES];
+          toast.showError(key ? t(key) : t("group.errors.fallback"));
+        },
       });
     };
 

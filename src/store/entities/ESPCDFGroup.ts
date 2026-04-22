@@ -438,4 +438,27 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
       () => ({ qrData })
     );
   }
+
+  /**
+   * Publishes param values through the adaptor group-level `setParams` path when supported.
+   * @param payload Device logical name → param name → value (shape defined by the active adaptor).
+   * @returns Adaptor-specific result.
+   * @throws Error when the adaptor does not implement {@link ESPCDFGroupOperation.setParams}.
+   */
+  setParams(
+    payload: Record<string, Record<string, unknown>>
+  ): Promise<unknown> {
+    return this.runAndEmit(
+      "setParams",
+      async () => {
+        if (!this.operations.setParams) {
+          throw new Error(
+            "setParams not supported by this group's SDK adaptor"
+          );
+        }
+        return this.operations.setParams(payload);
+      },
+      (result) => result
+    );
+  }
 }

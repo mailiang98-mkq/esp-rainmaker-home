@@ -6,20 +6,25 @@
 
 import { useMemo, useCallback, useEffect } from "react";
 import type { ESPCDFDeviceParam, ESPCDFGroup, ESPCDFNode } from "@store";
+import { fetchNodesIfEmpty } from "@store";
 import {
+  broadcastGroupParam,
+  BroadcastGroupParamOptions,
   findDeviceOfType,
   findMatchingParam,
   isDeviceTypeSubgroup,
   resolveHomogeneousDeviceType,
   stripGroupControlSubgroupDisplayName,
+  type ParamBroadcastTarget,
 } from "@features/group/utils/controlGroupHelpers";
 import { useCDF } from "@shared/hooks/useCDF";
-import { fetchNodesIfEmpty } from "@store";
 import { filterExcludedParamTypes } from "@shared/utils/paramUtils";
+
+export type { ParamBroadcastTarget };
 
 export interface ParamBroadcastRow {
   refParam: ESPCDFDeviceParam;
-  targets: ESPCDFDeviceParam[];
+  targets: ParamBroadcastTarget[];
 }
 
 export interface UseGroupControlOptions {
@@ -37,6 +42,16 @@ export interface UseGroupControlResult {
   isConnected: boolean;
   paramRows: ParamBroadcastRow[];
   handleEditGroup: () => void;
+  /**
+   * Applies one param value to all targets via {@link ESPCDFGroup.setParams}; the active adaptor
+   * implements transport (e.g. group MQTT vs unicast per param).
+   */
+  handleBroadcastParam: (
+    refParam: ESPCDFDeviceParam,
+    targets: ParamBroadcastTarget[],
+    value: unknown,
+    options?: BroadcastGroupParamOptions
+  ) => void;
 }
 
 /**
@@ -92,14 +107,14 @@ export function useGroupControl(
     }
     const refParams = filterExcludedParamTypes(referenceDevice.params) ?? [];
     return refParams.map((refParam) => {
-      const targets: ESPCDFDeviceParam[] = [];
+      const targets: ParamBroadcastTarget[] = [];
       for (const nid of deviceGroup.nodeIds ?? []) {
         const node = nodesById.get(nid);
         if (!node) continue;
         const dev = findDeviceOfType(node, homogeneousDeviceType);
         if (!dev) continue;
         const p = findMatchingParam(dev, refParam);
-        if (p) targets.push(p);
+        if (p) targets.push({ param: p, deviceName: dev.name });
       }
       return { refParam, targets };
     });
@@ -120,6 +135,18 @@ export function useGroupControl(
     } as any);
   }, [router, homeId, groupId, deviceGroup?.name]);
 
+  const handleBroadcastParam = useCallback(
+    (
+      refParam: ESPCDFDeviceParam,
+      targets: ParamBroadcastTarget[],
+      value: unknown,
+      options?: BroadcastGroupParamOptions
+    ) => {
+      broadcastGroupParam(deviceGroup, refParam, targets, value, options);
+    },
+    [deviceGroup]
+  );
+
   return {
     home,
     deviceGroup,
@@ -129,5 +156,6 @@ export function useGroupControl(
     isConnected,
     paramRows,
     handleEditGroup,
+    handleBroadcastParam,
   };
 }

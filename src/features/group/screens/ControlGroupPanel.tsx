@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View, Text } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -20,11 +20,14 @@ import ParameterControl from "@features/scene/components/ParameterControl";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { tokens } from "@shared/theme/tokens";
 import { testProps } from "@shared/utils/testProps";
-import type { ESPCDFDeviceParam } from "@store";
-import { useGroupControl } from "@features/group/hooks";
+import { useToast } from "@shared/hooks/useToast";
+import {
+  useGroupControl,
+} from "@features/group/hooks";
 
 const ControlGroupPanel = observer(() => {
   const { t } = useTranslation();
+  const toast = useToast();
   const router = useRouter();
   const { id, groupId } = useLocalSearchParams<{
     id?: string;
@@ -38,19 +41,13 @@ const ControlGroupPanel = observer(() => {
     homogeneousDeviceType,
     isConnected,
     paramRows,
-    handleEditGroup,
+    handleEditGroup,    
+    handleBroadcastParam,
   } = useGroupControl({
     homeId: id,
     groupId,
     router: router as Parameters<typeof useGroupControl>[0]["router"],
   });
-
-  const handleBroadcast = useCallback(
-    (targets: ESPCDFDeviceParam[], value: unknown) => {
-      void Promise.allSettled(targets.map((p) => p.setValue(value)));
-    },
-    []
-  );
 
   const invalid =
     !deviceGroup || !homogeneousDeviceType || paramRows.length === 0;
@@ -66,7 +63,7 @@ const ControlGroupPanel = observer(() => {
             hitSlop={12}
             accessibilityRole="button"
             accessibilityLabel={t("group.deviceGroups.editGroup")}
-          >
+          > 
             <Settings size={22} color={tokens.colors.primary} />
           </Pressable>
         }
@@ -117,7 +114,13 @@ const ControlGroupPanel = observer(() => {
                   param={refParam}
                   disabled={!isConnected}
                   setUpdating={setUpdating}
-                  onValueChange={(value) => handleBroadcast(targets, value)}
+                  onValueChange={(value: unknown) =>
+                    handleBroadcastParam(refParam, targets, value, {
+                      onSetParamsError: () => {
+                        toast.showError(t("group.errors.fallback"));
+                      },
+                    })
+                  }
                   qaId={`control_group_panel_param_${refParam.name}`}
                 >
                   <ParameterControl param={refParam} />

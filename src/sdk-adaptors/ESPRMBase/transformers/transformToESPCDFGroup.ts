@@ -6,7 +6,17 @@
 
 import { ESPCDFGroupSharingInfoInterface, ESPCDFNode, ESPCDFScene, ESPCDFSchedule, ESPCDFAutomation, ESPSDKAdaptorAPIResponse, ESPSDKAdaptorAPIDataResponse, ESPCDFPaginatedAPIResponse, ESPCDFAutomationCreateInput, ESPCDFGroupOperation, ESPCDFDevice } from "@store";
 import { ESPCDFGroup } from "@store";
-import { ESPRMGroup, ESPRMNode, ESPRMUser, ESPAutomationDetails, ESPAutomation, ESPPaginatedAutomationsResponse } from "@espressif/rainmaker-base-sdk";
+import {
+    ESPRMGroup,
+    ESPRMNode,
+    ESPRMUser,
+    ESPAutomationDetails,
+    ESPAutomation,
+    ESPPaginatedAutomationsResponse,
+    type DeviceParams,
+    type MultipleNodePayload,
+    type NodePayload,
+} from "@espressif/rainmaker-base-sdk";
 import { transformToESPCDFNode } from "./transformToESPCDFNode";
 import { transformToESPCDFScene } from "./transformToESPCDFScene";
 import { transformToESPCDFSchedule } from "./transformToESPCDFSchedule";
@@ -538,6 +548,45 @@ export function transformToESPCDFGroup(
             } catch (error) {
                 throw error;
             }
+        },
+
+        /**
+         * Applies a device-name → param map across nodes via {@link ESPRMUser.setMultipleNodesParams}
+         * (same batching path as scenes/schedules). Matches group control UI ({@link ESPCDFGroup.setParams}).
+         *
+         * Request shape follows SDK {@link NodePayload}: each device maps to a `DeviceParams[]` merged on the server.
+         */
+        async setParams(
+            payload: Record<string, Record<string, unknown>>,
+        ): Promise<unknown> {
+            const nodes = await group.getNodesWithDetails();
+            const batch: MultipleNodePayload[] = [];
+            for (const node of nodes) {
+                const nodeId =
+                    node.id ??
+                    (node as { nodeId?: string }).nodeId ??
+                    (node as { config?: { node_id?: string } }).config?.node_id ??
+                    "";
+                if (!nodeId) continue;
+                const devices = node.nodeConfig?.devices ?? [];
+                const namesOnNode = new Set(devices.map((d) => d.name));
+                const slice: Record<string, Record<string, unknown>> = {};
+                for (const [deviceName, paramsByName] of Object.entries(payload)) {
+                    if (!namesOnNode.has(deviceName)) continue;
+                    slice[deviceName] = paramsByName;
+                }
+                const nodePayload: NodePayload = {};
+                for (const [deviceName, paramsByName] of Object.entries(slice)) {
+                    nodePayload[deviceName] = [paramsByName as DeviceParams];
+                }
+                if (Object.keys(nodePayload).length > 0) {
+                    batch.push({ nodeId, payload: nodePayload });
+                }
+            }
+            if (batch.length === 0) {
+                return Promise.resolve();
+            }
+            return user.setMultipleNodesParams(batch);
         },
     };
 
