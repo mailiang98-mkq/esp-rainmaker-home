@@ -16,16 +16,47 @@ import { DEFAULT_AGENT_ID, RAINMAKER_MCP_CONNECTOR_URL } from "@/config/agent.co
 import { CDFConfig } from "@config/sdk.config";
 import { ESPCDF } from "@store";
 
-export interface PostLoginPipelineOptions {
+export type PostLoginPipelineProgressState = {
+  completed: number;
+  total: number;
+  lastFinished: string;
+};
+
+export interface PostLoginPipelineHooks {
+  onProgress?: (
+    stepName: string,
+    state: PostLoginPipelineProgressState
+  ) => void;
+  onStepStart?: (stepName: string) => void;
+  onStepComplete?: (stepName: string) => void;
+}
+
+export interface PostLoginPipelineBaseOptions {
   router: Router;
   syncHomeWithNodes: (shouldFetchFirstPage?: boolean) => Promise<void>;
   initUserCustomData: () => Promise<void>;
   shouldFetchFirstPage?: boolean;
   skipNodesFetch?: boolean;
-  onProgress?: (stepName: string, state: { completed: number; total: number; lastFinished: string }) => void;
-  onStepStart?: (stepName: string) => void;
-  onStepComplete?: (stepName: string) => void;
   store: ESPCDF;
+}
+
+export type PostLoginPipelineOptions = PostLoginPipelineBaseOptions &
+  PostLoginPipelineHooks;
+
+/**
+ * Composes shared post-login pipeline options with caller-provided lifecycle hooks.
+ * @param baseOptions Base dependencies required for the post-login pipeline.
+ * @param hooks Optional lifecycle hooks from the caller context.
+ * @returns Complete options object ready for pipeline execution.
+ */
+export function withPostLoginPipelineHooks(
+  baseOptions: PostLoginPipelineBaseOptions,
+  hooks: PostLoginPipelineHooks = {}
+): PostLoginPipelineOptions {
+  return {
+    ...baseOptions,
+    ...hooks,
+  };
 }
 
 /**
