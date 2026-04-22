@@ -65,8 +65,9 @@ export function transformToESPCDFUser(
         throw new Error("ESPRMNGUser is required for transformation");
     }
 
-    // Connect MQTT once the user is created
-    esprmngUser.connectMQTT().then(() => {
+    // Start MQTT connection early; store the promise so operations that need
+    // MQTT (e.g. syncHomeWithNodes → getNodes → SDK subscribeToNode) can await it.
+    const mqttConnectionPromise = esprmngUser.connectMQTT().then(() => {
         console.log("[transformToESPCDFUser] MQTT connected");
     }).catch((error) => {
         console.error("[transformToESPCDFUser] Failed to connect MQTT:", error);
@@ -297,6 +298,12 @@ export function transformToESPCDFUser(
             return esprmngUser.accessToken;
         },
         async syncHomeWithNodes(user, callbacks) {
+            // Wait for MQTT to be connected before fetching nodes.
+            // getNodes() triggers SDK-internal MQTT subscriptions (shadow get/accepted topics);
+            // without a live connection those subscriptions silently fail and subsequent
+            // shadow-get responses from AWS IoT Core are never received.
+            await mqttConnectionPromise;
+
             const groups = await esprmngUser.getGroups();
             let cdfGroups: ESPCDFGroup[] = groups.map((group: ESPRMNGGroup) =>
                 transformToESPCDFGroup(group, esprmngUser, ESPRMNGBaseAdaptorIdentifier)
