@@ -59,14 +59,15 @@ export function transformToESPCDFProvisioningDevice(
             ssid: string,
             password: string,
             onProgress?: (response: any) => void,
-            homeId?: string
+            homeId?: string,
+            provisionType?: string
         ): Promise<void> {
             await espDevice.provision(
                 ssid,
                 password,
                 onProgress ?? (() => {}),
-                homeId
-            );
+                homeId,
+                provisionType);
         },
 
         async initiateUserNodeMapping(params?: Record<string, any>): Promise<any> {
