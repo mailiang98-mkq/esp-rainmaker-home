@@ -28,17 +28,20 @@ interface UseWifiReturn {
   shouldSave: boolean;
   isModalVisible: boolean;
   showAgentTerms: boolean;
+  isJoinNetworkModalVisible: boolean;
   setSelectedWifi: (ssid: string) => void;
   setPassword: (password: string) => void;
   setShowPassword: (show: boolean) => void;
   setShouldSave: (save: boolean) => void;
   setIsModalVisible: (visible: boolean) => void;
   setShowAgentTerms: (show: boolean) => void;
+  setIsJoinNetworkModalVisible: (visible: boolean) => void;
   scanWifiNetworks: () => Promise<void>;
   handleConnect: () => Promise<void>;
   handleWifiSelect: (ssid: string) => void;
   handleAgentTermsComplete: () => void;
   handleAgentTermsClose: () => void;
+  handleJoinOtherNetworkConnect: (ssid: string, password: string) => Promise<void>;
 }
 
 /**
@@ -60,6 +63,7 @@ export const useWifi = (): UseWifiReturn => {
   const [shouldSave, setShouldSave] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showAgentTerms, setShowAgentTerms] = useState(false);
+  const [isJoinNetworkModalVisible, setIsJoinNetworkModalVisible] = useState(false);
 
   const user = store?.userStore?.user;
   const device: ESPCDFProvisioningDevice = store?.nodeStore?.connectedDevice as ESPCDFProvisioningDevice;
@@ -189,6 +193,19 @@ export const useWifi = (): UseWifiReturn => {
   };
 
   /**
+   * Handle a manual network connection from the Join Other Network modal.
+   * @param ssid - The SSID entered by the user.
+   * @param password - Password entered by the user (empty string for open networks).
+   */
+  const handleJoinOtherNetworkConnect = async (ssid: string, password: string) => {
+    setIsJoinNetworkModalVisible(false);
+    router.push({
+      pathname: "/(provision)/Provision",
+      params: { ssid, password },
+    });
+  };
+
+  /**
    * Handle agent terms completion
    */
   const handleAgentTermsComplete = () => {
@@ -217,15 +234,18 @@ export const useWifi = (): UseWifiReturn => {
     shouldSave,
     isModalVisible,
     showAgentTerms,
+    isJoinNetworkModalVisible,
     setSelectedWifi,
     setPassword,
     setShowPassword,
     setShouldSave,
     setIsModalVisible,
     setShowAgentTerms,
+    setIsJoinNetworkModalVisible,
     scanWifiNetworks,
     handleConnect,
     handleWifiSelect,
+    handleJoinOtherNetworkConnect,
     handleAgentTermsComplete,
     handleAgentTermsClose,
   };
