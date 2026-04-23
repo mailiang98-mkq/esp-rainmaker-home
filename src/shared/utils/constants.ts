@@ -401,3 +401,7 @@ export const WEBRTC_DEFAULT_MESSAGES = {
   ERROR: "Error",
   CONNECTION_FAILED: "Connection failed",
 } as const;
+
+// WebRTC Media constants
+export const WEBRTC_MEDIA_KIND_VIDEO = "video";
+export const WEBRTC_TRANSCEIVER_DIRECTION_RECVONLY = "recvonly";

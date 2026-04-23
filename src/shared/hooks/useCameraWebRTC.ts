@@ -14,6 +14,8 @@ import {
   WEBRTC_TRANSLATION_KEYS,
   WEBRTC_DEFAULT_MESSAGES,
   WEBRTC_SIGNALING_EVENTS,
+  WEBRTC_MEDIA_KIND_VIDEO,
+  WEBRTC_TRANSCEIVER_DIRECTION_RECVONLY,
 } from "@shared/utils/constants";
 
 // WebRTC and AWS KVS imports
@@ -384,6 +386,20 @@ export const useCameraWebRTC = (nodeId: string, channelName: string | null) => {
   }, []);
 
   /**
+   * Configures the peer connection to receive video only.
+   * Adds a recvonly video transceiver before offer creation so SDP negotiation
+   * does not require a local media stream and does not request audio.
+   * @param peerConnection - The RTCPeerConnection instance to configure
+   */
+  const configurePeerConnectionForVideoOnly = useCallback((
+    peerConnection: ExtendedRTCPeerConnection
+  ) => {
+    peerConnection.addTransceiver(WEBRTC_MEDIA_KIND_VIDEO, {
+      direction: WEBRTC_TRANSCEIVER_DIRECTION_RECVONLY,
+    });
+  }, []);
+
+  /**
    * Setup signaling client event handlers
    * Responsibility: Handle signaling protocol events (SDP_ANSWER, ICE_CANDIDATE, CLOSE, ERROR).
    * NOTE: The OPEN handler is intentionally omitted – offer creation is done
@@ -510,13 +526,16 @@ export const useCameraWebRTC = (nodeId: string, channelName: string | null) => {
   const createTrackHandler = useCallback((): ((event: { streams: MediaStream[]; track: any; transceiver: any; receiver: any }) => void) => {
     return (event: { streams: MediaStream[]; track: any; transceiver: any; receiver: any }) => {
       if (videoStreamSetRef.current) return;
+      if (!event.track || event.track.kind !== WEBRTC_MEDIA_KIND_VIDEO) return;
 
       if (event.streams && event.streams.length > 0) {
         const stream = event.streams[0] as MediaStream;
-        if (stream.getVideoTracks().length > 0) {
+        const remoteVideoTracks = stream.getVideoTracks();
+        if (remoteVideoTracks.length > 0) {
+          const videoOnlyStream = new MediaStream(remoteVideoTracks);
           videoStreamSetRef.current = true;
-          videoStreamRef.current = stream;
-          setVideoStream(stream);
+          videoStreamRef.current = videoOnlyStream;
+          setVideoStream(videoOnlyStream);
           setIsStreaming(true);
           setIsLoading(false);
         }
@@ -655,9 +674,12 @@ export const useCameraWebRTC = (nodeId: string, channelName: string | null) => {
       // Attach peer connection handlers
       setupPeerConnectionHandlers(peerConnection, signalingClient);
 
+      // Force recv-only video negotiation to prevent audio request paths
+      configurePeerConnectionForVideoOnly(peerConnection);
+
       // Send offer immediately – WebSocket is already open, no onopen wait needed
       const offer = await peerConnection.createOffer({
-        offerToReceiveAudio: true,
+        offerToReceiveAudio: false,
         offerToReceiveVideo: true,
       });
       await peerConnection.setLocalDescription(offer);
@@ -676,6 +698,7 @@ export const useCameraWebRTC = (nodeId: string, channelName: string | null) => {
     createPeerConnection,
     setupSignalingClientHandlers,
     setupPeerConnectionHandlers,
+    configurePeerConnectionForVideoOnly,
     handleStreamingError,
   ]);
 
