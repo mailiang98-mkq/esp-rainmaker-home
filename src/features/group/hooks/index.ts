@@ -61,4 +61,5 @@ export {
   type UseGroupControlResult,
   type UseGroupControlOptions,
   type ParamBroadcastRow,
+  type ParamBroadcastTarget,
 } from "./useGroupControl";

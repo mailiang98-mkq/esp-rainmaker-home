@@ -21,6 +21,9 @@ export interface EventDeviceSelectionDeviceItemProps {
   onPress: () => void;
 }
 
+/**
+ * Renders the event device selection device item UI section.
+ */
 export const EventDeviceSelectionDeviceItem: React.FC<
   EventDeviceSelectionDeviceItemProps
 > = ({

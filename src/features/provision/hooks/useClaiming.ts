@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Animated, Easing } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useCDF } from "@shared/hooks/useCDF";
 import {
@@ -29,6 +29,10 @@ interface UseClaimingReturn {
 export const useClaiming = (): UseClaimingReturn => {
   const { t } = useTranslation();
   const { store } = useCDF();
+  const { isCameraDevice: isCameraDeviceParam } = useLocalSearchParams<{
+    isCameraDevice?: string;
+  }>();
+  const isCameraDevice = isCameraDeviceParam === "true";
   const device: ESPCDFProvisioningDevice = store?.nodeStore?.connectedDevice;
 
   // State
@@ -85,7 +89,10 @@ export const useClaiming = (): UseClaimingReturn => {
     hasStartedRef.current = true;
 
     try {
-      await device.startAssistedClaiming(handleClaimProgress);
+      await device.startAssistedClaiming(
+        handleClaimProgress,
+        isCameraDevice ? "camera_claim" : undefined
+      );
     } catch (error) {
       setStatus(ESPCDFClaimStatus.failed);
       setErrorMessage(

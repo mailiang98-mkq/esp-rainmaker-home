@@ -87,6 +87,7 @@ const AnimatedGuide = ({ scanned }: { scanned: boolean }) => {
         }),
       ]),
     ).start();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   return (
@@ -482,6 +483,7 @@ const ScanQR = () => {
         pathname: "/(provision)/POP",
         params: {
           hasClaimCap: rmakerCaps.hasClaim ? "true" : "false",
+          hasCameraClaim: rmakerCaps.hasCameraClaim ? "true" : "false",
         },
       });
       return;
@@ -499,12 +501,15 @@ const ScanQR = () => {
     }
 
     // If device supports claiming, navigate to Claiming screen
-    // This is determined by rmaker.cap array containing "claim"
+    // This is determined by rmaker.cap array containing "claim" or "camera_claim"
     if (rmakerCaps.hasClaim) {
       // Close camera with preview before navigation
       await closeCamera();
       router.push({
         pathname: "/(provision)/Claiming",
+        params: {
+          isCameraDevice: rmakerCaps.hasCameraClaim ? "true" : "false",
+        },
       });
       return;
     }
@@ -517,7 +522,6 @@ const ScanQR = () => {
   /**
    * Utility function to handle QR scan errors
    * Uses a switch statement to categorize and handle different error types
-   *
    * @param errorMessage - The error message to analyze
    * @param t - Translation function
    * @param toast - Toast notification utility
@@ -727,7 +731,7 @@ const ScanQR = () => {
       setTimeout(async () => {
         try {
           await handleMatterCommissioning(result.data);
-        } catch (error) {
+        } catch {
           toast.showError(t("device.scan.qr.matterCommissioningFailed"));
         } finally {
           resetScanState();
@@ -773,6 +777,7 @@ const ScanQR = () => {
       }, 3000); // Check every 3 seconds to reduce re-renders
       return () => clearInterval(interval);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [bluetoothEnabled, isCheckingBluetooth]);
 
   // Reset scan state and disconnect device when screen comes into focus
@@ -787,6 +792,7 @@ const ScanQR = () => {
         // Close camera with preview when navigating away from this screen
         closeCamera().catch(console.error);
       };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     }, []),
   );
 
@@ -796,6 +802,7 @@ const ScanQR = () => {
       // Ensure camera is closed when component unmounts
       closeCamera().catch(console.error);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   return (

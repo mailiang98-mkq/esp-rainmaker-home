@@ -35,7 +35,6 @@ export const getParamsUIMap = (): Record<string, DeviceParamGroup["control"]> =>
 
 /**
  * Gets the UI control component for a given parameter
- * 
  * @param param - The device parameter
  * @param paramsUIMap - Optional pre-computed UI map (for performance)
  * @returns The React component for the parameter control, or null if not found
@@ -57,7 +56,6 @@ export const getParamControlComponent = (
 
 /**
  * Returns a default value based on parameter data type
- * 
  * @param type - The parameter data type (string, int, bool, float)
  * @returns Default value for the given type
  */
@@ -93,6 +91,9 @@ function isLikelyBooleanControlParam(param: ESPCDFDeviceParam): boolean {
   );
 }
 
+/**
+ * Handles default writable param value logic for this module.
+ */
 export function defaultWritableParamValue(param: ESPCDFDeviceParam): unknown {
   const fromDataType = defaultValueBasedOnParamDataType(param.dataType ?? "");
   if (fromDataType !== "") return fromDataType;
@@ -102,7 +103,6 @@ export function defaultWritableParamValue(param: ESPCDFDeviceParam): unknown {
 
 /**
  * Filters out parameters with excluded types (name and hidden parameters)
- * 
  * @param params - Array of device parameters to filter
  * @returns Filtered array excluding name and hidden parameters
  */

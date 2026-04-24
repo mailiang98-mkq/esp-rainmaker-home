@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { DeviceAction } from "@shared/components";
 import { ScheduleActionProps } from "@src/types/global";
 import { useSchedule } from "@context/schedules.context";
@@ -13,11 +14,10 @@ import { useSchedule } from "@context/schedules.context";
  *
  * Renders a list of device actions for a schedule
  * Allows interaction with individual actions
- *
- * @param {string} device - Device name (e.g. "light")
- * @param {string} displayDeviceName - Display device name
- * @param {Record<string, any>} action - Action object
- * @param {Function} onActionPress - Handler for action press events
+ * @param device - Device name (e.g. "light")
+ * @param displayDeviceName - Display device name
+ * @param action - Action object
+ * @param onActionPress - Handler for action press events
  */
 const ScheduleActions = ({
   device,
@@ -32,7 +32,7 @@ const ScheduleActions = ({
   return (
     <DeviceAction
       displayDeviceName={displayDeviceName}
-      device={device.type}
+      device={device.type ?? ""}
       actions={action}
       onPress={() => onActionPress()}
       isOutOfSync={isOutOfSync}

@@ -7,7 +7,6 @@
 /**
  * Sorts items by connectivity: connected first, then disconnected.
  * Pure; returns a new array without mutating the input.
- *
  * @param items - Array to sort
  * @param getIsConnected - Returns true if the item is connected
  * @returns New sorted array

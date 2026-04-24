@@ -19,6 +19,9 @@ export interface EventDeviceParamSelectionParamListProps {
   onParamPress: (param: ESPCDFDeviceParam) => void;
 }
 
+/**
+ * Renders the event device param selection param list UI section.
+ */
 export const EventDeviceParamSelectionParamList: React.FC<
   EventDeviceParamSelectionParamListProps
 > = ({ params, activeEventParam, getParamDisplayValue, onParamPress }) => {

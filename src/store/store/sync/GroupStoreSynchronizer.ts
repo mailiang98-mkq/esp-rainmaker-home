@@ -337,6 +337,7 @@ export class GroupStoreSynchronizer {
       case "transfer":
       case "getSharingInfo":
       case "getSubGroups":
+      case "setParams":
         // These operations don't affect store state
         break;
 

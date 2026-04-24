@@ -12,6 +12,9 @@ export interface BadgeTextProps extends TextProps {
   style?: StyleProp<TextStyle>;
 }
 
+/**
+ * Renders the badge text UI section.
+ */
 const BadgeText: React.FC<BadgeTextProps> = ({ children, style, ...rest }) => {
   return (
     <Text style={[globalStyles.badgeText, style]} {...rest}>

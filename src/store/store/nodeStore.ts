@@ -41,7 +41,7 @@ class NodeStore {
 
   /**
    * Get the list of nodes from the store
-   * @returns {ESPCDFNode[]} The list of nodes
+   * @returns The list of nodes
    */
   @computed get nodesList(): ESPCDFNode[] {
     return Object.values(this.nodesByIDMap);

@@ -87,7 +87,7 @@ export const apiRequest = async <T = any>(
         } else {
             throw new Error('Store not ready');
         }
-    } catch (error) {
+    } catch {
         authToken = await StorageAdapter.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
     }
 
@@ -627,7 +627,7 @@ export async function generateConversationTitle(message: string): Promise<string
             body: { message },
         });
         return response.reply || 'New Conversation';
-    } catch (error) {
+    } catch {
         return 'New Conversation';
     }
 }

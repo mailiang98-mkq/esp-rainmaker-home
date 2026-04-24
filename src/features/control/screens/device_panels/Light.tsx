@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
@@ -62,9 +63,8 @@ import {
  * - White: brightness + temperature (esp.param.temperature) and/or CCT (esp.param.cct)
  * - Light mode (esp.param.light-mode) synced with White / Color tab when present
  * - Scene presets (coming soon)
- *
  * @param node - The ESPRMNode representing the light device
- * @returns JSX component for light control
+ * @returns Tabbed light UI (white/color) with ParamControls for power, level, and color
  */
 const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
   // Hooks
@@ -202,7 +202,7 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
       if (device && params) {
         device.params = params;
       }
-    } catch (error) {
+    } catch {
       toast.showError(
         t("layout.shared.errorHeader"),
         t("device.errors.failedToRefreshDeviceState"),

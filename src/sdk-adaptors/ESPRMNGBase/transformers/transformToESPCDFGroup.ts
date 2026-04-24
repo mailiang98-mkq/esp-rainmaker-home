@@ -4,7 +4,7 @@ import { ESPRMNGAutomation, ESPRMNGGroup, ESPRMNGNode, ESPRMNGUser } from "@espr
 import { transformToESPCDFAutomation, type ResolvedAutomationEvents } from "./transformToESPCDFAutomation";
 import { transformToESPCDFNode } from "./transformToESPCDFNode";
 import { transformToESPCDFSchedule } from "./transformToESPCDFSchedule";
-import { cdfActionsToTargets, cdfEventsToTriggerItems, triggerItemToCdfEvent } from "../utils/automation";
+import { apiOperatorToTriggerOperator, cdfActionsToTargets, cdfEventsToTriggerItems, triggerItemToCdfEvent } from "../utils/automation";
 import { throwNormalizedRmngShareError } from "../utils/common";
 import { ESPCDF } from "@store";
 
@@ -15,7 +15,7 @@ type CdfEntry = {
     name: string;
     info?: string;
     nodes: string[];
-    triggers: Array<{ m?: number; d?: number; dd?: number; mm?: number; yy?: number; rsec?: number }>;
+    triggers: { m?: number; d?: number; dd?: number; mm?: number; yy?: number; rsec?: number }[];
     action: Record<string, Record<string, any>>;
     enabled?: boolean;
     validity?: { start?: number; end?: number };
@@ -56,7 +56,7 @@ export function transformToESPCDFGroup(
             subgroup.nodeIds = options.nodeIds;
             return transformToESPCDFGroup(subgroup, user, identifier);
         },
-        async getSharingInfo(options: { metadata?: boolean; withSubGroups?: boolean; withParentGroups?: boolean }): Promise<ESPSDKAdaptorAPIDataResponse<ESPCDFGroupSharingInfoInterface>> {
+        async getSharingInfo(_options: { metadata?: boolean; withSubGroups?: boolean; withParentGroups?: boolean }): Promise<ESPSDKAdaptorAPIDataResponse<ESPCDFGroupSharingInfoInterface>> {
             const { users = [] } = await group.getSharingInfo()
             cdfGroup._raw.shardingInfo = users
             return Promise.resolve({
@@ -77,7 +77,7 @@ export function transformToESPCDFGroup(
             const response = await group.delete();
             return { status: "success", description: response.status };
         },
-        async updateMetadata(metadata: Record<string, any>): Promise<ESPCDFAPIResponse> {
+        async updateMetadata(_metadata: Record<string, any>): Promise<ESPCDFAPIResponse> {
             throw new Error("RMNGBase SDK does not support updateMetadata");
         },
         async updateGroupInfo(updates: { groupName: string }): Promise<ESPCDFAPIResponse> {
@@ -123,10 +123,13 @@ export function transformToESPCDFGroup(
         },
         async removeSharingFor(username: string): Promise<ESPCDFAPIResponse> {
             const shardingInfo = cdfGroup._raw.shardingInfo as
-                | Array<{ email?: string; phone?: string; user_id: string }>
+                | { email?: string; phone?: string; user_id: string }[]
                 | undefined;
             const member = shardingInfo?.find(
-                (u) => u.email == username || u.phone == username || u.user_id == username,
+                (u) =>
+                    u.email === username ||
+                    u.phone === username ||
+                    u.user_id === username,
             );
             if (!member) {
                 throw new Error(`User ${username} not found in sharing info`);
@@ -138,7 +141,7 @@ export function transformToESPCDFGroup(
             }
             return Promise.resolve({ status: "success", description: `Sharing removed for user ${username}` });
         },
-        async createScene(sceneData: { id?: string; name: string; info?: string; nodes?: string[]; actions: { [key: string]: { [key: string]: any } } }): Promise<ESPCDFScene> {
+        async createScene(_sceneData: { id?: string; name: string; info?: string; nodes?: string[]; actions: { [key: string]: { [key: string]: any } } }): Promise<ESPCDFScene> {
             throw new Error("RMNGBase SDK does not support createScene");
         },
         async getScenes(): Promise<ESPCDFScene[]> {
@@ -181,9 +184,12 @@ export function transformToESPCDFGroup(
 
                 const existing = schedulesMapById.get(scheduleId);
                 if (existing) {
-                    if (!existing.nodes.includes(nodeId)) existing.nodes.push(nodeId);
+                    const isNewNode = !existing.nodes.includes(nodeId);
+                    if (isNewNode) {
+                        existing.nodes.push(nodeId);
+                        existing.devicesCount += devicesCount;
+                    }
                     existing.action[nodeId] = { ...(existing.action[nodeId] ?? {}), ...deviceAction };
-                    existing.devicesCount += devicesCount;
                 } else {
                     schedulesMapById.set(scheduleId, {
                         id: scheduleId,
@@ -281,21 +287,21 @@ export function transformToESPCDFGroup(
                 },
             };
         },
-        async getScheduleCapableDevices(espcdfGroup: ESPCDFGroup): Promise<Array<{
+        async getScheduleCapableDevices(espcdfGroup: ESPCDFGroup): Promise<{
             node: ESPCDFNode;
             device: ESPCDFDevice;
             isMaxScheduleReached: boolean;
-        }>> {
+        }[]> {
             try {
                 const nodes =
                     espcdfGroup.nodeDetails && espcdfGroup.nodeDetails.length > 0
                         ? espcdfGroup.nodeDetails
                         : await buildCdfNodesFromGroup(group, user, identifier);
-                const allDevices: Array<{
+                const allDevices: {
                     node: ESPCDFNode;
                     device: ESPCDFDevice;
                     isMaxScheduleReached: boolean;
-                }> = [];
+                }[] = [];
                 nodes.forEach((node) => {
                     const devices = node.devices ?? [];
                     devices
@@ -316,6 +322,11 @@ export function transformToESPCDFGroup(
             } catch (error) {
                 throw error;
             }
+        },
+        async setParams(
+            payload: Record<string, Record<string, unknown>>,
+        ): Promise<unknown> {
+            return group.setParams(payload);
         },
     };
 
@@ -398,7 +409,7 @@ async function resolveAutomationTriggerDetails(
     if (typeof getNodeFn !== "function") return [];
 
     const resolved: ResolvedAutomationEvents = [];
-    const nodeTriggersCache: Record<string, Array<{ id?: string; device?: string; param?: string; operator?: string; value?: unknown }>> = {};
+    const nodeTriggersCache: Record<string, { id?: string; device?: string; param?: string; operator?: string; value?: unknown }[]> = {};
 
     for (const triggerId of andIds) {
         if (typeof triggerId !== "string") continue;
@@ -414,7 +425,7 @@ async function resolveAutomationTriggerDetails(
                     continue;
                 }
                 const list = await getTriggersFn.call(node);
-                nodeTriggersCache[nid] = Array.isArray(list) ? (list as Array<{ id?: string; device?: string; param?: string; operator?: string; value?: unknown }>) : [];
+                nodeTriggersCache[nid] = Array.isArray(list) ? (list as { id?: string; device?: string; param?: string; operator?: string; value?: unknown }[]) : [];
             }
             const t = nodeTriggersCache[nid].find((tr) => tr.id === triggerId);
             if (t) {
@@ -422,7 +433,7 @@ async function resolveAutomationTriggerDetails(
                     id: t.id ?? "",
                     device: t.device ?? "",
                     param: t.param ?? "",
-                    operator: (t.operator ?? "==") as ">" | "<" | "==" | "!=" | ">=" | "<=",
+                    operator: apiOperatorToTriggerOperator(t.operator),
                     value: t.value,
                 }));
             }

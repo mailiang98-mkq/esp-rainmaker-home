@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import {
     ESPCDFCreateGroupRequest,
     ESPCDFGroup,
@@ -18,6 +19,8 @@ import {
     ESPCDFUserOperation,
     DEFAULT_HOME_GROUP_NAME,
     ESPCDFAPIResponse,
+    ESPCDFAssumeRoleRequest,
+    ESPCDFAssumeRoleResponse,
 } from "@store";
 import {
     ESPDevice,
@@ -47,12 +50,11 @@ const RMNG_REGISTER_CLIENT_TOKEN_PLACEHOLDER = "TOKEN";
 
 /**
  * Transforms ESPRMNGUser from the RainMaker SDK to ESPCDFUser format.
- * 
+ *
  * This utility converts the SDK user object to the CDF user format with:
  * - User info (id, name, email, nickname, phone)
  * - Operations wrapper that delegates to ESPRMNGUser methods
  * - Raw reference to the original ESPRMNGUser
- * 
  * @param esprmngUser - The ESPRMNGUser instance from the SDK
  * @param identifier - The adaptor identifier
  * @param cdfContext - Optional CDF context for operations
@@ -65,8 +67,9 @@ export function transformToESPCDFUser(
         throw new Error("ESPRMNGUser is required for transformation");
     }
 
-    // Connect MQTT once the user is created
-    esprmngUser.connectMQTT().then(() => {
+    // Start MQTT connection early; store the promise so operations that need
+    // MQTT (e.g. syncHomeWithNodes → getNodes → SDK subscribeToNode) can await it.
+    const mqttConnectionPromise = esprmngUser.connectMQTT().then(() => {
         console.log("[transformToESPCDFUser] MQTT connected");
     }).catch((error) => {
         console.error("[transformToESPCDFUser] Failed to connect MQTT:", error);
@@ -132,7 +135,7 @@ export function transformToESPCDFUser(
                 data: userInfo,
             };
         },
-        async updateUserInfo(userInfo: Partial<ESPCDFUserInfo>): Promise<ESPCDFAPIResponse<any>> {
+        async updateUserInfo(_userInfo: Partial<ESPCDFUserInfo>): Promise<ESPCDFAPIResponse<any>> {
             throw new Error("RMNGBase SDK does not support updateUserInfo");
         },
         async getCustomData(): Promise<any> {
@@ -168,7 +171,7 @@ export function transformToESPCDFUser(
             }
 
         },
-        async updateName(name: string): Promise<ESPCDFAPIResponse<any>> {
+        async updateName(_name: string): Promise<ESPCDFAPIResponse<any>> {
             console.warn("[transformToESPCDFUser] updateName is not supported by RMNGBase SDK");
             throw new Error("RMNGBase SDK does not support updateName")
         },
@@ -176,7 +179,7 @@ export function transformToESPCDFUser(
             console.warn("[transformToESPCDFUser] requestAccountDeletion is not supported by RMNGBase SDK");
             throw new Error("RMNGBase SDK does not support requestAccountDeletion")
         },
-        async confirmAccountDeletion(code: string): Promise<ESPCDFAPIResponse<any>> {
+        async confirmAccountDeletion(_code: string): Promise<ESPCDFAPIResponse<any>> {
             console.warn("[transformToESPCDFUser] confirmAccountDeletion is not supported by RMNGBase SDK");
             throw new Error("RMNGBase SDK does not support confirmAccountDeletion")
         },
@@ -255,16 +258,16 @@ export function transformToESPCDFUser(
             );
             return createCDFProvisioningDeviceFromAdapterDescriptor(descriptor as any);
         },
-        async getGroupById(groupId: string, options: Record<string, any>): Promise<any> {
+        async getGroupById(_groupId: string, _options: Record<string, any>): Promise<any> {
             throw new Error("RMNGBase SDK does not support getGroupById");
         },
-        async subscribeToEvent(event: string, callback: (event: any) => void): Promise<void> {
+        async subscribeToEvent(_event: string, _callback: (event: any) => void): Promise<void> {
             throw new Error("RMNGBase SDK does not support subscribeToEvent");
         },
-        async unsubscribeFromEvent(event: string, callback: (event: any) => void): Promise<void> {
+        async unsubscribeFromEvent(_event: string, _callback: (event: any) => void): Promise<void> {
             throw new Error("RMNGBase SDK does not support unsubscribeFromEvent");
         },
-        async setMultipleNodesParams(payload: Array<{ nodeId: string; payload: any }>): Promise<any> {
+        async setMultipleNodesParams(_payload: { nodeId: string; payload: any }[]): Promise<any> {
             throw new Error("RMNGBase SDK does not support setMultipleNodesParams");
         },
         async getGroups(): Promise<ESPCDFPaginatedAPIResponse<ESPCDFGroup[]>> {
@@ -297,6 +300,12 @@ export function transformToESPCDFUser(
             return esprmngUser.accessToken;
         },
         async syncHomeWithNodes(user, callbacks) {
+            // Wait for MQTT to be connected before fetching nodes.
+            // getNodes() triggers SDK-internal MQTT subscriptions (shadow get/accepted topics);
+            // without a live connection those subscriptions silently fail and subsequent
+            // shadow-get responses from AWS IoT Core are never received.
+            await mqttConnectionPromise;
+
             const groups = await esprmngUser.getGroups();
             let cdfGroups: ESPCDFGroup[] = groups.map((group: ESPRMNGGroup) =>
                 transformToESPCDFGroup(group, esprmngUser, ESPRMNGBaseAdaptorIdentifier)
@@ -377,6 +386,10 @@ export function transformToESPCDFUser(
                 status: "success",
                 description: "Notification endpoint unregistered successfully",
             };
+        },
+
+        async assumeRole(_request: ESPCDFAssumeRoleRequest): Promise<ESPCDFAssumeRoleResponse> {
+            throw new Error("ESPRMNGBase SDK assume role has different implementation which not assume role for particluar nodeId's or groupId's");
         },
     };
 

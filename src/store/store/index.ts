@@ -47,8 +47,8 @@ export class ESPCDF {
 
   /**
    * Adds a custom store to the root store.
-   * @param {string} storeName - The name of the custom store.
-   * @param {new (rootStore: ESPCDF) => any} StoreClass - The class of the custom store.
+   * @param storeName - The name of the custom store.
+   * @param StoreClass - The class of the custom store.
    *
    * Example:
    * ```ts
@@ -81,7 +81,6 @@ export class ESPCDF {
 
   /**
    * Gets an SDK adaptor by identifier.
-   *
    * @param adaptorIdentifier - The identifier of the adaptor to retrieve
    * @returns The SDK adaptor instance
    */
@@ -91,7 +90,6 @@ export class ESPCDF {
 
   /**
    * Returns the identifier of the currently active SDK adaptor, or null if none is set.
-   *
    * @returns The active adaptor identifier, or null
    */
   getActiveAdaptorIdentifier(): string | null {
@@ -129,7 +127,6 @@ export class ESPCDF {
  *
  * Creates a new CDF instance if one doesn't exist, or returns the existing instance.
  * Validates that the config and SDK registry are provided.
- *
  * @param config - CDF configuration containing SDK registry
  * @returns The singleton CDF store instance
  * @throws Error if config or SDK registry is missing

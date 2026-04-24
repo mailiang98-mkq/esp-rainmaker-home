@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
@@ -21,7 +22,7 @@ interface ScannedDeviceCardProps {
  *
  * Displays a card for a scanned device with its name and icon
  * @param props - Device information and onPress handler
- * @returns JSX component
+ * @returns Tappable row with device image and truncated name
  */
 export const ScannedDeviceCard: React.FC<ScannedDeviceCardProps> = ({
   name,

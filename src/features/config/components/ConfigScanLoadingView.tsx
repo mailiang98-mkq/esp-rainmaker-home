@@ -16,6 +16,9 @@ export interface ConfigScanLoadingViewProps {
   onCancel: () => void;
 }
 
+/**
+ * Renders the config scan loading view UI section.
+ */
 export function ConfigScanLoadingView({
   title,
   message,

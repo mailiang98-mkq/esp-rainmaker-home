@@ -19,6 +19,9 @@ import { testProps } from "@shared/utils/testProps";
 import { useToast } from "@shared/hooks/useToast";
 import { useCreateGroup } from "@features/group/hooks";
 
+/**
+ * Renders the create control group UI section.
+ */
 const CreateControlGroup = () => {
   const { t } = useTranslation();
   const toast = useToast();

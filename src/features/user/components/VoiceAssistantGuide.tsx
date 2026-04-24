@@ -21,6 +21,9 @@ type VoiceAssistantGuideProps = {
   imageMap: Record<string, number>;
 };
 
+/**
+ * Renders the voice assistant guide UI section.
+ */
 const VoiceAssistantGuide: React.FC<VoiceAssistantGuideProps> = ({
   headerLabel,
   steps,

@@ -18,6 +18,9 @@ export interface EventDeviceSelectionContentProps {
   renderDeviceItem: (device: DeviceSelectionData, index: number) => React.ReactNode;
 }
 
+/**
+ * Renders the event device selection content UI section.
+ */
 export const EventDeviceSelectionContent: React.FC<
   EventDeviceSelectionContentProps
 > = ({

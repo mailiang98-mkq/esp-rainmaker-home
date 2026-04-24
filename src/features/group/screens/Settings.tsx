@@ -43,7 +43,6 @@ const Setting = () => {
     isAddingUser,
     setIsAddingUser,
     newUserEmail,
-    setNewUserEmail,
     makePrimary,
     setMakePrimary,
     transfer,

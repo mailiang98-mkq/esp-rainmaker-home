@@ -24,6 +24,9 @@ export interface ActionDeviceSelectionDeviceItemProps {
   showDelete: boolean;
 }
 
+/**
+ * Renders the action device selection device item UI section.
+ */
 export const ActionDeviceSelectionDeviceItem: React.FC<
   ActionDeviceSelectionDeviceItemProps
 > = ({

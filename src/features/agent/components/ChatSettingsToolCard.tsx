@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { Text, ActivityIndicator, Pressable, TouchableWithoutFeedback } from "react-native";
 import { useTranslation } from "react-i18next";
 import { tokens } from "@shared/theme/tokens";
@@ -24,6 +25,9 @@ interface ChatSettingsToolCardProps {
   onDisconnect: (tool: AgentConfigTool) => void;
 }
 
+/**
+ * One MCP/tool card: shows connection status and connect/disconnect actions with loading states for the given tool URL.
+ */
 export function ChatSettingsToolCard({
   tool,
   index,

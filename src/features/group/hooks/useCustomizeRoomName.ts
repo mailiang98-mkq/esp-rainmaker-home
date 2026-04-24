@@ -27,6 +27,9 @@ export interface UseCustomizeRoomNameResult {
   handleRoomSelection: (roomLabel: string) => void;
 }
 
+/**
+ * Manages customize room name state and related actions.
+ */
 export function useCustomizeRoomName(
   options: UseCustomizeRoomNameOptions
 ): UseCustomizeRoomNameResult {

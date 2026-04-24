@@ -20,12 +20,8 @@ import { RAINMAKER_MCP_CONNECTOR_URL } from "@/config/agent.config";
 import { getAgentTermsAccepted } from "@features/agent/utils/storage";
 import { ConnectedConnector } from "@features/agent/utils/apiHelper";
 // Components
-import {
-  Header,
-  ScreenWrapper,
-  ConfirmationDialog,
-  AgentTermsBottomSheet,
-} from "@shared/components";
+import { Header, ScreenWrapper, ConfirmationDialog } from "@shared/components";
+import { AgentTermsBottomSheet } from "@features/agent/components";
 
 /* ------------------------------ Constants ------------------------------- */
 
@@ -46,8 +42,7 @@ interface LoadingScreenProps {
  * LoadingScreen
  *
  * Reusable component for displaying loading state with activity indicator and message
- *
- * @param props - Component props
+ * @param props - Loading screen props
  * @param props.message - Optional loading message to display
  */
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ message }) => {
@@ -148,6 +143,7 @@ const TryAgentsId = () => {
     };
 
     runPipeline();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [isAppReady, store, router]);
 
   /**
@@ -167,6 +163,7 @@ const TryAgentsId = () => {
       setIsLoading(false);
       setShowTermsBottomSheet(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [hasCheckedTerms, isPipelineReady, store]);
 
   const initAgentConfiguration = useCallback(async () => {
@@ -174,6 +171,7 @@ const TryAgentsId = () => {
     if (!isPipelineReady || !isTermsAccepted) return;
 
     loadAgentData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [id, isPipelineReady, isTermsAccepted, store, router]);
 
   // Effects

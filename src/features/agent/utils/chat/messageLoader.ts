@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { ESPCDFUser } from "@store";
 import {
   getConversationId,
@@ -72,7 +73,7 @@ export const loadPreviousMessages = async (
     } else {
       addDefaultWelcomeMessage(setMessageHistory, flatListRef);
     }
-  } catch (error) {
+  } catch {
     // If loading fails, add default message
     addDefaultWelcomeMessage(setMessageHistory, flatListRef);
   }

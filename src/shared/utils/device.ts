@@ -10,10 +10,10 @@ import {
   isAIAgentFromAdvertisement,
   parseBleManufacturerAdvertisement,
 } from "./bleAdvertisement";
-
-export type { BleAdvertisedDeviceKind, ParsedBleManufacturerAdvertisement } from "./bleAdvertisement";
 import { DEVICE_TYPE_LIST } from "@/config/devices.config";
 import { ESPCDFDevice, ESPCDFDeviceParam, ESPCDFNode } from "@store";
+
+export type { BleAdvertisedDeviceKind, ParsedBleManufacturerAdvertisement } from "./bleAdvertisement";
 
 /**
  * Device images
@@ -31,8 +31,10 @@ const deviceImages: Record<string, any> = {
   "fan-online": require("@assets/images/devices/fan-online.png"),
   temperature: require("@assets/images/devices/sensor.png"),
   "temperature-online": require("@assets/images/devices/sensor-online.png"),
-  'ai-assistant': require("@assets/images/devices/ai-assistant.png"),
-  'ai-assistant-online': require("@assets/images/devices/ai-assistant-online.png"),
+  "ai-assistant": require("@assets/images/devices/ai-assistant.png"),
+  "ai-assistant-online": require("@assets/images/devices/ai-assistant-online.png"),
+  camera: require("@assets/images/devices/camera.png"),
+  "camera-online": require("@assets/images/devices/camera.png"),
   // Add more mappings as needed
 };
 
@@ -194,10 +196,8 @@ const isDeviceCategory = (deviceType: string, category: string): boolean => {
  * 4. Flattens the resulting array of devices
  *
  * Uses WeakRef to allow garbage collection of nodes when they're no longer referenced elsewhere.
- *
- * @param {ESPRMNode[]} nodes - Array of ESP RainMaker nodes to transform
- * @returns {Array<ESPRMDevice & { node: WeakRef<ESPRMNode> }>} Flattened array of devices with weak node references
- *
+ * @param nodes - Array of ESP RainMaker nodes to transform
+ * @returns Flattened array of devices with weak node references
  * @example
  * const nodes = [
  *   { nodeConfig: { devices: [{ id: 1 }, { id: 2 }] } },
@@ -208,7 +208,7 @@ const isDeviceCategory = (deviceType: string, category: string): boolean => {
  */
 const transformNodesToDevices = (
   nodes: ESPCDFNode[]
-): Array<ESPCDFDevice & { node: WeakRef<ESPCDFNode> }> => {
+): (ESPCDFDevice & { node: WeakRef<ESPCDFNode> })[] => {
   // Reduce nodes array into a flattened array of devices with weak node references
   return nodes.reduce((accumulator, currentNode) => {
     // Extract devices array from node (first level), default to empty array if undefined
@@ -218,11 +218,11 @@ const transformNodesToDevices = (
     const devicesWithNodeRef = nodeDevices.map((device) => ({
       ...device,
       node: new WeakRef(currentNode),
-    })) as Array<ESPCDFDevice & { node: WeakRef<ESPCDFNode> }>;
+    })) as (ESPCDFDevice & { node: WeakRef<ESPCDFNode> })[];
 
     // Concatenate with accumulated devices
     return [...accumulator, ...devicesWithNodeRef];
-  }, [] as Array<ESPCDFDevice & { node: WeakRef<ESPCDFNode> }>);
+  }, [] as (ESPCDFDevice & { node: WeakRef<ESPCDFNode> })[]);
 };
 
 // Type definition for a device configuration
@@ -230,15 +230,12 @@ export type DeviceConfig = (typeof DEVICE_TYPE_LIST)[0];
 
 /**
  * Determines the error type based on BLE scan error message content
- * 
  * @param errorMessage - The error message to analyze
  * @param errorCode - Optional error code from React Native rejection
  * @returns The categorized error type: "permission" | "noDevices" | "scanFailed" | "bluetoothDisabled" | "generic"
- * 
  * @example
  * const errorType = getBleScanErrorType("BLE scanning failed");
  * // Returns: "scanFailed"
- * 
  * @example
  * const errorType = getBleScanErrorType("Error message", "BLUETOOTH_DISABLED");
  * // Returns: "bluetoothDisabled"
@@ -313,11 +310,9 @@ const getBleScanErrorType = (
 
 /**
  * Determines which permission is missing based on BLE and Location permission status
- * 
  * @param bleGranted - Whether BLE permission is granted (null means unknown/checking)
  * @param locationGranted - Whether Location permission is granted (null means unknown/checking)
  * @returns The missing permission type: "ble" | "location" | "both" | "none"
- * 
  * @example
  * const missing = getMissingPermission(false, true);
  * // Returns: "ble"
@@ -334,14 +329,11 @@ const getMissingPermission = (
 
 /**
  * Determines the error type based on QR scan error message content
- * 
  * @param errorMessage - The error message to analyze
  * @returns The categorized error type: "permission" | "bluetoothDisabled" | "connection" | "session" | "generic"
- * 
  * @example
  * const errorType = getQRScanErrorType("Bluetooth is not enabled");
  * // Returns: "bluetoothDisabled"
- * 
  * @example
  * const errorType = getQRScanErrorType("DEVICE_NOT_FOUND");
  * // Returns: "connection"

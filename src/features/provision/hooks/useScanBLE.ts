@@ -57,7 +57,6 @@ export const useScanBLE = (): UseScanBLEReturn => {
     bluetoothEnabled,
     isChecking,
     allPermissionsGranted,
-    requestPermissions,
     checkPermissions,
   } = useDevicePermissions();
 
@@ -107,6 +106,7 @@ export const useScanBLE = (): UseScanBLEReturn => {
 
     hasAttemptedScanRef.current = false;
     handleBleDeviceScan();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   /**
@@ -295,6 +295,7 @@ export const useScanBLE = (): UseScanBLEReturn => {
           pathname: "/(provision)/POP",
           params: {
             hasClaimCap: rmakerCaps.hasClaim ? "true" : "false",
+            hasCameraClaim: rmakerCaps.hasCameraClaim ? "true" : "false",
           },
         });
         return;
@@ -305,6 +306,9 @@ export const useScanBLE = (): UseScanBLEReturn => {
       if (rmakerCaps.hasClaim) {
         router.push({
           pathname: "/(provision)/Claiming",
+          params: {
+            isCameraDevice: rmakerCaps.hasCameraClaim ? "true" : "false",
+          },
         });
         return;
       }
@@ -356,8 +360,8 @@ export const useScanBLE = (): UseScanBLEReturn => {
     availableDevices,
 
     // Permissions
-    bleGranted,
-    locationGranted,
+    bleGranted: bleGranted ?? false,
+    locationGranted: locationGranted ?? false,
     bluetoothEnabled,
     isChecking,
     allPermissionsGranted,

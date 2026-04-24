@@ -177,18 +177,16 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
    * one row per device with params, plus whether the node has reached its max scene count.
    *
    * Used for scene device selection / provisioning flows — not a raw node list.
-   *
    * @returns Promise<Array<{ node: ESPCDFNode; device: ESPCDFDevice; isMaxSceneReached: boolean }>>
    * @throws Error if the adaptor does not implement this operation
-   *
    * @example
    * const rows = await group.getSceneCapableDevices();
    */
-  async getSceneCapableDevices(): Promise<Array<{
+  async getSceneCapableDevices(): Promise<{
     node: ESPCDFNode;
     device: ESPCDFDevice;
     isMaxSceneReached: boolean;
-  }>> {
+  }[]> {
     return this.runAndEmit(
       "getSceneCapableDevices",
       async () => {
@@ -209,18 +207,16 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
    * (same shape as scene rows: `isMaxSceneReached` is reused for the schedule service bound).
    *
    * Used for schedule device selection / provisioning flows.
-   *
    * @returns Promise<Array<{ node: ESPCDFNode; device: ESPCDFDevice; isMaxSceneReached: boolean }>>
    * @throws Error if the adaptor does not implement this operation
-   *
    * @example
    * const rows = await group.getScheduleCapableDevices();
    */
-  async getScheduleCapableDevices(): Promise<Array<{
+  async getScheduleCapableDevices(): Promise<{
     node: ESPCDFNode;
     device: ESPCDFDevice;
     isMaxSceneReached: boolean;
-  }>> {
+  }[]> {
     return this.runAndEmit(
       "getScheduleCapableDevices",
       async () => {
@@ -276,10 +272,8 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
    *
    * Fetches nodes from the group and extracts schedule configurations from their
    * services. Returns an array of ESPCDFSchedule entities that can be stored in ScheduleStore.
-   *
    * @returns Promise<ESPCDFSchedule[]> Array of schedule entities for this group's nodes
    * @throws Error if operation not supported or schedule extraction fails
-   *
    * @example
    * const schedules = await group.getSchedules();
    * // Schedules will be automatically added to scheduleStore via callback
@@ -327,10 +321,8 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
    *
    * Fetches nodes from the group and extracts automation configurations from their
    * services. Returns an array of ESPCDFAutomation entities that can be stored in AutomationStore.
-   *
    * @returns Promise<ESPCDFAutomation[]> Array of automation entities for this group's nodes
    * @throws Error if operation not supported or automation extraction fails
-   *
    * @example
    * const automations = await group.getAutomations();
    * // Automations will be automatically added to automationStore via callback
@@ -444,6 +436,29 @@ export class ESPCDFGroup implements ESPCDFGroupInterface {
       "startCommissioning",
       () => this.operations.startCommissioning!(qrData, onProgress),
       () => ({ qrData })
+    );
+  }
+
+  /**
+   * Publishes param values through the adaptor group-level `setParams` path when supported.
+   * @param payload Device logical name → param name → value (shape defined by the active adaptor).
+   * @returns Adaptor-specific result.
+   * @throws Error when the adaptor does not implement {@link ESPCDFGroupOperation.setParams}.
+   */
+  setParams(
+    payload: Record<string, Record<string, unknown>>
+  ): Promise<unknown> {
+    return this.runAndEmit(
+      "setParams",
+      async () => {
+        if (!this.operations.setParams) {
+          throw new Error(
+            "setParams not supported by this group's SDK adaptor"
+          );
+        }
+        return this.operations.setParams(payload);
+      },
+      (result) => result
     );
   }
 }

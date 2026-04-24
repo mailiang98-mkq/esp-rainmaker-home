@@ -15,6 +15,9 @@ export interface ActionDeviceParamSelectionEmptyStateProps {
   title: string;
 }
 
+/**
+ * Renders the action device param selection empty state UI section.
+ */
 export const ActionDeviceParamSelectionEmptyState: React.FC<
   ActionDeviceParamSelectionEmptyStateProps
 > = ({ title }) => {

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, {
   createContext,
   useContext,
@@ -381,10 +382,13 @@ interface AutomationProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Wraps the automation crud flow: reducer state, node/device pickers
+ */
 export function AutomationProvider({ children }: AutomationProviderProps) {
   const [state, dispatch] = useReducer(automationReducer, initialState);
   const {
-    store: { automationStore, nodeStore, groupStore },
+    store: { automationStore, groupStore },
   } = useCDF();
   // Helper functions to make state updates more convenient
   const setAutomationInfo = useCallback((automation: ESPCDFAutomation) => {
@@ -464,6 +468,7 @@ export function AutomationProvider({ children }: AutomationProviderProps) {
         }
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   const setAutomationName = useCallback((name: string) => {
@@ -719,7 +724,7 @@ export function AutomationProvider({ children }: AutomationProviderProps) {
 
     // Get current home group to use group-based creation
     const currentHomeId = groupStore.currentHomeId;
-    const currentHome = groupStore._groupsByID?.[currentHomeId];
+    const currentHome = groupStore._groupsByID?.[currentHomeId ?? ""];
 
     if (currentHome) {
       // Use group-based automation creation
@@ -776,7 +781,9 @@ export function AutomationProvider({ children }: AutomationProviderProps) {
   );
 }
 
-// Custom hook for using the Automation context
+/**
+ * Access to automation builder state and actions (must be used under `AutomationProvider`).
+ */
 export function useAutomation() {
   const context = useContext(AutomationContext);
   if (context === undefined) {

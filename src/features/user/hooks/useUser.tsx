@@ -46,6 +46,9 @@ export type RouteMap = {
 
 export type RouteAction = keyof RouteMap;
 
+/**
+ * Manages user state and related actions.
+ */
 export const useUser = () => {
   const router = useRouter();
   const { t } = useTranslation();

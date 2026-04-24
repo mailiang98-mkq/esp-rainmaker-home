@@ -21,9 +21,9 @@ export const RAINMAKER_EVENT_TO_CDF_NODE_SUBSCRIPTION_EVENTS: Record<string, str
 };
 
 /**
-* Resolves an incoming event type to a CDF topic. Unknown strings pass through unchanged
-* so future topics or vendor extensions can still be routed by custom handlers.
-*/
+ * Resolves an incoming event type to a CDF topic. Unknown strings pass through unchanged
+ * so future topics or vendor extensions can still be routed by custom handlers.
+ */
 export function mapRainmakerEventToCDFNodeSubscriptionEvent(eventType: string): string {
   if (!eventType) return eventType;
   return RAINMAKER_EVENT_TO_CDF_NODE_SUBSCRIPTION_EVENTS[eventType] ?? eventType;
@@ -35,7 +35,6 @@ export function mapRainmakerEventToCDFNodeSubscriptionEvent(eventType: string): 
  *
  * Used by the adaptor layer to forward SDK subscription manager updates
  * into the CDF subscription store (nodeEventHandlers contract).
- *
  * @param update - Update from subscription channel (e.g. SDK ESPNodeUpdateData)
  * @returns Event shape expected by subscriptionStore.nodeUpdates.listen
  */

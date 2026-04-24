@@ -8,6 +8,7 @@ import {
   ESPCDFNode,
   ESPCDFNodesByIDMap,
   ESPCDFNodeTransport,
+  ESPCDFTransportConfig,
 } from "@store";
 
 /**
@@ -24,7 +25,10 @@ export function mergeLocalTransportFromNodeMap(
   const localKey = ESPCDFNodeTransport.LOCAL;
   return incomingNodes.map((node) => {
     const previous = previousById[node.id];
-    const prevLocal = previous?.availableTransports?.[localKey];
+    const prevTransports = previous?.availableTransports as
+      | Record<string, ESPCDFTransportConfig>
+      | undefined;
+    const prevLocal = prevTransports?.[localKey];
     const prevBaseUrl = prevLocal?.metadata?.baseUrl;
     if (
       !prevLocal ||
@@ -33,13 +37,13 @@ export function mergeLocalTransportFromNodeMap(
     ) {
       return node;
     }
-    const merged: ESPCDFNode = {
+    const merged = {
       ...node,
       availableTransports: {
         ...(node.availableTransports || {}),
         [localKey]: prevLocal,
       },
-    };
+    } as unknown as ESPCDFNode;
     const raw = merged._raw as Record<string, unknown> | undefined;
     if (raw && typeof raw === "object") {
       const prevAt = raw.availableTransports as Record<string, unknown> | undefined;

@@ -25,7 +25,6 @@ export interface UseMultiTapOptions {
  *
  * A reusable hook for detecting multi-tap gestures with configurable triggers.
  * Supports multiple tap thresholds with exact-count matching.
- *
  * @example
  * ```ts
  * const handleTap = useMultiTap({

@@ -19,6 +19,9 @@ export interface CreateAutomationNameSectionProps {
   onNameChange: (name: string) => void;
 }
 
+/**
+ * Renders the create automation name section UI section.
+ */
 export const CreateAutomationNameSection: React.FC<
   CreateAutomationNameSectionProps
 > = ({ title, placeholder, value, onNameChange }) => {

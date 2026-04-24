@@ -52,10 +52,7 @@ const DEFAULT_CONFIG: MessageDisplayConfig = {
 
 /**
  * Combined hook for managing all chat-related functionality.
- * 
  * @description Provides a comprehensive hook for managing all chat-related functionality, including agent management, configuration, input handling, message management, scrolling, and WebSocket communication.
- * 
- * 
  * @example
  * ```tsx
  * const {
@@ -160,13 +157,10 @@ export const useAgentChat = (onTimeout?: () => void) => {
   // ==================== Agent Functions ====================
   /**
    * Loads the agent configuration from storage.
-   *
    * @description Fetches the selected agent ID from storage and retrieves its configuration.
    * Sets error states if the agent is not found or if there's an error loading the config.
-   *
    * @returns {Promise<any>} The agent configuration object.
    * @throws {Error} Throws an error if store is not available, agent ID is missing, or agent config is not found.
-   *
    * @example
    * ```tsx
    * try {
@@ -205,16 +199,14 @@ export const useAgentChat = (onTimeout?: () => void) => {
       setAgentError(errorMessage);
       throw err;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   /**
    * Loads all connected connectors.
-   *
    * @description Fetches the list of currently connected connectors from the API.
    * Returns an empty array if the request fails.
-   *
    * @returns {Promise<ConnectedConnector[]>} Array of connected connector objects. Returns empty array on error.
-   *
    * @example
    * ```tsx
    * const connectors = await loadConnectors();
@@ -225,20 +217,17 @@ export const useAgentChat = (onTimeout?: () => void) => {
     try {
       const connectedConnectors = await getConnectedConnectors();
       return connectedConnectors;
-    } catch (err: any) {
+    } catch {
       return [];
     }
   }, []);
 
   /**
    * Shows a connector warning dialog and returns a promise that resolves when user makes a choice.
-   *
    * @description Displays a warning dialog when required connectors are not connected.
    * Returns a promise that resolves to true if user chooses to continue, false otherwise.
-   *
    * @param {any} config - The agent configuration object containing connector information.
    * @returns {Promise<boolean>} Promise that resolves to true if user chooses to continue, false if they cancel.
-   *
    * @example
    * ```tsx
    * const shouldContinue = await showConnectorWarning(agentConfig);
@@ -260,12 +249,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Handles retry action for connector warning dialog.
-   *
    * @description Attempts to automatically connect the Rainmaker MCP connector.
    * If successful, resolves the warning. If failed, shows the warning dialog again.
-   *
    * @returns {Promise<void>} Promise that resolves when the retry operation completes.
-   *
    * @example
    * ```tsx
    * await handleConnectorWarningRetry();
@@ -295,12 +281,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Handles continue action for connector warning dialog.
-   *
    * @description Closes the warning dialog and resolves the promise with true,
    * allowing the user to continue without the required connector.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * handleConnectorWarningContinue();
@@ -315,7 +298,6 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Initializes the agent by loading configuration and checking connectors.
-   *
    * @description Performs a multi-step initialization process:
    * 1. Checks if user profile exists
    * 2. Loads agent configuration
@@ -323,10 +305,8 @@ export const useAgentChat = (onTimeout?: () => void) => {
    * 4. Checks if required connectors are connected
    * 5. Attempts auto-connection for missing connectors if possible
    * 6. Calls the onConnectorsReady callback when ready
-   *
    * @param {() => Promise<void>} onConnectorsReady - Callback function to execute when connectors are ready.
    * @returns {Promise<void>} Promise that resolves when initialization completes or fails.
-   *
    * @example
    * ```tsx
    * await initializeAgent(async () => {
@@ -421,12 +401,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
   // ==================== Config Functions ====================
   /**
    * Loads the message display configuration from storage.
-   *
    * @description Retrieves the saved message display configuration from persistent storage.
    * Falls back to default configuration if loading fails or no config exists.
-   *
    * @returns {Promise<void>} Promise that resolves when the config is loaded.
-   *
    * @example
    * ```tsx
    * await loadMessageDisplayConfig();
@@ -438,7 +415,7 @@ export const useAgentChat = (onTimeout?: () => void) => {
       const config = await getMessageDisplayConfig();
       messageDisplayConfigRef.current = config;
       setMessageDisplayConfig(config);
-    } catch (error) {
+    } catch {
       messageDisplayConfigRef.current = DEFAULT_CONFIG;
       setMessageDisplayConfig(DEFAULT_CONFIG);
     }
@@ -446,12 +423,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Loads the chat font size setting from storage.
-   *
    * @description Retrieves the saved font size preference from persistent storage.
    * Falls back to default size (2) if loading fails or no setting exists.
-   *
    * @returns {Promise<void>} Promise that resolves when the font size is loaded.
-   *
    * @example
    * ```tsx
    * await loadFontSize();
@@ -462,7 +436,7 @@ export const useAgentChat = (onTimeout?: () => void) => {
     try {
       const size = await getChatFontSize();
       setFontSize(size);
-    } catch (error) {
+    } catch {
       setFontSize(2);
     }
   }, []);
@@ -475,13 +449,10 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Saves the message display configuration to storage.
-   *
    * @description Persists the message display configuration to storage and updates the state.
    * Shows an error toast if saving fails.
-   *
    * @param {MessageDisplayConfig} config - The message display configuration to save.
    * @returns {Promise<void>} Promise that resolves when the config is saved.
-   *
    * @example
    * ```tsx
    * await saveConfig({
@@ -498,7 +469,7 @@ export const useAgentChat = (onTimeout?: () => void) => {
         await saveMessageDisplayConfig(config);
         messageDisplayConfigRef.current = config;
         setMessageDisplayConfig(config);
-      } catch (error) {
+      } catch {
         toast.showError(
           t("layout.shared.errorHeader") || "Error",
           t("chat.messageDisplayConfig.saveFailed") || "Failed to save settings"
@@ -511,11 +482,8 @@ export const useAgentChat = (onTimeout?: () => void) => {
   // ==================== Input Functions ====================
   /**
    * Resets the input field to its default state.
-   *
    * @description Clears the input text and resets the input height to the default value (44px).
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * resetInput();
@@ -530,17 +498,14 @@ export const useAgentChat = (onTimeout?: () => void) => {
   // ==================== Messages Functions ====================
   /**
    * Adds a new chat message to the message history.
-   *
    * @description Creates a new chat message with a unique ID and timestamp, then adds it to the message history.
    * Automatically trims the message history if it exceeds MAX_MESSAGES_IN_MEMORY limit.
-   *
    * @param {string} text - The message text content.
    * @param {boolean} isUser - Whether the message is from the user (true) or assistant (false).
    * @param {string} [messageType="unknown"] - The type of message (e.g., "user", "assistant", "thinking", "timeout").
    * @param {string} [toolName] - Optional name of the tool associated with the message.
    * @param {any} [jsonData] - Optional JSON data to attach to the message.
    * @returns {void}
-   *
    * @example
    * ```tsx
    * addChatMessage("Hello, how can I help?", false, "assistant");
@@ -581,13 +546,10 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Adds a thinking message to the thinking messages array.
-   *
    * @description Appends a thinking message to the internal thinking messages array.
    * These messages are typically combined and displayed later when the thinking process completes.
-   *
    * @param {string} text - The thinking message text to add.
    * @returns {void}
-   *
    * @example
    * ```tsx
    * addThinkingMessage("Analyzing request...");
@@ -604,12 +566,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Flushes and combines all thinking messages into a single string.
-   *
    * @description Combines all accumulated thinking messages into a single string,
    * clears the thinking messages array, and returns the combined text.
-   *
    * @returns {string} The combined thinking messages as a single string, or empty string if no messages.
-   *
    * @example
    * ```tsx
    * addThinkingMessage("Step 1");
@@ -629,11 +588,8 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Clears all thinking messages.
-   *
    * @description Removes all accumulated thinking messages from the array.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * clearThinkingMessages();
@@ -647,13 +603,10 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Toggles the JSON expansion state for a specific message.
-   *
    * @description Expands or collapses the JSON data display for a message.
    * Updates both the expanded messages set and the message's isJsonExpanded property.
-   *
    * @param {string} messageId - The unique ID of the message to toggle.
    * @returns {void}
-   *
    * @example
    * ```tsx
    * toggleJsonExpansion("message-123");
@@ -682,12 +635,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Clears all messages and resets message-related state.
-   *
    * @description Removes all messages from history, clears expanded JSON messages,
    * and clears thinking messages. Resets the chat to an empty state.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * clearMessages();
@@ -717,14 +667,11 @@ export const useAgentChat = (onTimeout?: () => void) => {
   // ==================== WebSocket Functions ====================
   /**
    * Handles incoming WebSocket messages and processes them accordingly.
-   *
    * @description Processes WebSocket messages based on their type and action.
    * Handles different message types: timeout, handshake_ack, update_state, add, and skip.
    * Updates UI state, adds messages to history, and manages connection state.
-   *
    * @param {WebSocketMessage} message - The WebSocket message to process.
    * @returns {void}
-   *
    * @example
    * ```tsx
    * // This is typically called internally by the WebSocket onmessage handler
@@ -822,6 +769,7 @@ export const useAgentChat = (onTimeout?: () => void) => {
           break;
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     [
       addChatMessage,
       addThinkingMessage,
@@ -835,14 +783,11 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Connects to the WebSocket server at the specified URL.
-   *
    * @description Establishes a WebSocket connection, sets up event handlers,
    * and sends a handshake message with conversation ID if available.
    * Shows error toast if connection fails.
-   *
    * @param {string} url - The WebSocket server URL to connect to.
    * @returns {Promise<void>} Promise that resolves when connection is established or fails.
-   *
    * @example
    * ```tsx
    * await connectWebSocket("wss://example.com/chat");
@@ -914,17 +859,15 @@ export const useAgentChat = (onTimeout?: () => void) => {
         );
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     [store, handleWebSocketMessage, addChatMessage, t, toast]
   );
 
   /**
    * Initializes the WebSocket connection by getting the URL and connecting.
-   *
    * @description Retrieves the WebSocket URL from storage and establishes a connection.
    * Silently handles errors during initialization.
-   *
    * @returns {Promise<void>} Promise that resolves when initialization completes or fails.
-   *
    * @example
    * ```tsx
    * await initializeWebSocket();
@@ -937,20 +880,18 @@ export const useAgentChat = (onTimeout?: () => void) => {
       if (url) {
         await connectWebSocket(url);
       }
-    } catch (error) {
+    } catch {
       // Silent error handling
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store, connectWebSocket]);
 
   /**
    * Sends a message through the WebSocket connection.
-   *
    * @description Sends a user message to the server via WebSocket if connected.
    * Does nothing if message is empty, not connected, or WebSocket is not ready.
-   *
    * @param {string} message - The message text to send.
    * @returns {void}
-   *
    * @example
    * ```tsx
    * sendMessage("Turn on the living room lights");
@@ -968,7 +909,7 @@ export const useAgentChat = (onTimeout?: () => void) => {
             content: message,
           };
           wsRef.current.send(JSON.stringify(messageData));
-        } catch (error) {
+        } catch {
           // Silent error handling
         }
       }
@@ -978,12 +919,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Disconnects the WebSocket connection.
-   *
    * @description Closes the WebSocket connection and resets connection state.
    * Cleans up the WebSocket reference.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * disconnect();
@@ -1002,12 +940,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
   // ==================== Scroll Functions ====================
   /**
    * Enables auto-scroll functionality for the message list.
-   *
    * @description Allows the message list to automatically scroll to the bottom
    * when new messages are added. Resets the user scrolling flag.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * enableAutoScroll();
@@ -1021,12 +956,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Disables auto-scroll functionality for the message list.
-   *
    * @description Prevents the message list from automatically scrolling to the bottom.
    * Sets the user scrolling flag to indicate manual scrolling is in progress.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * disableAutoScroll();
@@ -1040,13 +972,10 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Scrolls the message list to the end (bottom).
-   *
    * @description Programmatically scrolls the FlatList to show the last message.
    * Does nothing if the FlatList reference is not available.
-   *
    * @param {boolean} [animated=true] - Whether to animate the scroll transition.
    * @returns {void}
-   *
    * @example
    * ```tsx
    * scrollToEnd(true);  // Scroll with animation
@@ -1061,12 +990,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Handles the scroll begin drag event.
-   *
    * @description Called when the user starts manually scrolling the message list.
    * Disables auto-scroll and marks that the user is actively scrolling.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * <FlatList
@@ -1082,12 +1008,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Handles the scroll end drag event.
-   *
    * @description Called when the user finishes dragging the message list.
    * Resets the user scrolling flag after a delay to allow momentum scrolling to complete.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * <FlatList
@@ -1104,12 +1027,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Handles the momentum scroll end event.
-   *
    * @description Called when momentum scrolling completes.
    * Resets the user scrolling flag immediately.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * <FlatList
@@ -1130,12 +1050,9 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Handles the content size change event for the message list.
-   *
    * @description Called when the content size of the FlatList changes (e.g., new message added).
    * Automatically scrolls to the end if auto-scroll is enabled and there are messages.
-   *
    * @returns {void}
-   *
    * @example
    * ```tsx
    * <FlatList
@@ -1161,10 +1078,8 @@ export const useAgentChat = (onTimeout?: () => void) => {
   // ==================== Conversations Functions ====================
   /**
    * Loads conversations for the given agent.
-   *
    * @description Fetches the list of conversations for the specified agent ID.
    * Updates internal state and returns the list. On error, returns an empty array.
-   *
    * @param {string} agentId - The agent ID to load conversations for.
    * @returns {Promise<ConversationListItem[]>} Promise that resolves with the list of conversations.
    */
@@ -1190,7 +1105,6 @@ export const useAgentChat = (onTimeout?: () => void) => {
 
   /**
    * Deletes a conversation for the given agent.
-   *
    * @param {string} agentId - The agent ID.
    * @param {string} conversationId - The conversation ID to delete.
    * @returns {Promise<void>} Promise that resolves when deletion completes.

@@ -23,6 +23,9 @@ type ChartTypeToggleProps = {
   onChange: (type: ChartType) => void;
 };
 
+/**
+ * Renders the chart type toggle UI section.
+ */
 const ChartTypeToggle = ({
   chartType,
   loading,

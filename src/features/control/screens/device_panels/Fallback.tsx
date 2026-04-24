@@ -34,9 +34,8 @@ import { ESPCDFDevice, ESPCDFDeviceParam } from "@store";
  * A fallback component that displays device information and parameters when a specific
  * device panel is not available. Shows basic device info like name, type, connection status,
  * and a list of all available parameters.
- *
- * @param props - Component props containing the device node
- * @returns JSX component displaying device information
+ * @param props - `node` and `device` for generic param list rendering
+ * @returns Scrollable list of device fields and supported param controls
  */
 const DeviceFallback = observer(
   ({ node, device: deviceProp }: DeviceFallbackProps) => {

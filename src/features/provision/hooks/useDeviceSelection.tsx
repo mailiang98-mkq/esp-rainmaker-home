@@ -21,7 +21,7 @@ import type { ESPCDFNode, ESPCDFDevice } from "@store";
 import {
   ESPRM_SCENES_SERVICE,
   ESPRM_SCHEDULES_SERVICE,
-} from "@sdk-adaptors/ESPRMBase/constants";
+} from "@shared/utils/constants";
 import { ESPRMNGBaseAdaptorIdentifier } from "@config/sdk.identifiers";
 
 export type DeviceServiceType =
@@ -31,7 +31,6 @@ export type DeviceSelectionIdentifier = "scene" | "schedule";
 
 /**
  * Hook for managing device selection logic in scene/schedule creation
- *
  * @param identifier - "scene" or "schedule" to determine which context to use
  * @returns View model containing devices, handlers, and computed values
  */
@@ -63,15 +62,14 @@ export const useDeviceSelection = (
     setSelectedDevice,
     getActionValue,
     deleteAction,
-    state,
   } = context;
 
   const [deviceData, setDeviceData] = useState<
-    Array<{
+    {
       node: ESPCDFNode;
       device: ESPCDFDevice;
       isMaxSceneReached: boolean;
-    }>
+    }[]
   >([]);
 
   // Fetch support nodes with devices from home based on service type
@@ -129,13 +127,7 @@ export const useDeviceSelection = (
       }));
       return sortDevicesByConnectivity(allDevices);
     }
-  }, [
-    deviceData,
-    state.actions,
-    state.forceUpdateUI,
-    checkActionExists,
-    identifier,
-  ]);
+  }, [deviceData, checkActionExists, identifier]);
 
   /**
    * Filtered list of selected devices

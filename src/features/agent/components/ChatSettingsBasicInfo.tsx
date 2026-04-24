@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { TouchableWithoutFeedback, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 import { InfoRow } from "@shared/components";
@@ -15,6 +16,9 @@ interface ChatSettingsBasicInfoProps {
   conversationId: string | null;
 }
 
+/**
+ * Collapsible-style block of labeled info rows from server agent config plus the stored conversation id.
+ */
 export function ChatSettingsBasicInfo({
   agentConfig,
   conversationId,

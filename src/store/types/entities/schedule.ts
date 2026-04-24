@@ -61,8 +61,12 @@ export interface ESPCDFScheduleInterface {
   _raw: any;
 }
 
-export interface ESPCDFScheduleCreateInput extends
-  Omit<ESPCDFScheduleInterface, "operations" | "adaptorIdentifier" | "_raw"> { }
+export type ESPCDFScheduleCreateInput = Omit<
+  ESPCDFScheduleInterface,
+  "operations" | "adaptorIdentifier" | "_raw"
+>;
 
-export interface ESPCDFScheduleEditInput extends
-  Omit<ESPCDFScheduleInterface, "operations" | "adaptorIdentifier" | "_raw" | "id" | "nodes"> { }
+export type ESPCDFScheduleEditInput = Omit<
+  ESPCDFScheduleInterface,
+  "operations" | "adaptorIdentifier" | "_raw" | "id" | "nodes"
+>;

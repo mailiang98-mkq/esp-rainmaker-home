@@ -161,16 +161,17 @@ export interface ESPCDFAutomationInterface {
  * Input shape for updating an existing automation (partial update).
  * Derived from ESPCDFAutomationInterface; omits runtime-only and identity fields; all fields optional.
  */
-export interface ESPCDFAutomationEditInput extends Partial<
+export type ESPCDFAutomationEditInput = Partial<
   Omit<
     ESPCDFAutomationInterface,
     "operations" | "_raw" | "adaptorIdentifier" | "id"
   >
-> { }
+>;
 
-export interface ESPCDFAutomationCreateInput
-  extends Omit<ESPCDFAutomationInterface, "operations" | "_raw" | "adaptorIdentifier" | "id"> {
-}
+export type ESPCDFAutomationCreateInput = Omit<
+  ESPCDFAutomationInterface,
+  "operations" | "_raw" | "adaptorIdentifier" | "id"
+>;
 
 /**
  * Interface representing the raw response from automation API.

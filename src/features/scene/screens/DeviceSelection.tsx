@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 
@@ -11,12 +12,13 @@ import { observer } from "mobx-react-lite";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 
 // Components
-import { Header, ScreenWrapper } from "@shared/components";
+import { DeviceSelectionList, Header, ScreenWrapper } from "@shared/components";
 import {
   DeviceSelectionEmptyState,
   DeviceSelectionFooter,
+  SceneDeviceItem,
 } from "@features/scene/components";
-import DeviceSelectionList from "@shared/components/DeviceSelectionList";
+import { DEVICE_SELECTION_LIST_VARIANT_SCENE } from "@shared/utils/constants";
 import type { DeviceSelectionData } from "@src/types/global";
 
 // Hooks
@@ -67,14 +69,28 @@ const DeviceSelection = observer(() => {
         ) : (
           <>
             <DeviceSelectionList
-              identifier="scene"
+              variant={DEVICE_SELECTION_LIST_VARIANT_SCENE}
               selectedDevices={selectedDevices as DeviceSelectionData[]}
               nonSelectedDevices={nonSelectedDevices as DeviceSelectionData[]}
-              getDeviceActions={getDeviceActionsForDevice}
-              isDeviceDisabled={isDeviceDisabled}
-              isDeviceOnline={isDeviceOnline}
-              onDeviceSelect={handleDeviceSelect}
-              onDeviceDelete={handleDeviceDelete}
+              translationKeySelectedSection="scene.deviceSelection.selectedDevices"
+              translationKeySelectDevices="scene.deviceSelection.selectDevices"
+              translationKeySelectMore="scene.deviceSelection.selectMore"
+              renderDeviceItem={(device, index) => (
+                <View key={`${device.node.id}-${index}`}>
+                  <SceneDeviceItem
+                    node={device.node}
+                    device={device.device}
+                    isSelected={device.isSelected}
+                    isDisabled={isDeviceDisabled(device)}
+                    isOnline={isDeviceOnline(device)}
+                    isMaxSceneReached={device.isMaxSceneReached}
+                    actions={getDeviceActionsForDevice(device)}
+                    onPress={() => handleDeviceSelect(device)}
+                    onDelete={() => handleDeviceDelete(device)}
+                    qaId="scene_device_selection_item"
+                  />
+                </View>
+              )}
             />
             <DeviceSelectionFooter
               selectedDevicesCount={selectedDevices.length}

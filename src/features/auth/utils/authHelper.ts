@@ -55,6 +55,9 @@ export const createEmailValidator =
     return { isValid: true };
   };
 
+/**
+ * Checks whether username allowed for auth matches the expected condition.
+ */
 export function isUsernameAllowedForAuth(
   value: string,
   allowed: readonly AuthUsernameType[]

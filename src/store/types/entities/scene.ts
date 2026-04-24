@@ -35,8 +35,12 @@ export interface ESPCDFSceneInterface {
   _raw: any;
 }
 
-export interface ESPCDFSceneCreateInput extends
-  Omit<ESPCDFSceneInterface, "operations" | "adaptorIdentifier" | "_raw"> { }
+export type ESPCDFSceneCreateInput = Omit<
+  ESPCDFSceneInterface,
+  "operations" | "adaptorIdentifier" | "_raw"
+>;
 
-export interface ESPCDFSceneEditInput extends
-  Omit<ESPCDFSceneInterface, "operations" | "adaptorIdentifier" | "_raw" | "id" | "nodes"> { }
+export type ESPCDFSceneEditInput = Omit<
+  ESPCDFSceneInterface,
+  "operations" | "adaptorIdentifier" | "_raw" | "id" | "nodes"
+>;

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import {
   View,
@@ -47,9 +48,8 @@ interface SceneCardProps extends SceneItemProps {
  *
  * A component for displaying a scene item in both horizontal (favorites) and vertical (all scenes) layouts.
  * Features include scene name, device count, favorite toggle, info button, and activate button.
- *
- * @param props - Component props including scene details and callbacks
- * @returns JSX component
+ * @param props - Scene title, counts, layout variant, and handlers for open, favorite, and delete
+ * @returns Tappable scene tile with optional favorite/delete actions and loading states
  */
 const SceneItem: React.FC<SceneCardProps> = ({
   index = 1,
@@ -71,7 +71,7 @@ const SceneItem: React.FC<SceneCardProps> = ({
       {...(qaId ? testProps(qaId) : {})}
       style={[
         globalStyles.sceneCard,
-        index % (sceneCardDimensions?.cardsPerRow ?? 1) != 0 &&
+        index % (sceneCardDimensions?.cardsPerRow ?? 1) !== 0 &&
           globalStyles.sceneCardVertical,
         {
           width: sceneCardDimensions?.width || 120,

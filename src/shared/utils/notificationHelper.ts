@@ -16,7 +16,6 @@ export const KEY_EVENT_DATA_PAYLOAD_RAW = "event_data_payload_raw";
  *
  * Android bridge may not serialize nested maps; native sends event_data_payload_raw
  * (JSON string) as fallback. This helper ensures event_data_payload is always an object.
- *
  * @param data - Raw notification payload from native (event_data_payload may be string or object)
  * @returns Normalized payload with event_data_payload as object for SDK consumption
  */

@@ -19,6 +19,9 @@ import type { ToolConnectionStatus } from '@src/types/global';
 
 const AGENT_CONFIGS_MAP_KEY = 'agents_config';
 
+/**
+ * Retrieves agent config from cache for downstream consumers.
+ */
 export const getAgentConfigFromCache = async (
   agentId: string
 ): Promise<AgentConfigResponse | null> => {
@@ -40,11 +43,14 @@ export const getAgentConfigFromCache = async (
     const configMap: Record<string, AgentConfigResponse> =
       JSON.parse(cachedConfigs);
     return configMap[trimmedAgentId] || null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
 
+/**
+ * Handles save agent config to cache logic for this module.
+ */
 export const saveAgentConfigToCache = async (
   agentId: string,
   config: AgentConfigResponse
@@ -68,19 +74,25 @@ export const saveAgentConfigToCache = async (
   await StorageAdapter.setItem(AGENT_CONFIGS_MAP_KEY, JSON.stringify(configMap));
 };
 
+/**
+ * Retrieves agent name from cache for downstream consumers.
+ */
 export const getAgentNameFromCache = async (
   agentId: string
 ): Promise<string | null> => {
   try {
     const config = await getAgentConfigFromCache(agentId);
     return config?.name || null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
 
 // ==================== Agent API Operations ====================
 
+/**
+ * Retrieves agent config for downstream consumers.
+ */
 export const getAgentConfig = async (
   agentId?: string,
   user?: ESPCDFUser
@@ -111,6 +123,9 @@ export const getAgentConfig = async (
   }
 };
 
+/**
+ * Retrieves web socket url for downstream consumers.
+ */
 export const getWebSocketUrl = async (user: ESPCDFUser): Promise<string | null> => {
   try {
     if (!user) {
@@ -120,16 +135,19 @@ export const getWebSocketUrl = async (user: ESPCDFUser): Promise<string | null> 
     let token: string | null = null;
     try {
       token = await user.getAccessToken();
-    } catch (error) {
+    } catch {
       token = await StorageAdapter.getItem(TOKEN_STORAGE_KEYS.ACCESS_TOKEN);
     }
 
     return `${AGENTS_WEBSOCKET_BASE_URL}/user/agents/${agentId}/ws?token=${token || ''}`;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
 
+/**
+ * Retrieves tool connection status for downstream consumers.
+ */
 export function getToolConnectionStatus(
   toolUrl: string,
   connectors: ConnectedConnector[],

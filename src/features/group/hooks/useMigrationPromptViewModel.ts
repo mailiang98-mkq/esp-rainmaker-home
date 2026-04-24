@@ -6,7 +6,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import type { ESPCDF, ESPCDFUser } from "@store";
-import { ESPRMBaseAdaptorIdentifier } from "@sdk-adaptors/ESPRMBase";
+import { ESPRMBaseAdaptorIdentifier } from "@config/sdk.identifiers";
 import {
   getRainMakerUserState,
   setRainMakerUserState,

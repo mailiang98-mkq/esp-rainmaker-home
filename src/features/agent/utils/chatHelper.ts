@@ -28,7 +28,7 @@ export const extractJsonData = (rawStr: string): any => {
     // Parse the cleaned JSON string
     const data = JSON.parse(fixedJson);
     return data;
-  } catch (err) {
+  } catch {
     return null;
   }
 };
@@ -91,7 +91,7 @@ export const formatTimestamp = (timestamp: Date): string => {
       hour: "2-digit",
       minute: "2-digit",
     });
-  } catch (error) {
+  } catch {
     return new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",

@@ -43,7 +43,8 @@ export type ESPCDFGroupOperationType =
   | "removeNodes"
   | "leave"
   | "issueUserNoC"
-  | "startCommissioning";
+  | "startCommissioning"
+  | "setParams";
 
 /**
  * Interface representing a group sharing user information.
@@ -96,16 +97,20 @@ export interface ESPCDFGroupOperation {
     qrData: string,
     onProgress?: (message: ESPCDFCommissioningProgress) => void
   ): Promise<() => void>;
+  // Optional: group-level param publish.
+  setParams?(
+    payload: Record<string, Record<string, unknown>>
+  ): Promise<unknown>;
 }
 
 export interface ESPCDFIssueUserNoCResponse {
   status: string;
   description: string;
-  certificates?: Array<{
+  certificates?: {
     groupId: string;
     matterUserId: string;
     userNoC: string;
-  }>;
+  }[];
 }
 
 export interface ESPCDFCommissioningProgress {
@@ -133,4 +138,10 @@ export interface ESPCDFGroupInterface {
   fabricDetails?: Record<string, any>;
   operations: ESPCDFGroupOperation;
   _raw: any;
+  /**
+   * Present on {@link ESPCDFGroup} instances: group-level param publish.
+   */
+  setParams?(
+    payload: Record<string, Record<string, unknown>>
+  ): Promise<unknown>;
 }

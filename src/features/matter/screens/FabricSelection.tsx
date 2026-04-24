@@ -72,6 +72,9 @@ function extractCommissioningErrorMessage(payload: Record<string, unknown>) {
   return typeof msg === "string" ? msg : String(msg);
 }
 
+/**
+ * Renders the fabric selection screen UI section.
+ */
 export function FabricSelectionScreen() {
   const { qrData } = useLocalSearchParams();
   const router = useRouter();
@@ -94,6 +97,7 @@ export function FabricSelectionScreen() {
 
   useEffect(() => {
     loadGroupsAndFabrics();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, []);
 
   useEffect(() => {

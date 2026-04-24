@@ -53,7 +53,6 @@ export interface ValidationResult {
 
 /**
  * Validates scene data before creation or update
- * 
  * @param sceneData - The scene data to validate
  * @returns ValidationResult with isValid flag and optional error message
  */
@@ -97,7 +96,6 @@ export const validate = (sceneData: SceneData): ValidationResult => {
 
 /**
  * Creates a new scene using group-based creation
- * 
  * @param sceneData - The scene data to create
  * @param currentHome - The current home group entity
  * @param onSuccess - Callback function called on successful creation (handles UI logic)
@@ -147,7 +145,6 @@ export const create = async (
 
 /**
  * Updates an existing scene
- * 
  * @param sceneId - The ID of the scene to update
  * @param sceneData - The updated scene data
  * @param sceneEntity - The scene entity from sceneStore
@@ -199,7 +196,6 @@ export const update = async (
 
 /**
  * Deletes an existing scene
- * 
  * @param sceneId - The ID of the scene to delete
  * @param sceneEntity - The scene entity from sceneStore
  * @param onSuccess - Callback function called on successful deletion (handles UI logic)
@@ -235,7 +231,6 @@ export const deleteScene = async (
 
 /**
  * Checks if the action button should be disabled
- * 
  * @param isLoading - Whether a save operation is in progress
  * @param sceneName - The scene name
  * @param sceneActionsCount - The number of scene actions
@@ -251,7 +246,6 @@ export const shouldDisableActionButton = (
 
 /**
  * Gets a warning message if any nodes are not connected
- * 
  * @param nodes - Array of scene nodes
  * @param nodesByIDMap - Map of node IDs to node objects with connectivity status
  * @param warningMessageKey - Translation key for the warning message (optional, for i18n)
@@ -274,7 +268,6 @@ export const getConnectionWarning = (
 
 /**
  * Gets selected device information with parameters and their values
- * 
  * @param selectedDevice - The selected device info with nodeId and deviceName
  * @param nodesByIDMap - Map of node IDs to node objects
  * @param getActionValue - Function to get action value for a parameter
@@ -287,7 +280,7 @@ export const getSelectedDeviceWithParams = (
 ): {
   selectedDevice?: ESPCDFDevice;
   nodeId?: string;
-  params?: Array<ESPCDFDeviceParam & { value: any }>;
+  params?: (ESPCDFDeviceParam & { value: any })[];
 } => {
   const nodeId = selectedDevice?.nodeId;
   if (!nodeId) return {};
@@ -298,19 +291,18 @@ export const getSelectedDeviceWithParams = (
   );
   if (!device) return {};
 
-  const params: Array<ESPCDFDeviceParam & { value: any }> | undefined = device.params?.map((param) => ({
+  const params: (ESPCDFDeviceParam & { value: any })[] | undefined = device.params?.map((param) => ({
     ...param,
     value:
       getActionValue(nodeId, device.name, param.name) ??
       defaultWritableParamValue(param),
-  })) as Array<ESPCDFDeviceParam & { value: any }>;
+  })) as (ESPCDFDeviceParam & { value: any })[];
 
   return { selectedDevice: device, nodeId, params };
 };
 
 /**
  * Filters scenes into favorite and non-favorite lists
- * 
  * @param sceneList - Array of all scenes
  * @param favoriteSceneIds - Array of favorite scene IDs
  * @returns Object containing favoriteScenes and allScenes arrays
@@ -334,7 +326,6 @@ export const filterScenes = (
 /**
  * Sorts devices by connectivity status
  * Online devices appear before offline ones
- *
  * @param devices - Device list to sort
  * @returns Sorted device list (new array, does not mutate input)
  */
@@ -348,7 +339,6 @@ export const sortDevicesByConnectivity = (
 
 /**
  * Gets actions for a selected device
- * 
  * @param device - Device to get actions for
  * @param checkActionExists - Function to check if an action exists
  * @param getActionValue - Function to get action value

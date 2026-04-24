@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import DeviceAction from "@shared/components/ParamControls/DeviceAction";
 import { SceneActionsProps } from "@src/types/global";
 
@@ -12,7 +13,6 @@ import { SceneActionsProps } from "@src/types/global";
  *
  * Renders a single device action for a scene
  * Allows interaction with individual actions
- *
  * @param device - Device object
  * @param displayDeviceName - Display device name
  * @param action - Action object

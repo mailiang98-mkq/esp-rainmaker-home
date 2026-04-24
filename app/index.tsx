@@ -18,10 +18,11 @@ import { registerForNotification } from "@shared/utils/notifications";
 import { executePostLoginPipeline } from "@features/auth/utils/postLoginPipeline";
 // theme
 import { tokens } from "@shared/theme/tokens";
-import asyncStorageAdapter from "@native-adaptors/implementations/ESPAsyncStorage";
-import { RUNTIME_CONFIG_STORAGE_KEYS } from "@config/runtime.config";
 
-const index = () => {
+/**
+ * Root splash / auth gate: runs post-login pipeline or redirects to login.
+ */
+const Index = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { store, isInitialized, syncHomeWithNodes, initUserCustomData } =
@@ -46,7 +47,7 @@ const index = () => {
       if (!isAuthRoute) {
         router.replace("/(auth)/Login");
       }
-    } catch (error) {
+    } catch {
       await user?.logout();
       router.replace("/(auth)/Login");
     }
@@ -59,6 +60,7 @@ const index = () => {
           authCheck();
         }, 2000);
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     }, [store, isInitialized]),
   );
 
@@ -67,6 +69,7 @@ const index = () => {
     if (user && isInitialized) {
       initNotification();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [user, isInitialized]);
 
   const initNotification = async () => {
@@ -85,7 +88,7 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;
 
 const styles = StyleSheet.create({
   splashScreen: {

@@ -8,8 +8,10 @@
  * Parsed RainMaker capabilities from device version info
  */
 export interface RMakerCapabilities {
-  /** Whether device supports assisted claiming */
+  /** Whether device supports assisted claiming (either "claim" or "camera_claim") */
   hasClaim: boolean;
+  /** Whether device supports camera-specific assisted claiming */
+  hasCameraClaim: boolean;
   /** Whether device supports WiFi scanning */
   hasWifiScan: boolean;
   /** Whether device supports WiFi provisioning */
@@ -23,6 +25,7 @@ export interface RMakerCapabilities {
 // Capability string constants
 const RMAKER_CAP = {
   CLAIM: "claim",
+  CAMERA_CLAIM: "camera_claim",
   WIFI_SCAN: "wifi_scan",
   WIFI_PROV: "wifi_prov",
   NO_POP: "no_pop",
@@ -30,7 +33,6 @@ const RMAKER_CAP = {
 
 /**
  * Parses RainMaker capabilities from device version info and prov capabilities.
- *
  * @param versionInfo - The version info object from device (contains rmaker.cap)
  * @param provCapabilities - The prov capabilities array from device (contains no_pop, etc.)
  * @returns Parsed RMakerCapabilities object
@@ -41,6 +43,7 @@ export function parseRMakerCapabilities(
 ): RMakerCapabilities {
   const result: RMakerCapabilities = {
     hasClaim: false,
+    hasCameraClaim: false,
     hasWifiScan: false,
     hasWifiProv: false,
     requiresPop: true, // Default to requiring POP
@@ -71,7 +74,8 @@ export function parseRMakerCapabilities(
     if (rmakerInfo && rmakerInfo.cap && Array.isArray(rmakerInfo.cap)) {
       const caps: string[] = rmakerInfo.cap;
       result.rawCapabilities = caps;
-      result.hasClaim = caps.includes(RMAKER_CAP.CLAIM);
+      result.hasCameraClaim = caps.includes(RMAKER_CAP.CAMERA_CLAIM);
+      result.hasClaim = caps.includes(RMAKER_CAP.CLAIM) || result.hasCameraClaim;
       result.hasWifiScan = caps.includes(RMAKER_CAP.WIFI_SCAN);
       result.hasWifiProv = caps.includes(RMAKER_CAP.WIFI_PROV);
     }

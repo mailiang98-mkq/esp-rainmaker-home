@@ -26,6 +26,9 @@ export interface CreateAutomationEventsSectionProps {
   onAddEvent: () => void;
 }
 
+/**
+ * Renders the create automation events section UI section.
+ */
 export const CreateAutomationEventsSection: React.FC<
   CreateAutomationEventsSectionProps
 > = ({

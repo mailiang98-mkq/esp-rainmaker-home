@@ -50,7 +50,7 @@ const themes = {
   light: {
     colors: {
       white: "#ffffff",
-      black: "#2c3e50",
+      black: "#000000",
       bluetooth: "#2c5aa0",
       gray: "#7f8c8d",
       lightGray: "#bdc3c7",
@@ -137,6 +137,9 @@ const themes = {
 let currentThemeName: keyof typeof themes = "light";
 
 // Function to set the current theme
+/**
+ * Updates current theme with the provided input.
+ */
 export function setCurrentTheme(name: keyof typeof themes) {
   if (themes[name]) {
     currentThemeName = name;
@@ -146,6 +149,9 @@ export function setCurrentTheme(name: keyof typeof themes) {
 }
 
 // Get current theme name
+/**
+ * Retrieves current theme for downstream consumers.
+ */
 export function getCurrentTheme(): keyof typeof themes {
   return currentThemeName;
 }

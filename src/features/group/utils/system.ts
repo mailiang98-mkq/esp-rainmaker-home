@@ -18,10 +18,8 @@ export const SYSTEM_PARAM_TYPES = {
 
 /**
  * Gets the system service and available parameters from a node's configuration
- *
  * @param node - The ESP Rainmaker node to check for system service support
  * @returns Object containing the system service and available parameters
- *
  * @example
  * const { systemService, availableParams } = getNodeSystemConfig(node);
  * if (systemService && availableParams.length > 0) {

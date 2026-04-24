@@ -115,7 +115,18 @@ import com.app.utils.ESPAppUtilityModule
          EventBus.getDefault().register(this)
          val intentFilter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
      }
- 
+
+     /**
+      * Clears BLE and SoftAP discovery caches so create/search flows do not reuse stale
+      * entries from a previous transport or session. Call before starting a new device scan/create.
+      */
+    private fun clearDiscoveryCaches() {
+         deviceList.clear()
+         bluetoothDevices.clear()
+         bleDevices.clear()
+         softAPDevices.clear()
+     }
+
      /**
       * Registers the React Native module as a package, enabling it to provide view managers and native modules.
       */
@@ -267,13 +278,9 @@ import com.app.utils.ESPAppUtilityModule
                  else -> ESPConstants.TransportType.TRANSPORT_BLE
              }
  
-         // Clear previously discovered devices
-         bleDevices.clear()
-         softAPDevices.clear()
- 
+        clearDiscoveryCaches()
+
          if (transportEnum == ESPConstants.TransportType.TRANSPORT_BLE) {
-             deviceList.clear()
-             bluetoothDevices.clear()
              searchBLEDevices(devicePrefix, promise)
          } else if (transportEnum == ESPConstants.TransportType.TRANSPORT_SOFTAP) {
              searchWiFiDevices(devicePrefix, promise)
@@ -488,19 +495,16 @@ import com.app.utils.ESPAppUtilityModule
       * @param deviceName The name of the device to connect to.
       * @param promise Promise to resolve with the connection result.
       */
-     @SuppressLint("MissingPermission")
-     @ReactMethod
-     fun connect(deviceName: String, promise: Promise) {
- 
-         if (bleDevices.containsKey(deviceName) || deviceList.isNotEmpty()) {
-             connectBLEDevice(deviceName, promise)
-         } else if (softAPDevices.containsKey(deviceName) || softAPDevices.isNotEmpty()) {
- 
-             connectSoftAPDevice(deviceName, promise)
-         } else {
-             promise.reject("NO_DEVICES_FOUND", "No devices found in BLE or SoftAP lists")
-         }
-     }
+    @SuppressLint("MissingPermission")
+    @ReactMethod
+    fun connect(deviceName: String, promise: Promise) {
+        when {
+            softAPDevices.containsKey(deviceName) -> connectSoftAPDevice(deviceName, promise)
+            bleDevices.containsKey(deviceName) -> connectBLEDevice(deviceName, promise)
+            deviceList.any { it.deviceName == deviceName } -> connectBLEDevice(deviceName, promise)
+            else -> promise.reject("NO_DEVICES_FOUND", "No devices found for: $deviceName")
+        }
+    }
  
      /**
       * Handles connection to a BLE device.
@@ -1146,15 +1150,14 @@ import com.app.utils.ESPAppUtilityModule
                      return
                  }
              }
- 
-             if (transportEnum == ESPConstants.TransportType.TRANSPORT_BLE) {
- 
-                 Log.d(TAG, "Entering BLE Transport Logic")
- 
-                 deviceList.clear()
-                 bluetoothDevices.clear()
- 
-                 espProvisionManager?.searchBleEspDevices("PROV_", object : BleScanListener {
+
+           clearDiscoveryCaches()
+
+            if (transportEnum == ESPConstants.TransportType.TRANSPORT_BLE) {
+
+                Log.d(TAG, "Entering BLE Transport Logic")
+
+                espProvisionManager?.searchBleEspDevices("PROV_", object : BleScanListener {
                      override fun scanStartFailed() {
                          promise.reject("SCAN_FAILED", "BLE scan could not be started.")
                      }
@@ -1248,8 +1251,9 @@ import com.app.utils.ESPAppUtilityModule
                          promise.reject("SCAN_ERROR", e?.message ?: "Error during BLE scan.")
                      }
                  })
-             } else if (transportEnum == ESPConstants.TransportType.TRANSPORT_SOFTAP) {
-                 espProvisionManager?.searchWiFiEspDevices("PROV_", object : WiFiScanListener {
+            } else if (transportEnum == ESPConstants.TransportType.TRANSPORT_SOFTAP) {
+
+                espProvisionManager?.searchWiFiEspDevices("PROV_", object : WiFiScanListener {
                      override fun onWifiListReceived(wifiList: ArrayList<WiFiAccessPoint>?) {
                          if (wifiList.isNullOrEmpty()) {
                              promise.reject(

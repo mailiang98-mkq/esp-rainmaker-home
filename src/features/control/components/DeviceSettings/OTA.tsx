@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -29,7 +30,6 @@ import { OTAProps } from "@src/types/global";
  * - Update checking
  * - Update initiation
  * - Progress indication
- *
  * @param props - Component properties for OTA functionality
  */
 const OTA: React.FC<OTAProps> = ({

@@ -138,7 +138,7 @@ export const autoConnectRainmakerMCP = async (
     await loadConnectors();
     setIsConnectingConnector(false);
     return true;
-  } catch (error) {
+  } catch {
     setIsConnectingConnector(false);
     return false;
   }

@@ -155,8 +155,7 @@ export class ESPCDFSchedule implements ESPCDFScheduleInterface {
 
   /**
    * Checks if the schedule is enabled
-   *
-   * @returns {boolean} True if the schedule is enabled, false otherwise
+   * @returns True if the schedule is enabled, false otherwise
    */
   isEnabled(): boolean {
     return this.enabled || false;
@@ -167,10 +166,8 @@ export class ESPCDFSchedule implements ESPCDFScheduleInterface {
    *
    * This method stores metadata indicating that a node's schedule configuration
    * is not synchronized with the server state.
-   *
-   * @param {string} nodeId - The identifier of the node
-   * @param {any} value - The metadata value to store
-   *
+   * @param nodeId - The identifier of the node
+   * @param value - The metadata value to store
    * @example
    * schedule.addOutOfSyncMeta('node1', { lastSync: timestamp });
    */
@@ -183,10 +180,8 @@ export class ESPCDFSchedule implements ESPCDFScheduleInterface {
 
   /**
    * Retrieves out-of-sync metadata for a specific node
-   *
-   * @param {string} nodeId - The identifier of the node
-   * @returns {any} The stored metadata for the node
-   *
+   * @param nodeId - The identifier of the node
+   * @returns The stored metadata for the node
    * @example
    * const syncStatus = schedule.getOutOfSyncMeta('node1');
    */
@@ -199,9 +194,7 @@ export class ESPCDFSchedule implements ESPCDFScheduleInterface {
    *
    * This method clears the stored metadata indicating that a node's schedule
    * configuration has been synchronized.
-   *
-   * @param {string} nodeId - The identifier of the node
-   *
+   * @param nodeId - The identifier of the node
    * @example
    * schedule.removeOutOfSyncMeta('node1');
    */
@@ -216,7 +209,6 @@ export class ESPCDFSchedule implements ESPCDFScheduleInterface {
    *
    * This method removes all stored metadata about node synchronization status,
    * effectively marking all nodes as synchronized.
-   *
    * @example
    * schedule.clearOutOfSyncMeta();
    */

@@ -7,6 +7,9 @@
 import { Stack } from "expo-router";
 import { Platform } from "react-native";
 
+/**
+ * Renders the group layout UI section.
+ */
 export default function GroupLayout() {
   return (
     <Stack

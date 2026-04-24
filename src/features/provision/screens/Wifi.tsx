@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
+  TouchableOpacity,
 } from "react-native";
 
 // Styles and Theme
@@ -23,16 +24,13 @@ import { useTranslation } from "react-i18next";
 import { useWifi } from "@features/provision/hooks";
 
 // Components
-import {
-  Header,
-  ScreenWrapper,
-  Button,
-  AgentTermsBottomSheet,
-} from "@shared/components";
+import { Header, ScreenWrapper, Button } from "@shared/components";
+import { AgentTermsBottomSheet } from "@features/agent/components";
 import {
   NetworkListModal,
   WifiNetworkSelection,
   WifiPasswordInput,
+  JoinOtherNetworkModal,
 } from "@features/provision/components";
 import { Checkbox } from "react-native-paper";
 import { testProps } from "@shared/utils/testProps";
@@ -58,13 +56,16 @@ const Wifi = () => {
     shouldSave,
     isModalVisible,
     showAgentTerms,
+    isJoinNetworkModalVisible,
     setPassword,
     setShowPassword,
     setShouldSave,
     setIsModalVisible,
+    setIsJoinNetworkModalVisible,
     scanWifiNetworks,
     handleConnect,
     handleWifiSelect,
+    handleJoinOtherNetworkConnect,
     handleAgentTermsComplete,
     handleAgentTermsClose,
   } = useWifi();
@@ -152,6 +153,23 @@ const Wifi = () => {
                 }}
                 qaId="button_connect_wifi"
               />
+
+              <TouchableOpacity
+                style={[
+                  styles.joinOtherNetworkLink,
+                  isLoading && styles.joinOtherNetworkLinkDisabled,
+                ]}
+                onPress={() => {
+                  setIsJoinNetworkModalVisible(true);
+                }}
+                disabled={isLoading}
+                accessibilityState={{ disabled: isLoading }}
+                {...testProps("button_join_other_network_wifi")}
+              >
+                <Text style={styles.joinOtherNetworkText}>
+                  {t("device.wifi.joinOtherNetworkLink")}
+                </Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -171,6 +189,12 @@ const Wifi = () => {
           visible={showAgentTerms}
           onClose={handleAgentTermsClose}
           onComplete={handleAgentTermsComplete}
+        />
+
+        <JoinOtherNetworkModal
+          visible={isJoinNetworkModalVisible}
+          onCancel={() => setIsJoinNetworkModalVisible(false)}
+          onConnect={handleJoinOtherNetworkConnect}
         />
       </ScreenWrapper>
     </>
@@ -210,6 +234,19 @@ const styles = StyleSheet.create({
   saveText: {
     fontSize: tokens.fontSize.sm,
     color: tokens.colors.text_primary,
+  },
+  joinOtherNetworkLink: {
+    alignSelf: "center",
+    paddingVertical: tokens.spacing._5,
+    paddingHorizontal: tokens.spacing._5,
+  },
+  joinOtherNetworkText: {
+    fontSize: tokens.fontSize._15,
+    fontFamily: tokens.fonts.medium,
+    color: tokens.colors.primary,
+  },
+  joinOtherNetworkLinkDisabled: {
+    opacity: 0.5,
   },
 });
 

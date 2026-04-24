@@ -13,6 +13,13 @@ export type { WarningBannerProps } from "./Banners/WarningBanner";
 export { default as DeviceCard } from "./Cards/DeviceCard";
 export { default as CollapsibleCard } from "./Cards/CollapsibleCard";
 
+// Device selection (cross-flow list shell; rows supplied by features)
+export { default as DeviceSelectionList } from "./DeviceSelection/DeviceSelectionList";
+export type {
+  DeviceSelectionListProps,
+  DeviceSelectionListVariant,
+} from "./DeviceSelection/DeviceSelectionList";
+
 // Form
 export { default as InputDialog } from "./Form/InputDialog";
 export { default as EditableField } from "./Form/EditableField";
@@ -34,7 +41,6 @@ export { default as ScreenWrapper } from "./Layout/ScreenWrapper";
 // Modals
 export { default as EditModal } from "./Modals/EditModal";
 export { default as ConfirmationDialog } from "./Modals/ConfirmationDialog";
-export { default as AgentTermsBottomSheet } from "./Modals/AgentTermsBottomSheet";
 
 // Navigation
 export { default as FooterTabs } from "./Navigations/FooterTabs";
@@ -66,3 +72,9 @@ export { default as ColorTemperatureSlider } from "./ParamControls/ColorTemperat
 // param controls
 export { default as ParamWrap } from "./ParamControls/ParamWrap";
 export { default as DeviceAction } from "./ParamControls/DeviceAction";
+
+// Video Player (camera / WebRTC)
+export * from "./VideoPlayer";
+
+// Device params (generic renderer)
+export { DeviceParamsRenderer } from "./DeviceParams/DeviceParamsRenderer";

@@ -5,6 +5,77 @@ All notable changes to the ESP RainMaker Home app will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0]
+
+### Added
+
+**Camera Device Support (WebRTC)**
+
+* Added support for a new **camera device type** with a dedicated control panel UI.
+* Integrated **WebRTC-based video streaming** using AWS Kinesis Video Streams (KVS).
+* Implemented signaling client, channel caching, and AWS region helpers.
+* Added a **VideoPlayer component** with playback controls, connection state, and streaming statistics.
+* Introduced `useCameraWebRTC` hook to manage peer connection lifecycle.
+
+**Manual Wi-Fi Network Join**
+
+* Added support for manually entering **Wi-Fi SSID and password** during provisioning.
+* Enabled connection to **open networks** (no password required).
+
+---
+
+### Enhanced
+
+**Provisioning Experience**
+
+* Improved **post-provisioning navigation flow** with the addition of a **“Continue” button** on the user manual screen.
+
+**Control & Data Handling**
+
+* Improved **control group updates** by routing parameter updates through `ESPCDFGroup.setParams` for better consistency.
+
+**Code Quality & Maintainability**
+
+* Introduced **strict code quality enforcement**:
+
+  * ESLint with stricter rules and JSDoc validation
+  * Architecture boundary checks using dependency-cruiser
+  * Spell checking via cspell
+  * Pre-commit hooks using Husky
+* Refactored codebase to:
+
+  * Improve typings and inline documentation
+  * Remove duplication and clean up shared components
+  * Strengthen modular, feature-based architecture
+
+**DevOps & Release Automation**
+
+* Added **GitHub tag-based APK release automation**:
+
+  * Automated APK build and artifact generation
+  * Attached versioned APKs to CI pipelines
+  * Optimized Gradle builds (ABI splits, shrinking, R8)
+
+---
+
+### Fixed
+
+**Provisioning**
+
+- Resolved MQTT-based provisioning failures.
+
+**Device Sync [RMNG]**
+
+- Fixed MQTT connection timing issues to ensure reliable node synchronization and prevent dropped shadow updates.
+
+**Authentication & Navigation**
+
+- Fixed OAuth login back navigation issue where users could get stuck on the account setup screen.
+
+**Data Accuracy**
+
+- Corrected incorrect device counts in scenes and schedules.
+
 ## [4.0.1]
 
 ### Fixed

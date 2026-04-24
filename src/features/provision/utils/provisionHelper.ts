@@ -137,7 +137,7 @@ export const getLocalizedErrorMessage = (
   }
 
   // iOS ESPProvisionError descriptions (case-insensitive keyword matching)
-  const iosErrorPatterns: Array<{ keywords: string[]; message: string }> = [
+  const iosErrorPatterns: { keywords: string[]; message: string }[] = [
     {
       keywords: ["wi-fi status: authentication error", "authentication error"],
       message: t("device.errors.wifiAuthFailed") || "Wi-Fi Authentication failed.",

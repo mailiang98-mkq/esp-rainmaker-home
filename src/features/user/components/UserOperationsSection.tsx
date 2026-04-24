@@ -18,6 +18,9 @@ type UserOperationsSectionProps = {
   onOperationPress: (action: string) => void;
 };
 
+/**
+ * Renders the user operations section UI section.
+ */
 const UserOperationsSection: React.FC<UserOperationsSectionProps> = ({
   operations,
   onOperationPress,

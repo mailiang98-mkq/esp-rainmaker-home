@@ -6,7 +6,17 @@
 
 import { ESPCDFGroupSharingInfoInterface, ESPCDFNode, ESPCDFScene, ESPCDFSchedule, ESPCDFAutomation, ESPSDKAdaptorAPIResponse, ESPSDKAdaptorAPIDataResponse, ESPCDFPaginatedAPIResponse, ESPCDFAutomationCreateInput, ESPCDFGroupOperation, ESPCDFDevice } from "@store";
 import { ESPCDFGroup } from "@store";
-import { ESPRMGroup, ESPRMNode, ESPRMUser, ESPAutomationDetails, ESPAutomation, ESPPaginatedAutomationsResponse } from "@espressif/rainmaker-base-sdk";
+import {
+    ESPRMGroup,
+    ESPRMNode,
+    ESPRMUser,
+    ESPAutomationDetails,
+    ESPAutomation,
+    ESPPaginatedAutomationsResponse,
+    type DeviceParams,
+    type MultipleNodePayload,
+    type NodePayload,
+} from "@espressif/rainmaker-base-sdk";
 import { transformToESPCDFNode } from "./transformToESPCDFNode";
 import { transformToESPCDFScene } from "./transformToESPCDFScene";
 import { transformToESPCDFSchedule } from "./transformToESPCDFSchedule";
@@ -78,11 +88,11 @@ export function transformToESPCDFGroup(
                 throw error;
             }
         },
-        async getSceneCapableDevices(espcdfGroup: ESPCDFGroup): Promise<Array<{
+        async getSceneCapableDevices(espcdfGroup: ESPCDFGroup): Promise<{
             node: ESPCDFNode;
             device: ESPCDFDevice;
             isMaxSceneReached: boolean;
-        }>> {
+        }[]> {
             try {
                 // Use nodeDetails from ESPCDFGroup instance to get latest data
                 const nodeDetails = espcdfGroup.nodeDetails || [];
@@ -95,11 +105,11 @@ export function transformToESPCDFGroup(
                 );
 
                 // One row per device (with params) for scene selection UIs
-                const allDevices: Array<{
+                const allDevices: {
                     node: ESPCDFNode;
                     device: ESPCDFDevice;
                     isMaxSceneReached: boolean;
-                }> = [];
+                }[] = [];
 
                 nodesWithScenesService.forEach((node) => {
                     const devices = node.devices ?? [];
@@ -108,7 +118,7 @@ export function transformToESPCDFGroup(
                     )?.params?.[0] as any;
 
                     const isMaxSceneReached =
-                        scene && scene.bounds?.max && scene.bounds.max == scene.value.length;
+                        scene && scene.bounds?.max && scene.bounds.max === scene.value.length;
 
                     devices
                         .filter((device) => device.params && device.params.length > 0)
@@ -126,11 +136,11 @@ export function transformToESPCDFGroup(
                 throw error;
             }
         },
-        async getScheduleCapableDevices(espcdfGroup: ESPCDFGroup): Promise<Array<{
+        async getScheduleCapableDevices(espcdfGroup: ESPCDFGroup): Promise<{
             node: ESPCDFNode;
             device: ESPCDFDevice;
             isMaxSceneReached: boolean;
-        }>> {
+        }[]> {
             try {
                 // Use nodeDetails from ESPCDFGroup instance to get latest data
                 const nodeDetails = espcdfGroup.nodeDetails || [];
@@ -143,11 +153,11 @@ export function transformToESPCDFGroup(
                 );
 
                 // One row per device (with params) for schedule selection UIs
-                const allDevices: Array<{
+                const allDevices: {
                     node: ESPCDFNode;
                     device: ESPCDFDevice;
                     isMaxSceneReached: boolean;
-                }> = [];
+                }[] = [];
 
                 nodesWithSchedulesService.forEach((node) => {
                     const devices = node.devices ?? [];
@@ -156,7 +166,7 @@ export function transformToESPCDFGroup(
                     )?.params?.[0] as any;
 
                     const isMaxSceneReached =
-                        schedule && schedule.bounds?.max && schedule.bounds.max == schedule.value.length;
+                        schedule && schedule.bounds?.max && schedule.bounds.max === schedule.value.length;
 
                     devices
                         .filter((device) => device.params && device.params.length > 0)
@@ -231,11 +241,12 @@ export function transformToESPCDFGroup(
                         if (scenesMap.has(sceneId)) {
                             // Merge with existing scene
                             const existingScene = scenesMap.get(sceneId)!;
-                            if (!existingScene.nodes.includes(node.id)) {
+                            const isNewNode = !existingScene.nodes.includes(node.id);
+                            if (isNewNode) {
                                 existingScene.nodes.push(node.id);
+                                existingScene.devicesCount += Object.keys(sceneData.action || {}).length;
                             }
                             existingScene.actions[node.id] = sceneData.action || {};
-                            existingScene.devicesCount += Object.keys(sceneData.action || {}).length;
                         } else {
                             // Create new scene entry
                             scenesMap.set(sceneId, {
@@ -285,14 +296,14 @@ export function transformToESPCDFGroup(
             name: string;
             info?: string;
             nodes?: string[];
-            triggers: Array<{
+            triggers: {
                 m?: number;
                 d?: number;
                 dd?: number;
                 mm?: number;
                 yy?: number;
                 rsec?: number;
-            }>;
+            }[];
             action: {
                 [key: string]: {
                     [key: string]: any;
@@ -339,14 +350,14 @@ export function transformToESPCDFGroup(
                     name: string;
                     info?: string;
                     nodes: string[];
-                    triggers: Array<{
+                    triggers: {
                         m?: number;
                         d?: number;
                         dd?: number;
                         mm?: number;
                         yy?: number;
                         rsec?: number;
-                    }>;
+                    }[];
                     action: { [key: string]: { [key: string]: any } };
                     enabled?: boolean;
                     validity?: {
@@ -390,11 +401,12 @@ export function transformToESPCDFGroup(
                         if (schedulesMap.has(scheduleId)) {
                             // Merge with existing schedule
                             const existingSchedule = schedulesMap.get(scheduleId)!;
-                            if (!existingSchedule.nodes.includes(node.id)) {
+                            const isNewNode = !existingSchedule.nodes.includes(node.id);
+                            if (isNewNode) {
                                 existingSchedule.nodes.push(node.id);
+                                existingSchedule.devicesCount += Object.keys(scheduleData.action || {}).length;
                             }
                             existingSchedule.action[node.id] = scheduleData.action || {};
-                            existingSchedule.devicesCount += Object.keys(scheduleData.action || {}).length;
                         } else {
                             // Create new schedule entry
                             schedulesMap.set(scheduleId, {
@@ -537,6 +549,45 @@ export function transformToESPCDFGroup(
                 throw error;
             }
         },
+
+        /**
+         * Applies a device-name → param map across nodes via {@link ESPRMUser.setMultipleNodesParams}
+         * (same batching path as scenes/schedules). Matches group control UI ({@link ESPCDFGroup.setParams}).
+         *
+         * Request shape follows SDK {@link NodePayload}: each device maps to a `DeviceParams[]` merged on the server.
+         */
+        async setParams(
+            payload: Record<string, Record<string, unknown>>,
+        ): Promise<unknown> {
+            const nodes = await group.getNodesWithDetails();
+            const batch: MultipleNodePayload[] = [];
+            for (const node of nodes) {
+                const nodeId =
+                    node.id ??
+                    (node as { nodeId?: string }).nodeId ??
+                    (node as { config?: { node_id?: string } }).config?.node_id ??
+                    "";
+                if (!nodeId) continue;
+                const devices = node.nodeConfig?.devices ?? [];
+                const namesOnNode = new Set(devices.map((d) => d.name));
+                const slice: Record<string, Record<string, unknown>> = {};
+                for (const [deviceName, paramsByName] of Object.entries(payload)) {
+                    if (!namesOnNode.has(deviceName)) continue;
+                    slice[deviceName] = paramsByName;
+                }
+                const nodePayload: NodePayload = {};
+                for (const [deviceName, paramsByName] of Object.entries(slice)) {
+                    nodePayload[deviceName] = [paramsByName as DeviceParams];
+                }
+                if (Object.keys(nodePayload).length > 0) {
+                    batch.push({ nodeId, payload: nodePayload });
+                }
+            }
+            if (batch.length === 0) {
+                return Promise.resolve();
+            }
+            return user.setMultipleNodesParams(batch);
+        },
     };
 
     return new ESPCDFGroup({
@@ -546,7 +597,7 @@ export function transformToESPCDFGroup(
         nodeIds: group.nodes || [],
         nodeDetails: group.nodeDetails?.map((node: ESPRMNode) => transformToESPCDFNode(node)) || [],
         subGroups: group.subGroups?.map((subGroup: ESPRMGroup) => transformToESPCDFGroup(subGroup, user, identifier)) || [],
-        parentId: group.parentId,
+        parentId: group.parentGroupId || '',
         isPrimaryUser: group.isPrimaryUser || false,
         description: group.description || '',
         customData: group.customData || {},

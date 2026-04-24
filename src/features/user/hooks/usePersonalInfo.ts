@@ -29,6 +29,9 @@ export const PERSONAL_INFO_FIELDS: PersonalInfoField[] = [
   },
 ];
 
+/**
+ * Manages personal info state and related actions.
+ */
 export const usePersonalInfo = () => {
   const { t } = useTranslation();
   const { store } = useCDF();
@@ -63,6 +66,7 @@ export const usePersonalInfo = () => {
       }
     };
     initializeUserInfo();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [store]);
 
   const handleAsyncOperation = async (

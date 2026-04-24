@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React from "react";
 import {
   ActivityIndicator,
@@ -36,7 +37,6 @@ import type { GroupSharedUser, GroupSharingProps } from "@src/types/global";
  * - Add User functionality
  * - Remove user functionality
  * - Excludes primary user from lists
- *
  * @param props - Component properties for group sharing functionality
  */
 const GroupSharing: React.FC<GroupSharingProps> = ({

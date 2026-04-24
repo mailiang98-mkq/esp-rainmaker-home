@@ -6,6 +6,9 @@
 
 import { useCallback, useRef } from 'react';
 
+/**
+ * Manages debounce state and related actions.
+ */
 export function useDebounce<T extends (...args: any[]) => void>(
   callback: T,
   delay: number

@@ -11,6 +11,10 @@ import { Header, ScreenWrapper, ConfirmationDialog } from "@shared/components";
 import { ChatSettingsContent } from "@features/agent/components";
 import { useChatSettings } from "@features/agent/hooks";
 
+/**
+ * ChatSettingsScreen component
+ * @returns Chat settings screen UI
+ */
 export function ChatSettingsScreen() {
   const { t } = useTranslation();
   const {

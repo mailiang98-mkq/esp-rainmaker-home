@@ -8,13 +8,11 @@ import {
   ESPCDFAPIResponse,
   ESPCDFPaginatedAPIResponse,
   ESPCDFAPIDataResponse,
-  ESPCDFGroupInterface,
 } from "../../types";
 import type { GroupStoreCallbacks } from "../callbacks";
 import type {
   ESPCDFProvisionResponse
 } from "../provision";
-import type { ESPCDFNodeUpdateSubscriptionContext } from "../subscription";
 import { ESPCDFGroup } from "../../entities/ESPCDFGroup";
 import { ESPCDFGroupSharingRequest } from "../../entities/ESPCDFGroupSharingRequest";
 import { ESPCDFNode } from "../../entities/ESPCDFNode";
@@ -104,7 +102,7 @@ export interface ESPCDFUserOperation {
     callback: (data: any) => void
   ): Promise<any>;
   setMultipleNodesParams(
-    payload: Array<{ nodeId: string; payload: any }>
+    payload: { nodeId: string; payload: any }[]
   ): Promise<ESPCDFAPIResponse>;
   getNodeDetails(nodeId: string): Promise<ESPCDFNode>;
   getAccessToken(): Promise<string>;
@@ -135,6 +133,12 @@ export interface ESPCDFUserOperation {
    * Unsubscribe from node updates and release subscription manager resources.
    */
   unsubscribeFromNodeUpdates?(): Promise<void>;
+
+  /**
+   * Obtain short-lived AWS credentials scoped to the requested role/resources.
+   * Optional: adaptors that do not support this operation may omit it.
+   */
+  assumeRole?(request: ESPCDFAssumeRoleRequest): Promise<ESPCDFAssumeRoleResponse>;
 
   // Optional Matter commissioning operations
   getGroupsAndFabrics?(): Promise<ESPCDFGroup[]>;
@@ -174,6 +178,30 @@ export interface AddDeviceParams {
   ssid: string;
   password: string;
   onProgress?: (response: ESPCDFProvisionResponse) => void;
+}
+
+/**
+ * SDK-agnostic request payload for the assume-role operation.
+ */
+export interface ESPCDFAssumeRoleRequest {
+  /** The role to assume */
+  userRole?: string;
+  /** The group IDs to assume the role for */
+  groupIds?: string[];
+  /** The node IDs to assume the role for */
+  nodeIds?: string[];
+  /** Extra payload to include in the assume-role request */
+  extraPayload?: Record<string, any>;
+}
+
+/**
+ * SDK-agnostic response returned by the assume-role operation.
+ * Contains short-lived AWS credentials for accessing cloud resources.
+ */
+export interface ESPCDFAssumeRoleResponse {
+  accessKey: string;
+  secretKey: string;
+  sessionToken: string;
 }
 
 export interface ESPCDFUserInterface {

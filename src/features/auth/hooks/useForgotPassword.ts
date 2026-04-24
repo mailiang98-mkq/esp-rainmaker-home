@@ -15,6 +15,9 @@ import {
 } from "@features/auth/utils/authHelper";
 import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 
+/**
+ * Manages forgot password state and related actions.
+ */
 export function useForgotPassword() {
   const { t } = useTranslation();
   const { store } = useCDF();

@@ -15,6 +15,9 @@ import { useDeleteAccount } from "@features/user/hooks";
 import { useTranslation } from "react-i18next";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 
+/**
+ * Renders the delete account UI section.
+ */
 const DeleteAccount: React.FC = () => {
   const { t } = useTranslation();
   const {

@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from "react";
+
+import { useCallback } from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 // Components
 import { ColorPicker } from "react-native-color-picker";
 
 // Types & Styles
-import { ParamControlChildProps, getParamBounds } from "./lib/types";
+import { ParamControlChildProps } from "./lib/types";
 import { paramControlStyles as styles } from "./lib/styles";
 import { tokens } from "@shared/theme/tokens";
 
@@ -27,10 +28,9 @@ interface HSVColor {
  * A circular color picker component for selecting hue values.
  * Provides an intuitive color wheel interface for hue selection
  * and displays the current value in degrees.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns JSX component for circular hue control
+ * @returns Circular hue wheel (or arc) that maps touch angle to hue commits
  */
 const HueCircle: React.FC<ParamControlChildProps> = ({
   label,

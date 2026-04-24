@@ -31,13 +31,12 @@ import { testProps } from "@shared/utils/testProps";
  * A wrapper component for controlling device parameter.
  * Provides common functionality like value validation, error handling,
  * and optional checkbox selection for scene creation.
- *
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
  * @param showCheckbox - Whether to show selection checkbox
  * @param isSelected - Whether the parameter is selected
  * @param onSelect - Callback when selection changes
- * @returns JSX component for parameter control wrapper
+ * @returns Column with optional scene checkbox, throttled writes, and the nested param UI
  */
 const ParamControlWrap = observer(
   ({
@@ -52,7 +51,7 @@ const ParamControlWrap = observer(
     qaId,
   }: ParamControlProps & { qaId?: string }) => {
     // 1. Computed Values
-    const { min, max, step = 1, ...rest } = getParamBounds(param);
+    const { min, max } = getParamBounds(param);
     const toast = useToast();
     const state = useLocalObservable(() => ({
       value: param.value,
@@ -63,6 +62,7 @@ const ParamControlWrap = observer(
 
     useEffect(() => {
       state.value = param.value;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     }, [param.value]);
 
     // 2. Handlers

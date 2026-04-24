@@ -1,3 +1,14 @@
+/**
+ * SPDX-FileCopyrightText: 2026 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Babel configuration
+ * @param api - Babel API (cache, env, etc.)
+ * @returns Babel configuration object
+ */
 module.exports = function (api) {
   api.cache(true);
   return {

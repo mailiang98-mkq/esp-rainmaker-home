@@ -25,6 +25,9 @@ export interface ActionDeviceParamSelectionParamSheetProps {
   renderParamControl: (param: ESPCDFDeviceParam) => React.ReactNode;
 }
 
+/**
+ * Renders the action device param selection param sheet UI section.
+ */
 export const ActionDeviceParamSelectionParamSheet: React.FC<
   ActionDeviceParamSelectionParamSheetProps
 > = ({

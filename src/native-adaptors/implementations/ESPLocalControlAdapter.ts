@@ -10,9 +10,8 @@ import ESPLocalControlModule from "../interfaces/ESPLocalControlInterface";
 const ESPLocalControlAdapter: ESPLocalControlAdapterInterface = {
   /**
    * Checks if a device with the given node ID is connected locally.
-   *
-   * @param {string} nodeId - The unique identifier of the device.
-   * @returns {Promise<boolean>} - Resolves to `true` if the device is connected, `false` otherwise.
+   * @param nodeId - The unique identifier of the device.
+   * @returns - Resolves to `true` if the device is connected, `false` otherwise.
    * @throws {Error} - Throws an error if the check fails.
    */
   isConnected: async (nodeId: string): Promise<boolean> => {
@@ -26,13 +25,12 @@ const ESPLocalControlAdapter: ESPLocalControlAdapterInterface = {
 
   /**
    * Establishes a connection with the ESP device using the specified parameters.
-   *
-   * @param {string} nodeId - The unique identifier of the device.
-   * @param {string} baseurl - The base URL of the device (including IP address and port).
-   * @param {number} securityType - The security type (0: None, 1: Security1, 2: Security2).
-   * @param {string} [pop] - The proof of possession for secure connections (optional).
-   * @param {string} [username] - The username for Security2 authentication (optional).
-   * @returns {Promise<Record<string, any>>} - Resolves with a record containing connection details on success.
+   * @param nodeId - The unique identifier of the device.
+   * @param baseurl - The base URL of the device (including IP address and port).
+   * @param securityType - The security type (0: None, 1: Security1, 2: Security2).
+   * @param [pop] - The proof of possession for secure connections (optional).
+   * @param [username] - The username for Security2 authentication (optional).
+   * @returns - Resolves with a record containing connection details on success.
    * @throws {Error} - Throws an error if the connection fails.
    *
    * Notes:
@@ -65,11 +63,10 @@ const ESPLocalControlAdapter: ESPLocalControlAdapterInterface = {
 
   /**
    * Sends data to the connected ESP device at the specified path.
-   *
-   * @param {string} nodeId - The unique identifier of the device.
-   * @param {string} path - The endpoint path to which data will be sent.
-   * @param {string} data - The data to send, encoded as a Base64 string.
-   * @returns {Promise<string>} - Resolves with the response from the device, encoded as a Base64 string.
+   * @param nodeId - The unique identifier of the device.
+   * @param path - The endpoint path to which data will be sent.
+   * @param data - The data to send, encoded as a Base64 string.
+   * @returns - Resolves with the response from the device, encoded as a Base64 string.
    * @throws {Error} - Throws an error if the data transmission fails.
    */
   sendData: async (

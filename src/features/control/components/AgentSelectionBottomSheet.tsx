@@ -72,13 +72,14 @@ const AgentSelectionBottomSheet: React.FC<AgentSelectionBottomSheetProps> = ({
     } else {
       setError(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [visible]);
 
   const loadAgents = async () => {
     setLoading(true);
     setError(null);
     try {
-      const agents = await getAllAgents(store?.userStore);
+      const agents = await getAllAgents(store?.userStore?.user);
       setAllAgents(agents || []);
     } catch (err: any) {
       console.error("Failed to load agents:", err);

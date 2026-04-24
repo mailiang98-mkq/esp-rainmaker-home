@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { X } from "lucide-react-native";
 import { tokens } from "@shared/theme/tokens";
@@ -30,7 +31,6 @@ type SceneDeviceItemProps = {
  *
  * Reusable component for displaying a device in the device selection list
  * Used in scene device selection screens
- *
  * @param node - The node containing the device
  * @param device - The device to display
  * @param isSelected - Whether the device is selected
@@ -43,12 +43,12 @@ type SceneDeviceItemProps = {
  * @param qaId - Optional QA identifier for testing
  */
 export default function SceneDeviceItem({
-  node,
+  node: _node,
   device,
   isSelected,
   isDisabled,
   isOnline,
-  isMaxSceneReached,
+  isMaxSceneReached: _isMaxSceneReached,
   actions,
   onPress,
   onDelete,

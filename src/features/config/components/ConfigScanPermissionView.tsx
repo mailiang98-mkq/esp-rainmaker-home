@@ -16,6 +16,9 @@ export interface ConfigScanPermissionViewProps {
   onBack: () => void;
 }
 
+/**
+ * Renders the config scan permission view UI section.
+ */
 export function ConfigScanPermissionView({
   title,
   onGrant,

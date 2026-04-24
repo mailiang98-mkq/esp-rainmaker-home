@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { View, Text, Pressable, Image, ActivityIndicator } from "react-native";
 import { useTranslation } from "react-i18next";
 import { tokens } from "@shared/theme/tokens";
@@ -21,6 +22,9 @@ interface ConfigureDeviceCardProps {
   onPress: () => void;
 }
 
+/**
+ * Selectable device row for assigning hardware to the agent: image, online state, selection ring, and update spinner.
+ */
 export function ConfigureDeviceCard({
   deviceData,
   index,

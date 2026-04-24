@@ -177,7 +177,7 @@ const AddAgentBottomSheet: React.FC<AddAgentBottomSheetProps> = ({
       // Only save if validation passes
       onSave(trimmedName, trimmedId);
       onClose();
-    } catch (error: any) {
+    } catch {
       setAgentIdError(
         t("aiSettings.errors.invalidAgentId") || "Invalid agent ID",
       );

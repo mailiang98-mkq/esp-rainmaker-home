@@ -15,6 +15,9 @@ import {
   createConfirmPasswordValidator,
 } from "@features/auth/utils/authHelper";
 
+/**
+ * Manages change password state and related actions.
+ */
 export function useChangePassword() {
   const { store } = useCDF();
   const { t } = useTranslation();
@@ -30,10 +33,12 @@ export function useChangePassword() {
   const [isLoading, setIsLoading] = useState(false);
 
   const oldPasswordValidator = createPasswordValidator(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   const newPasswordValidator = useCallback(
     createNewPasswordValidator(() => oldPassword, t),
     [oldPassword, t]
   );
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   const confirmPasswordValidator = useCallback(
     createConfirmPasswordValidator(() => newPassword, t),
     [newPassword, t]

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { TouchableOpacity, Text } from "react-native";
 import { useTranslation } from "react-i18next";
 import { RefreshCw } from "lucide-react-native";
@@ -17,6 +18,9 @@ interface AgentSettingsHeaderRightProps {
   onRefresh: () => void;
 }
 
+/**
+ * Header actions for agent settings: toggles edit/done when agents exist, or shows a refresh control when the list is empty.
+ */
 export function AgentSettingsHeaderRight({
   hasAgents,
   isEditing,

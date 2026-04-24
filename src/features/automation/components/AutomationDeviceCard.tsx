@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { DeviceAction } from "@shared/components";
 import { observer } from "mobx-react-lite";
 import { AutomationDeviceCardProps } from "@src/types/global";
@@ -13,14 +14,13 @@ import { AutomationDeviceCardProps } from "@src/types/global";
  *
  * Unified component that renders both automation events and actions
  * Uses type prop to determine behavior and display
- *
- * @param {Record<string, any>} device - Device object with type and name
- * @param {string} displayDeviceName - Display device name
- * @param {"event" | "action"} type - Type of automation component (event or action)
- * @param {Record<string, any>} actions - Action object (for action type)
- * @param {Record<string, { condition: string; value: any }>} eventConditions - Event conditions (for event type)
- * @param {Function} onPress - Handler for press events
- * @param {string} qaId - QA identifier
+ * @param device - Device object with type and name
+ * @param displayDeviceName - Display device name
+ * @param type - Type of automation component (event or action)
+ * @param actions - Action object (for action type)
+ * @param eventConditions - Event conditions (for event type)
+ * @param onPress - Handler for press events
+ * @param qaId - QA identifier
  */
 const AutomationDeviceCard = ({
   device,

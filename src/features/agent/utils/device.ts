@@ -19,6 +19,9 @@ import type { AIDeviceData } from '@src/types/global';
 import { ESPCDFDevice, ESPCDFDeviceParam, ESPCDFNode, ESPCDFServiceParam } from '@store';
 
 
+/**
+ * Checks whether ai assistant device matches the expected condition.
+ */
 export function isAIAssistantDevice(device: ESPCDFDevice): boolean {
   const deviceType = device.type?.toLowerCase() || '';
 
@@ -37,6 +40,9 @@ export function isAIAssistantDevice(device: ESPCDFDevice): boolean {
   return matchesAIType || matchesConfig;
 }
 
+/**
+ * Handles filter ai assistant devices logic for this module.
+ */
 export function filterAIAssistantDevices(
   nodeList: ESPCDFNode[] | undefined
 ): AIDeviceData[] {
@@ -69,16 +75,25 @@ export function filterAIAssistantDevices(
   return devices;
 }
 
+/**
+ * Retrieves device key for downstream consumers.
+ */
 export function getDeviceKey(nodeId: string, deviceName: string): string {
   return `${nodeId}-${deviceName}`;
 }
 
+/**
+ * Handles find agent id param logic for this module.
+ */
 export function findAgentIdParam(
   device: ESPCDFDevice
 ): ESPCDFDeviceParam | null {
   return device?.params?.find((param) => param.name === 'Agent ID') || null;
 }
 
+/**
+ * Retrieves current agent id for downstream consumers.
+ */
 export function getCurrentAgentId(device: ESPCDFDevice): string | undefined {
   const agentIdParam = findAgentIdParam(device);
   return agentIdParam?.value ? String(agentIdParam.value) : undefined;
@@ -141,11 +156,14 @@ export async function setUserAuthForNode(node: ESPCDFNode): Promise<void> {
     await node?.setMultipleParams({
       [userAuthService.name]: [paramsToSet],
     });
-  } catch (error) {
+  } catch {
     // Silent error handling - don't block the flow
   }
 }
 
+/**
+ * Handles update refresh tokens for all ai devices logic for this module.
+ */
 export async function updateRefreshTokensForAllAIDevices(
   nodeList: ESPCDFNode[]
 ): Promise<void> {
@@ -189,11 +207,11 @@ export async function updateRefreshTokensForAllAIDevices(
         // Set user auth (refresh token and base URL) for rmaker-user-auth service
         // This is called for all nodes, but setUserAuthForNode checks if the service exists
         await setUserAuthForNode(node);
-      } catch (error) {
+      } catch {
         // Silent error handling - continue processing other nodes
       }
     }
-  } catch (error) {
+  } catch {
     // Silent error handling - don't block login flow
   }
 }

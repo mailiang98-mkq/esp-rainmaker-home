@@ -178,4 +178,17 @@ export const DEVICE_TYPE_LIST = [
     disabled: false,
     controlPanel: "ai-agent",
   },
+  {
+    label: "Camera",
+    groupLabel: "Camera",
+    type: ["camera"],
+    name: "Camera",
+    param: "Camera",
+    icon: {
+      camera: { icon: "camera" },
+    },
+    defaultIcon: "camera",
+    disabled: false,
+    controlPanel: "camera",
+  },
 ];

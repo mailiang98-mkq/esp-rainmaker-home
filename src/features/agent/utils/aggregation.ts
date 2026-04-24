@@ -16,10 +16,9 @@ import { ESPCDFUser } from '@store';
  * 1. Template agents (common agents from API)
  * 2. User agents (from API)
  * 3. Custom data agents (from user storage)
- * 
+ *
  * Deduplicates by agentId with custom data taking precedence.
  * Orders as: Templates → User agents → Custom data
- * 
  * @param user - The user instance
  * @returns Promise with aggregated list of agents
  */
@@ -122,7 +121,7 @@ export async function getAllAgents(
             },
           ];
         }
-      } catch (e) {
+      } catch {
         // Fall through to empty array
       }
     }
@@ -134,7 +133,6 @@ export async function getAllAgents(
  * Validates an agent by calling getAgentConfig.
  * Only treats 404/not found errors as invalid.
  * Other errors (network, 500, etc.) are not treated as invalid.
- * 
  * @param agentId - The agent ID to validate
  * @returns Promise with validation result
  */
@@ -170,7 +168,6 @@ export async function validateAgent(
  * Checks if an agent can be deleted based on its source.
  * Agents with source 'user' or 'template' (common) cannot be deleted.
  * Only custom agents can be deleted.
- * 
  * @param agent - Agent configuration with id field that reflects source
  * @returns true if agent can be deleted, false otherwise
  */
@@ -195,7 +192,6 @@ export function canDeleteAgentBySource(agent: AgentConfig): boolean {
 /**
  * Removes an invalid agent from custom data storage.
  * Only removes if the agent exists in custom data.
- * 
  * @param agentId - The agent ID to remove
  * @param user - The user instance
  */
@@ -255,7 +251,6 @@ export async function removeInvalidAgentFromCustomData(
 
 /**
  * Checks if an agent exists in the agents list and determines the appropriate action.
- * 
  * @param agentId - The agent ID to check
  * @param agents - List of available agents
  * @param selectedAgentId - Currently selected agent ID
@@ -309,9 +304,8 @@ export function checkAgentExistenceAndAction(
  * - Whether it's already been processed
  * - Whether agents are still loading
  * - Whether agents list is available
- * 
+ *
  * Pure function - returns the next processed ID value for the caller to manage.
- * 
  * @param agentId - The agent ID from route params
  * @param currentProcessedId - The currently processed agent ID value
  * @param isLoadingAgents - Whether agents are currently loading

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { View, Text, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 import { MessageSquare } from "lucide-react-native";
@@ -15,6 +16,9 @@ interface ConfigureChatCardProps {
   onPress: () => void;
 }
 
+/**
+ * Entry card on the configure flow that navigates to chat-oriented setup when pressed.
+ */
 export function ConfigureChatCard({ onPress }: ConfigureChatCardProps) {
   const { t } = useTranslation();
 

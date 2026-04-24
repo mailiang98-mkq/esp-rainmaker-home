@@ -5,16 +5,15 @@
  */
 
 import { ESPCDFProvisioningDevice, ESPCDFProvisioningDeviceInterface, ESPCDFProvisioningDeviceOperations, } from "@store";
-import { ESPDevice, ChallengeResponseHelper } from "@espressif/rainmaker-base-sdk";
+import { ESPDevice, ChallengeResponseHelper, ClaimCapabilities } from "@espressif/rainmaker-base-sdk";
 
 /**
  * Transforms ESPDevice from the RainMaker SDK to ESPCDFProvisioningDevice format.
- * 
+ *
  * This utility converts the SDK device object to the CDF provisioning device format with:
  * - Device properties (name, transport, security, etc.)
  * - Operations wrapper that delegates to ESPDevice methods
  * - Raw reference to the original ESPDevice
- * 
  * @param espDevice - The ESPDevice instance from the SDK
  * @returns ESPCDFProvisioningDevice instance with all required operations
  */
@@ -60,9 +59,15 @@ export function transformToESPCDFProvisioningDevice(
             ssid: string,
             password: string,
             onProgress?: (response: any) => void,
-            homeId?: string
+            homeId?: string,
+            provisionType?: string
         ): Promise<void> {
-            await espDevice.provision(ssid, password, onProgress, homeId);
+            await espDevice.provision(
+                ssid,
+                password,
+                onProgress ?? (() => {}),
+                homeId,
+                provisionType);
         },
 
         async initiateUserNodeMapping(params?: Record<string, any>): Promise<any> {
@@ -81,8 +86,8 @@ export function transformToESPCDFProvisioningDevice(
             return await espDevice.sendData(endPoint, data);
         },
 
-        async startAssistedClaiming(onProgress?: (response: any) => void): Promise<void> {
-            await espDevice.startAssistedClaiming(onProgress);
+        async startAssistedClaiming(onProgress?: (response: any) => void, claimCapability?: string): Promise<void> {
+            await espDevice.startAssistedClaiming(onProgress, claimCapability as ClaimCapabilities);
         },
 
         async checkChallengeResponseSupport(): Promise<boolean> {

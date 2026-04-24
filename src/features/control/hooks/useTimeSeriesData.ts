@@ -41,7 +41,6 @@ import {
  *
  * For standard periods ("1H", "1D", "7D", "4W", "1Y"), the initial (first) fetch request
  * is always relative to the current time (i.e., most recent up to "now").
- *
  * @param param - The device parameter to fetch time series data for
  * @returns Object containing data, loading state, error, fetchData function
  */
@@ -184,6 +183,7 @@ export const useTimeSeriesData = (
         setLoading(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
     [param]
   );
 

@@ -10,6 +10,9 @@ import { MessageSquare } from "lucide-react-native";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 
+/**
+ * Placeholder when no RainMaker agents exist yet: icon and localized title/description.
+ */
 export function AgentSettingsEmptyState() {
   const { t } = useTranslation();
 

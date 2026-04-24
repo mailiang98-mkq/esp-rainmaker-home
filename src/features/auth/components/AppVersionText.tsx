@@ -14,6 +14,9 @@ interface AppVersionTextProps {
   testId?: string;
 }
 
+/**
+ * Renders the app version text UI section.
+ */
 export function AppVersionText({ testId = "text_app_version" }: AppVersionTextProps) {
   const { t } = useTranslation();
   const appVersion = Constants.expoConfig?.version;

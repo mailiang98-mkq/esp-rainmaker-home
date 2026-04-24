@@ -18,6 +18,9 @@ export interface ActionDeviceParamSelectionParamListProps {
   onParamPress: (param: ESPCDFDeviceParam) => void;
 }
 
+/**
+ * Renders the action device param selection param list UI section.
+ */
 export const ActionDeviceParamSelectionParamList: React.FC<
   ActionDeviceParamSelectionParamListProps
 > = ({ params, getParamDisplayValue, onParamPress }) => {

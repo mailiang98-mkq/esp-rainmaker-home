@@ -95,7 +95,7 @@ export function useActionDeviceSelection(
       allDevices,
       (d) => d.node.connectivityStatus?.isConnected ?? false
     );
-  }, [store, state.actions, state.forceUpdateUI, checkActionExists]);
+  }, [store, checkActionExists]);
 
   const eventDevice = useMemo(() => {
     if (!eventInfo || !state.nodeId) return null;

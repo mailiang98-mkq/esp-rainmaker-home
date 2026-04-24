@@ -11,7 +11,7 @@ import { ESPCDFParamInterface, ESPCDFParamOperation } from "./param";
  */
 export type ESPCDFServiceParamOperationType = "setValue";
 
-export interface ESPCDFServiceParamOperation extends ESPCDFParamOperation {}
+export type ESPCDFServiceParamOperation = ESPCDFParamOperation;
 
 /**
  * Service param interface; extends base with service-specific properties.

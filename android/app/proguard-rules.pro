@@ -51,20 +51,44 @@
 # ============================================================
 -keep class com.google.protobuf.** { *; }
 -dontwarn com.google.protobuf.**
- 
+
 # AWS SDK (IoT MQTT)
 -keep class com.amazonaws.** { *; }
 -dontwarn com.amazonaws.**
- 
+
 # Eclipse Paho MQTT v3 (bundled with aws-android-sdk-iot). R8 obfuscation breaks LoggerFactory
 # (MissingResourceException: "Error locating the logging class") and SPI-based network modules.
 -keep class org.eclipse.paho.client.mqttv3.** { *; }
 -keep interface org.eclipse.paho.client.mqttv3.** { *; }
 -dontwarn org.eclipse.paho.client.mqttv3.**
- 
+
 # Platform TLS internals are referenced reflectively by AWS / OkHttp; they are not on the app
 # classpath during R8 analysis and must not fail the release shrink step.
 -dontwarn com.android.org.conscrypt.**
 -dontwarn org.apache.harmony.xnet.provider.jsse.**
- 
+
+# ============================================================
+# WebRTC - Required for react-native-webrtc
+# Prevents WebRtcClassLoader and other WebRTC classes from being obfuscated
+# ============================================================
+
+-keep class org.webrtc.** { *; }
+-keep interface org.webrtc.** { *; }
+
+-keep class org.webrtc.WebRtcClassLoader { *; }
+-keep class org.webrtc.WebRtcClassLoader$* { *; }
+
+-keepclasseswithmembernames class org.webrtc.** {
+    native <methods>;
+}
+
+-keepclassmembers class * {
+    @org.webrtc.CalledByNative <methods>;
+}
+
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+
+-dontwarn org.webrtc.**
+
 # Add any project specific keep options here:

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, {
   createContext,
   useEffect,
@@ -36,6 +37,9 @@ export const StoreContext = createContext<StoreContextType | undefined>(
   undefined,
 );
 
+/**
+ * Bootstraps the unified CDF store, restores session when possible, and exposes sync/home helpers to the tree.
+ */
 export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [espCDFUser, setESPCDFUser] = useState<ESPCDFUser | null>(null);

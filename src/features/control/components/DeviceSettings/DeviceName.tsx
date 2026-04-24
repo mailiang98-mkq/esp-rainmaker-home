@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import React, { useRef } from "react";
 import {
   Pressable,
@@ -36,7 +37,6 @@ import { testProps } from "@shared/utils/testProps";
  * - Inline name editing
  * - Input validation
  * - Save state handling
- *
  * @param props - Component properties for device name management
  */
 const DeviceName: React.FC<DeviceNameProps> = ({

@@ -24,6 +24,9 @@ import { ESPCDFUser } from '@store';
 
 // ==================== Agent Storage ====================
 
+/**
+ * Retrieves agents for downstream consumers.
+ */
 export const getAgents = (user: ESPCDFUser): AgentConfig[] => {
   try {
     const customData = user?.customData;
@@ -46,7 +49,7 @@ export const getAgents = (user: ESPCDFUser): AgentConfig[] => {
     };
 
     return [defaultAgent, ...storedAgents];
-  } catch (error) {
+  } catch {
     // Return default agent even on error
     return [{
       id: 'default',
@@ -58,6 +61,9 @@ export const getAgents = (user: ESPCDFUser): AgentConfig[] => {
   }
 };
 
+/**
+ * Handles save agents logic for this module.
+ */
 export const saveAgents = async (
   user: ESPCDFUser,
   agents: AgentConfig[]
@@ -81,6 +87,9 @@ export const saveAgents = async (
   await user.setCustomData(updatePayload);
 };
 
+/**
+ * Retrieves selected agent id for downstream consumers.
+ */
 export const getSelectedAgentId = async (
   user: ESPCDFUser,
   agents?: AgentConfig[]
@@ -118,13 +127,16 @@ export const getSelectedAgentId = async (
     if (defaultAgent) {
       return Promise.resolve(defaultAgent.agentId);
     }
-  } catch (error) {
+  } catch {
     // Silent error handling
   }
 
   return Promise.resolve(DEFAULT_AGENT_ID);
 };
 
+/**
+ * Handles save selected agent logic for this module.
+ */
 export const saveSelectedAgent = async (
   user: ESPCDFUser,
   agentId: string
@@ -153,6 +165,9 @@ export const saveSelectedAgent = async (
   await user.setCustomData(updatePayload);
 };
 
+/**
+ * Retrieves agents and selected id for downstream consumers.
+ */
 export const getAgentsAndSelectedId = async (
   user: ESPCDFUser
 ): Promise<{ agents: AgentConfig[]; selectedAgentId: string }> => {
@@ -168,7 +183,7 @@ export const getAgentsAndSelectedId = async (
     const selectedAgentId = await getSelectedAgentId(user, agents);
 
     return Promise.resolve({ agents, selectedAgentId });
-  } catch (error) {
+  } catch {
     return Promise.resolve({
       agents: [],
       selectedAgentId: DEFAULT_AGENT_ID,
@@ -176,6 +191,9 @@ export const getAgentsAndSelectedId = async (
   }
 };
 
+/**
+ * Checks whether agents configured matches the expected condition.
+ */
 export const hasAgentsConfigured = (
   user: ESPCDFUser
 ): boolean => {
@@ -185,13 +203,16 @@ export const hasAgentsConfigured = (
     }
     const agents = getAgents(user);
     return agents.length > 0;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
 
 // ==================== Message Display Config Storage ====================
 
+/**
+ * Retrieves message display config for downstream consumers.
+ */
 export const getMessageDisplayConfig = async (): Promise<MessageDisplayConfig> => {
   try {
     const config = await StorageAdapter.getItem(
@@ -200,7 +221,7 @@ export const getMessageDisplayConfig = async (): Promise<MessageDisplayConfig> =
     if (config) {
       return JSON.parse(config);
     }
-  } catch (error) {
+  } catch {
     // Silent error handling
   }
 
@@ -216,6 +237,9 @@ export const getMessageDisplayConfig = async (): Promise<MessageDisplayConfig> =
   };
 };
 
+/**
+ * Handles save message display config logic for this module.
+ */
 export const saveMessageDisplayConfig = async (
   config: MessageDisplayConfig
 ): Promise<void> => {
@@ -227,6 +251,9 @@ export const saveMessageDisplayConfig = async (
 
 // ==================== Font Size Storage ====================
 
+/**
+ * Retrieves chat font size for downstream consumers.
+ */
 export const getChatFontSize = async (): Promise<number> => {
   try {
     const fontSize = await StorageAdapter.getItem(AGENT_STORAGE_KEYS.CHAT_FONT_SIZE);
@@ -236,12 +263,15 @@ export const getChatFontSize = async (): Promise<number> => {
         return size;
       }
     }
-  } catch (error) {
+  } catch {
     // Silent error handling
   }
   return DEFAULT_FONT_SIZE;
 };
 
+/**
+ * Handles save chat font size logic for this module.
+ */
 export const saveChatFontSize = async (fontSize: number): Promise<void> => {
   const validSize = Math.max(
     MIN_FONT_SIZE,
@@ -255,12 +285,18 @@ export const saveChatFontSize = async (fontSize: number): Promise<void> => {
 
 // ==================== Conversation Storage ====================
 
+/**
+ * Checks whether conversation expired matches the expected condition.
+ */
 export const isConversationExpired = (timestamp: number): boolean => {
   const now = Date.now();
   const age = now - timestamp;
   return age > CONVERSATION_EXPIRATION_MS;
 };
 
+/**
+ * Retrieves conversation id for downstream consumers.
+ */
 export const getConversationId = async (
   user?: ESPCDFUser
 ): Promise<string | null> => {
@@ -292,7 +328,7 @@ export const getConversationId = async (
           await deleteConversationId(user);
           return null;
         }
-      } catch (parseError) {
+      } catch {
         await deleteConversationId(user);
         return null;
       }
@@ -318,11 +354,17 @@ export const getConversationId = async (
     }
 
     return parsed.conversationId;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
 
+/**
+ * Save conversation ID to custom data in user store
+ * @param conversationId - Conversation ID
+ * @param user - User entity from the CDF store
+ * @returns Resolves when the conversation ID is saved
+ */
 export const saveConversationId = async (
   conversationId: string,
   user?: ESPCDFUser
@@ -355,6 +397,9 @@ export const saveConversationId = async (
   await user.setCustomData(updatePayload);
 };
 
+/**
+ * Handles delete conversation id logic for this module.
+ */
 export const deleteConversationId = async (
   user?: ESPCDFUser
 ): Promise<void> => {
@@ -371,7 +416,7 @@ export const deleteConversationId = async (
     };
 
     await user.setCustomData(updatePayload);
-  } catch (error) {
+  } catch {
     // Silent error handling
   }
 };
@@ -392,7 +437,7 @@ export const getAgentTermsAccepted = (
       return customData[CUSTOM_DATA_KEYS.AGENT_TERMS_ACCEPTED].value as boolean;
     }
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

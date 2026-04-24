@@ -82,7 +82,7 @@ export function useActionDeviceParamSelection(): UseActionDeviceParamSelectionRe
       ) ?? [];
 
     return { selectedDevice: device, nodeId: nId, params: writable };
-  }, [state.selectedDevice, state.actions, store.nodeStore.nodesByIDMap, getActionValue]);
+  }, [state.selectedDevice, store.nodeStore.nodesByIDMap, getActionValue]);
 
   const disableActionButton = !selectedDevice;
 

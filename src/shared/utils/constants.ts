@@ -48,6 +48,15 @@ export const FORBIDDEN = 6;
 
 // SDK ERRORS
 export const ESP_TOKEN_ERROR = "ESPTokenError";
+export const OAUTH_CANCELLED_ERROR_TAG = "OAUTH_CANCELLED";
+export const OAUTH_NO_BROWSER_FOUND_ERROR_TAG = "NO_BROWSER_FOUND";
+
+// APP LIFECYCLE
+export const APP_STATE_ACTIVE = "active";
+export const APP_STATE_INACTIVE = "inactive";
+export const APP_STATE_BACKGROUND = "background";
+export const OAUTH_APP_RESUME_CHECK_DELAY_MS = 1000;
+export const OAUTH_APP_RESUME_CANCEL_GRACE_PERIOD_MS = 4000;
 
 // DATA TYPES
 export const DATA_TYPE_ALL = "all";
@@ -75,6 +84,17 @@ export const ESPRM_DIRECTION_PARAM_TYPE = "esp.param.direction";
 export const ESPRM_REFRESH_TOKEN_PARAM_TYPE = "esp.param.refresh-token";
 export const ESPRM_USER_TOKEN_PARAM_TYPE = "esp.param.user-token";
 export const ESPRM_BASE_URL_PARAM_TYPE = "esp.param.base-url";
+export const ESPRM_CHANNEL_PARAM_TYPE = "esp.param.channel";
+
+/**
+ * `extractDeviceType` values with no meaningful power param for card UI: DeviceCard uses node
+ * connectivity (`isConnected`) for `getDeviceImage` instead of `ESPRM_POWER_PARAM_TYPE`.
+ */
+export const POWER_PARAM_UNSUPPORTED_DEVICE_TYPES = new Set<string>([
+  "temperature-sensor",
+  "ai assistant",
+  "camera",
+]);
 
 // PARAM NAMES
 export const VOLUME_PARAM_NAME = "Volume";
@@ -123,6 +143,18 @@ export const GROUP_TYPE_ROOM = "room";
 export const GROUP_TYPE_HOME = "home";
 export const GROUP_TYPE_GROUP = "group";
 export const GROUP_TYPE_SUBGROUP = "subgroup";
+
+// DEVICE SELECTION LIST (layout variant; not i18n)
+export const DEVICE_SELECTION_LIST_VARIANT_SCENE = "scene";
+export const DEVICE_SELECTION_LIST_VARIANT_SCHEDULE = "schedule";
+
+// DEVICE SELECTION LIST — QA / test ids
+export const QA_DEVICE_SELECTION_SCROLL_SCENE = "scroll_scene_devices";
+export const QA_DEVICE_SELECTION_SCROLL_SCHEDULE = "scroll_schedule_devices";
+export const QA_DEVICE_SELECTION_VIEW_SELECTED_DEVICES = "view_selected_devices";
+export const QA_DEVICE_SELECTION_TEXT_SELECTED_DEVICES = "text_selected_devices";
+export const QA_DEVICE_SELECTION_VIEW_NON_SELECTED_DEVICES = "view_non_selected_devices";
+export const QA_DEVICE_SELECTION_TEXT_SELECT_DEVICES = "text_select_devices";
 
 // LIGHT CONTROL SCREEN
 export const COLOR_TAB = "Colour";
@@ -339,3 +371,37 @@ export const TIME_SERIES_LABELS = {
   CURRENT_PERIOD: "Current Period"
 } as const;
 
+
+// WebRTC Connection State constants
+export const WEBRTC_CONNECTION_STATE = {
+  CONNECTED: "connected",
+  CONNECTING: "connecting",
+  DISCONNECTED: "disconnected",
+  CLOSED: "closed",
+  FAILED: "failed",
+} as const;
+
+// WebRTC Signaling Client Event Names
+export const WEBRTC_SIGNALING_EVENTS = {
+  OPEN: "open",
+  SDP_ANSWER: "sdpAnswer",
+  ICE_CANDIDATE: "iceCandidate",
+  CLOSE: "close",
+  ERROR: "error",
+} as const;
+
+// WebRTC Translation Keys
+export const WEBRTC_TRANSLATION_KEYS = {
+  ERROR_HEADER: "layout.shared.errorHeader",
+  CONNECTION_FAILED: "device.camera.errors.connectionFailed",
+} as const;
+
+// WebRTC Default Messages
+export const WEBRTC_DEFAULT_MESSAGES = {
+  ERROR: "Error",
+  CONNECTION_FAILED: "Connection failed",
+} as const;
+
+// WebRTC Media constants
+export const WEBRTC_MEDIA_KIND_VIDEO = "video";
+export const WEBRTC_TRANSCEIVER_DIRECTION_RECVONLY = "recvonly";

@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Architecture boundaries (Espressif SDK, sdk-adaptors, shared↔features, lower layers↔features).
+      # Full `npm run lint`
+      # and `npm run typecheck` are not CI-gated yet due to pre-existing issues.
+      - name: Architecture (dependency-cruiser)
+        run: npm run lint:arch

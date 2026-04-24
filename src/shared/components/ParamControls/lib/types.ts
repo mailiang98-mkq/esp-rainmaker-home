@@ -31,11 +31,17 @@ export interface ParamControlChildProps {
 }
 
 // Helper function to ensure value is within bounds
+/**
+ * Handles clamp value logic for this module.
+ */
 export const clampValue = (value: number, min: number, max: number): number => {
   return Math.min(Math.max(value, min), max);
 };
 
 // Helper function to convert value to string safely
+/**
+ * Handles safe value to string logic for this module.
+ */
 export const safeValueToString = (value: any): string => {
   if (value === null || value === undefined) return '';
   return String(value);
@@ -60,6 +66,9 @@ export const comparableRoundedParamNumber = (value: any): number | null => {
 };
 
 // Helper function to get bounds from param
+/**
+ * Retrieves param bounds for downstream consumers.
+ */
 export const getParamBounds = (param: ESPCDFDeviceParam) => {
   return {
     ...param?.bounds

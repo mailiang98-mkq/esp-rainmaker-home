@@ -13,15 +13,16 @@
  *
  * ⚠️ IMPORTANT: IDs must be in snake_case format (e.g., "button_login", "input_email")
  * This function does NOT perform automatic conversion - use snake_case manually.
- *
  * @param {string} id - The identifier to use for test props (must be in snake_case)
  * @returns {Record<string, string>} Object containing testID and nativeID properties
- *
  * @example
  * <TextInput {...testProps("input_email")} />
  * // returns { testID: "input_email", nativeID: "input_email" }
  */
 
+/**
+ * Handles test props logic for this module.
+ */
 export const testProps = (id: string): Record<string, string> => {
   return {
     testID: id,

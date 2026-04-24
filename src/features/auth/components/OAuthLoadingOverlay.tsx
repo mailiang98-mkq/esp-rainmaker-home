@@ -4,29 +4,88 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useEffect, useRef } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  BackHandler,
+  AppState,
+  AppStateStatus,
 } from "react-native";
 import { UserCircle, X } from "lucide-react-native";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { testProps } from "@shared/utils/testProps";
+import {
+  APP_STATE_ACTIVE,
+  APP_STATE_BACKGROUND,
+  APP_STATE_INACTIVE,
+  OAUTH_APP_RESUME_CHECK_DELAY_MS,
+} from "@shared/utils/constants";
 
 interface OAuthLoadingOverlayProps {
   onClose: () => void;
   message: string;
   progressMessage?: string;
+  monitorAppLifecycle?: boolean;
+  onAppBecameActive?: () => void;
 }
 
+/**
+ * Renders the o auth loading overlay UI section.
+ */
 export function OAuthLoadingOverlay({
   onClose,
   message,
   progressMessage,
+  monitorAppLifecycle = false,
+  onAppBecameActive,
 }: OAuthLoadingOverlayProps) {
+  const previousAppStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const appResumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      onClose();
+      return true;
+    });
+    return () => sub.remove();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!monitorAppLifecycle || !onAppBecameActive) {
+      return;
+    }
+
+    const appStateSub = AppState.addEventListener("change", (nextState) => {
+      const previousState = previousAppStateRef.current;
+      const wasBackgrounded =
+        previousState === APP_STATE_BACKGROUND ||
+        previousState === APP_STATE_INACTIVE;
+      if (wasBackgrounded && nextState === APP_STATE_ACTIVE) {
+        if (appResumeTimeoutRef.current) {
+          clearTimeout(appResumeTimeoutRef.current);
+        }
+        appResumeTimeoutRef.current = setTimeout(() => {
+          onAppBecameActive();
+          appResumeTimeoutRef.current = null;
+        }, OAUTH_APP_RESUME_CHECK_DELAY_MS);
+      }
+      previousAppStateRef.current = nextState;
+    });
+
+    return () => {
+      appStateSub.remove();
+      if (appResumeTimeoutRef.current) {
+        clearTimeout(appResumeTimeoutRef.current);
+        appResumeTimeoutRef.current = null;
+      }
+    };
+  }, [monitorAppLifecycle, onAppBecameActive]);
+
   return (
     <View
       style={[

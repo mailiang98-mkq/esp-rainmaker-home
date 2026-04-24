@@ -27,7 +27,6 @@ export interface AuthStoreAdapter {
  * Delegates auth calls to the active adaptor.
  * All methods pass through to the adaptor; login and loginWithOauth also store
  * the result in userStore.
- *
  * @example
  * ```ts
  * store.userStore.auth.login({ username, password });

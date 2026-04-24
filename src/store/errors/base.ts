@@ -42,7 +42,6 @@ export abstract class ESPCDFError extends Error {
   /**
    * Returns a structured error object for serialization.
    * Useful for logging, monitoring, and error reporting.
-   *
    * @returns A serializable representation of the error
    */
   toJSON() {

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 import { ESPCDFScene, ESPSDKAdaptorAPIResponse } from "@store";
 import { ESPRMUser } from "@espressif/rainmaker-base-sdk";
 
@@ -17,10 +18,9 @@ enum SceneOperation {
 
 /**
  * Transforms scene data to ESPCDFScene entity with operations
- * 
+ *
  * Creates an ESPCDFScene entity with add, edit, remove, and activate operations
  * that use the ESPRMUser's setMultipleNodesParams method to perform scene operations.
- * 
  * @param scene - Scene data object containing scene information
  * @param user - ESPRMUser instance for performing scene operations
  * @param identifier - Adaptor identifier for the scene
@@ -48,7 +48,6 @@ export function transformToESPCDFScene(
     const sceneNodes = scene.nodes || [];
     /**
      * Generates payload for scene operations based on the ESP Rainmaker API format
-     * 
      * @param actions - Scene action configuration object containing device actions
      * @param nodeId - ID of the target node
      * @param type - Operation type (ADD, EDIT, REMOVE, ACTIVATE)
@@ -109,7 +108,6 @@ export function transformToESPCDFScene(
 
     /**
      * Determines the appropriate operation type for editing a scene based on action existence
-     * 
      * @param nodeId - The node identifier
      * @param oldActions - The existing actions
      * @param newActions - The new actions to be applied
@@ -137,7 +135,6 @@ export function transformToESPCDFScene(
 
     /**
      * Internal method to perform scene operations
-     * 
      * @param type - Operation type
      * @param sceneName - Scene name
      * @param actions - Scene actions

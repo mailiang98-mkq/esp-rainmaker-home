@@ -9,14 +9,37 @@ import { useCDF } from "@shared/hooks/useCDF";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@shared/hooks/useToast";
-import { executePostLoginPipeline } from "@features/auth/utils/postLoginPipeline";
-import { CDF_EXTERNAL_PROPERTIES } from "@shared/utils/constants";
+import {
+  executePostLoginPipeline,
+  withPostLoginPipelineHooks,
+} from "@features/auth/utils/postLoginPipeline";
+import {
+  CDF_EXTERNAL_PROPERTIES,
+  OAUTH_APP_RESUME_CANCEL_GRACE_PERIOD_MS,
+} from "@shared/utils/constants";
 import { getAuthAllowedUsernameTypes } from "@features/auth/utils/authHelper";
 import {
   createAuthUsernameValidator,
   createPasswordValidator,
   isUsernameAllowedForAuth,
 } from "@features/auth/utils/authHelper";
+import {
+  cancelOAuthAttempt,
+  completeOAuthAttempt,
+  createOAuthPostLoginPipelineHooks,
+  createInitialOAuthFlowState,
+  enterOAuthPostLoginPipeline,
+  failOAuthAttempt,
+  initPipelineProgress,
+  isCurrentOAuthAttempt,
+  isOAuthLoadingStatus,
+  mapOAuthErrorToMessage,
+  OAUTH_PIPELINE_STEP_GET_USER_PROFILE_AND_ROUTE,
+  shouldMonitorOAuthAppLifecycle,
+  startOAuthAttempt,
+  type OAuthFlowState,
+  type PipelineProgress as OAuthPipelineProgress,
+} from "@features/auth/utils/oauthFlow";
 export type PostSignupLoginCredentials = {
   username: string;
   password: string;
@@ -31,26 +54,27 @@ export function setPendingPostSignupLogin(
   pendingPostSignupLogin = creds;
 }
 
+/**
+ * Handles peek pending post signup login logic for this module.
+ */
 export function peekPendingPostSignupLogin(): PostSignupLoginCredentials | null {
   return pendingPostSignupLogin;
 }
 
+/**
+ * Handles consume pending post signup login logic for this module.
+ */
 export function consumePendingPostSignupLogin(): PostSignupLoginCredentials | null {
   const next = pendingPostSignupLogin;
   pendingPostSignupLogin = null;
   return next;
 }
 
-export type PipelineProgress = {
-  currentStep: string;
-  completed: number;
-  total: number;
-  steps: Array<{
-    name: string;
-    status: "pending" | "running" | "completed" | "failed";
-  }>;
-};
+export type PipelineProgress = OAuthPipelineProgress;
 
+/**
+ * Manages login state and related actions.
+ */
 export function useLogin() {
   const { store, syncHomeWithNodes, initUserCustomData, setESPCDFUser } =
     useCDF();
@@ -66,12 +90,28 @@ export function useLogin() {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isOAuthLoading, setIsOAuthLoading] = useState(false);
+  const [oauthFlowState, setOAuthFlowState] = useState<OAuthFlowState>(
+    createInitialOAuthFlowState
+  );
   const [pipelineProgress, setPipelineProgress] = useState<PipelineProgress | null>(null);
   const [showConfigResetDialog, setShowConfigResetDialog] = useState(false);
   const [isConfigResetting, setIsConfigResetting] = useState(false);
   const [authFieldsKey, setAuthFieldsKey] = useState(0);
   const postSignupAutoLoginStartedRef = useRef(false);
+  const oauthFlowStateRef = useRef(oauthFlowState);
+  const oauthAttemptInFlightRef = useRef(false);
+  const oauthResumeCancelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  useEffect(() => {
+    oauthFlowStateRef.current = oauthFlowState;
+  }, [oauthFlowState]);
+
+  const isOAuthLoading = isOAuthLoadingStatus(oauthFlowState.status);
+  const isOAuthBrowserFlowInProgress = shouldMonitorOAuthAppLifecycle(
+    oauthFlowState.status
+  );
 
   const usernameValidator = useMemo(
     () => createAuthUsernameValidator(getAuthAllowedUsernameTypes(), t),
@@ -90,13 +130,15 @@ export function useLogin() {
 
         if (!store?.userStore.user) return;
 
-        setESPCDFUser(store.userStore.user ?? null);
-        await executePostLoginPipeline({
+        const postLoginOptions = withPostLoginPipelineHooks({
           store,
           router,
           syncHomeWithNodes,
           initUserCustomData,
         });
+
+        setESPCDFUser(store.userStore.user ?? null);
+        await executePostLoginPipeline(postLoginOptions);
       } catch (error: unknown) {
         const err = error as { description?: string };
         toast.showError(
@@ -181,102 +223,138 @@ export function useLogin() {
     router.push("/(auth)/Forgot");
   };
 
+  /**
+   * Cancels the current OAuth attempt and resets overlay progress state.
+   */
+  const cancelOAuthFlow = useCallback(() => {
+    if (oauthResumeCancelTimerRef.current) {
+      clearTimeout(oauthResumeCancelTimerRef.current);
+      oauthResumeCancelTimerRef.current = null;
+    }
+    oauthAttemptInFlightRef.current = false;
+    const nextState = cancelOAuthAttempt(oauthFlowStateRef.current);
+    oauthFlowStateRef.current = nextState;
+    setOAuthFlowState(nextState);
+    setPipelineProgress(null);
+  }, []);
+
+  /**
+   * Starts provider OAuth authentication and runs post-login setup on success.
+   * @param provider OAuth provider key.
+   */
   const oauthLogin = async (provider: string) => {
-    setIsOAuthLoading(true);
+    const startedState = startOAuthAttempt(oauthFlowStateRef.current);
+    oauthFlowStateRef.current = startedState;
+    setOAuthFlowState(startedState);
+    const oauthAttemptId = startedState.attemptId;
+    oauthAttemptInFlightRef.current = true;
+    if (oauthResumeCancelTimerRef.current) {
+      clearTimeout(oauthResumeCancelTimerRef.current);
+      oauthResumeCancelTimerRef.current = null;
+    }
     setPipelineProgress(null);
     try {
       const user = await store?.userStore.auth?.loginWithOauth({
         identityProvider: provider,
       });
+      if (!isCurrentOAuthAttempt(oauthFlowStateRef.current, oauthAttemptId)) {
+        return;
+      }
 
       if (user) {
+        const pipelineState = enterOAuthPostLoginPipeline(
+          oauthFlowStateRef.current,
+          oauthAttemptId
+        );
+        oauthFlowStateRef.current = pipelineState;
+        setOAuthFlowState(pipelineState);
         store!.userStore[CDF_EXTERNAL_PROPERTIES.IS_OAUTH_LOGIN] = true;
         setESPCDFUser(store!.userStore.user ?? null);
-
-        const pipelineSteps = [
-          { name: "setUserTimeZone", status: "pending" as const },
-          { name: "registerForNotification", status: "pending" as const },
-          { name: "syncHomeWithNodes", status: "pending" as const },
-          { name: "updateRefreshTokensForAllAIDevices", status: "pending" as const },
-          { name: "initUserCustomData", status: "pending" as const },
-          { name: "getUserProfileAndRoute", status: "pending" as const },
-        ];
-
-        setPipelineProgress({
-          currentStep: "",
-          completed: 0,
-          total: pipelineSteps.length,
-          steps: pipelineSteps,
-        });
-
-        await executePostLoginPipeline({
-          store: store!,
-          router,
-          syncHomeWithNodes,
-          initUserCustomData,
-          onStepStart: (stepName) => {
-            setPipelineProgress((prev) => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                currentStep: stepName,
-                steps: prev.steps.map((step) =>
-                  step.name === stepName ? { ...step, status: "running" as const } : step
-                ),
-              };
-            });
+        setPipelineProgress(initPipelineProgress());
+        const postLoginOptions = withPostLoginPipelineHooks(
+          {
+            store: store!,
+            router,
+            syncHomeWithNodes,
+            initUserCustomData,
           },
-          onStepComplete: (stepName) => {
-            setPipelineProgress((prev) => {
-              if (!prev) return prev;
-              const updatedSteps = prev.steps.map((step) =>
-                step.name === stepName ? { ...step, status: "completed" as const } : step
-              );
-              const completed = updatedSteps.filter((s) => s.status === "completed").length;
-              return {
-                ...prev,
-                currentStep: stepName,
-                completed,
-                steps: updatedSteps,
-              };
-            });
-          },
-          onProgress: (stepName, state) => {
-            setPipelineProgress((prev) => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                currentStep: stepName,
-                completed: state.completed,
-                total: state.total,
-              };
-            });
-          },
-        });
+          createOAuthPostLoginPipelineHooks(setPipelineProgress)
+        );
+        await executePostLoginPipeline(postLoginOptions);
+
+        const completedState = completeOAuthAttempt(
+          oauthFlowStateRef.current,
+          oauthAttemptId
+        );
+        oauthFlowStateRef.current = completedState;
+        setOAuthFlowState(completedState);
+      } else {
+        const completedState = completeOAuthAttempt(
+          oauthFlowStateRef.current,
+          oauthAttemptId
+        );
+        oauthFlowStateRef.current = completedState;
+        setOAuthFlowState(completedState);
       }
     } catch (error) {
-      console.error(`OAuth login failed for provider ${provider}:`, error);
-      let errorMessage = "OAuth login failed. Please try again.";
-      if (error instanceof Error) {
-        if (error.message.includes("OAUTH_CANCELLED")) {
-          errorMessage = "OAuth login was cancelled.";
-        } else if (error.message.includes("NO_BROWSER_FOUND")) {
-          errorMessage = "No browser app found. Please install a browser.";
-        } else {
-          errorMessage = `OAuth error: ${error.message}`;
-        }
+      if (!isCurrentOAuthAttempt(oauthFlowStateRef.current, oauthAttemptId)) {
+        return;
       }
+      const failedState = failOAuthAttempt(
+        oauthFlowStateRef.current,
+        oauthAttemptId
+      );
+      oauthFlowStateRef.current = failedState;
+      setOAuthFlowState(failedState);
+      console.error(`OAuth login failed for provider ${provider}:`, error);
+      const errorMessage = mapOAuthErrorToMessage(error);
       toast.showError("OAuth Login Failed", errorMessage);
       setPipelineProgress(null);
     } finally {
-      setIsOAuthLoading(false);
+      if (isCurrentOAuthAttempt(oauthFlowStateRef.current, oauthAttemptId)) {
+        oauthAttemptInFlightRef.current = false;
+      }
+      if (oauthResumeCancelTimerRef.current) {
+        clearTimeout(oauthResumeCancelTimerRef.current);
+        oauthResumeCancelTimerRef.current = null;
+      }
     }
   };
 
-  const handleCancelOAuth = () => {
-    setIsOAuthLoading(false);
-    setPipelineProgress(null);
-  };
+  /**
+   * Handles app foreground return while the browser OAuth phase is pending.
+   */
+  const handleOAuthAppBecameActive = useCallback(() => {
+    if (!shouldMonitorOAuthAppLifecycle(oauthFlowStateRef.current.status)) {
+      return;
+    }
+    const attemptIdOnResume = oauthFlowStateRef.current.attemptId;
+    if (oauthResumeCancelTimerRef.current) {
+      clearTimeout(oauthResumeCancelTimerRef.current);
+    }
+    oauthResumeCancelTimerRef.current = setTimeout(() => {
+      const isSameAttempt = isCurrentOAuthAttempt(
+        oauthFlowStateRef.current,
+        attemptIdOnResume
+      );
+      if (!isSameAttempt) {
+        return;
+      }
+      if (
+        shouldMonitorOAuthAppLifecycle(oauthFlowStateRef.current.status) &&
+        oauthAttemptInFlightRef.current
+      ) {
+        cancelOAuthFlow();
+        toast.showError("OAuth Login Failed", "OAuth login was cancelled.");
+      }
+    }, OAUTH_APP_RESUME_CANCEL_GRACE_PERIOD_MS);
+  }, [cancelOAuthFlow, toast]);
+
+  const handleCancelOAuth = useCallback(() => {
+    cancelOAuthFlow();
+  }, [cancelOAuthFlow]);
+
+  const monitorOAuthAppLifecycle = isOAuthBrowserFlowInProgress;
 
   const handleConfigReset = () => {
     setShowConfigResetDialog(true);
@@ -297,7 +375,10 @@ export function useLogin() {
     if (!pipelineProgress) {
       return t("auth.login.settingUpAccount") || "Setting up account";
     }
-    if (pipelineProgress.currentStep === "getUserProfileAndRoute") {
+    if (
+      pipelineProgress.currentStep ===
+      OAUTH_PIPELINE_STEP_GET_USER_PROFILE_AND_ROUTE
+    ) {
       return t("auth.login.finishingUp") || "Finishing up";
     }
     if (!pipelineProgress.currentStep) {
@@ -315,6 +396,8 @@ export function useLogin() {
     isPasswordValid,
     isLoading,
     isOAuthLoading,
+    isOAuthBrowserFlowInProgress,
+    monitorOAuthAppLifecycle,
     pipelineProgress,
     showConfigResetDialog,
     isConfigResetting,
@@ -327,6 +410,7 @@ export function useLogin() {
     login,
     forgotPwd,
     oauthLogin,
+    handleOAuthAppBecameActive,
     handleCancelOAuth,
     handleConfigReset,
     getCurrentFriendlyMessage,

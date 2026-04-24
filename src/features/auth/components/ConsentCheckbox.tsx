@@ -21,6 +21,9 @@ interface ConsentCheckboxProps {
   privacyLabel: string;
 }
 
+/**
+ * Renders the consent checkbox UI section.
+ */
 export function ConsentCheckbox({
   checked,
   onToggle,

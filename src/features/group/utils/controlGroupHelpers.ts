@@ -14,10 +14,16 @@ import { getValidHomes } from "@store/utils/home";
  */
 export const GROUP_CONTROL_SUBGROUP_PREFIX = "gc_";
 
+/**
+ * Checks whether group control subgroup name matches the expected condition.
+ */
 export function isGroupControlSubgroupName(name?: string): boolean {
   return Boolean(name?.startsWith(GROUP_CONTROL_SUBGROUP_PREFIX));
 }
 
+/**
+ * Handles strip group control subgroup display name logic for this module.
+ */
 export function stripGroupControlSubgroupDisplayName(name?: string): string {
   if (!name) return "";
   return isGroupControlSubgroupName(name)
@@ -60,6 +66,9 @@ export function getPrimaryHomogeneousDeviceType(node: ESPCDFNode): string | null
   return allSame ? firstType : null;
 }
 
+/**
+ * Handles node matches homogeneous type logic for this module.
+ */
 export function nodeMatchesHomogeneousType(
   node: ESPCDFNode,
   lockedType: string
@@ -67,6 +76,9 @@ export function nodeMatchesHomogeneousType(
   return getPrimaryHomogeneousDeviceType(node) === lockedType;
 }
 
+/**
+ * Retrieves locked type from selection for downstream consumers.
+ */
 export function getLockedTypeFromSelection(
   nodes: ESPCDFNode[],
   selectedIds: string[]
@@ -93,6 +105,9 @@ export function resolveHomeIdContainingNode(
   return homes.find((g) => g.nodeIds?.includes(nodeId))?.id;
 }
 
+/**
+ * Handles find device of type logic for this module.
+ */
 export function findDeviceOfType(
   node: ESPCDFNode,
   deviceType: string
@@ -100,6 +115,9 @@ export function findDeviceOfType(
   return node.devices?.find((d) => d.type === deviceType);
 }
 
+/**
+ * Handles find matching param logic for this module.
+ */
 export function findMatchingParam(
   device: ESPCDFDevice,
   ref: ESPCDFDeviceParam
@@ -112,6 +130,9 @@ export function findMatchingParam(
   );
 }
 
+/**
+ * Handles resolve homogeneous device type logic for this module.
+ */
 export function resolveHomogeneousDeviceType(
   group: ESPCDFGroup,
   nodesById: Map<string, ESPCDFNode>
@@ -124,4 +145,42 @@ export function resolveHomogeneousDeviceType(
   if (!firstId) return null;
   const node = nodesById.get(firstId);
   return node ? getPrimaryHomogeneousDeviceType(node) : null;
+}
+
+/** One logical device row for group-level param broadcast (e.g. list card power, panel sliders). */
+export interface ParamBroadcastTarget {
+  param: ESPCDFDeviceParam;
+  /** Logical RainMaker device name for group-level payload keys. */
+  deviceName: string;
+}
+
+export interface BroadcastGroupParamOptions {
+  /** Invoked when {@link ESPCDFGroup.setParams} rejects (e.g. transport / API error). */
+  onSetParamsError?: (err: unknown) => void;
+}
+
+/**
+ * Sends one logical param value to all targets: {@link ESPCDFGroup.setParams} when `deviceGroup` is
+ * defined, otherwise per-target {@link ESPCDFDeviceParam.setValue}.
+ */
+export function broadcastGroupParam(
+  deviceGroup: ESPCDFGroup | undefined,
+  refParam: ESPCDFDeviceParam,
+  targets: ParamBroadcastTarget[],
+  value: unknown,
+  options?: BroadcastGroupParamOptions
+): void {
+  if (!deviceGroup) {
+    void Promise.allSettled(targets.map((t) => t.param.setValue(value)));
+    return;
+  }
+  const payload: Record<string, Record<string, unknown>> = {};
+  for (const { deviceName } of targets) {
+    if (!payload[deviceName]) payload[deviceName] = {};
+    payload[deviceName][refParam.name] = value;
+  }
+  void deviceGroup.setParams(payload).catch((err: unknown) => {
+    console.error("[broadcastGroupParam] group setParams failed:", err);
+    options?.onSetParamsError?.(err);
+  });
 }

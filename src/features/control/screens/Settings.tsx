@@ -42,10 +42,7 @@ import {
   DeviceInfo,
   OTA,
   DeviceOperations,
-} from "@features/group/components";
-
-// validations
-import { validateEmail as _validateEmail } from "@shared/utils/validations";
+} from "@features/control/components";
 
 // Constants
 import {
@@ -185,7 +182,7 @@ const Settings = observer(() => {
         toast.showSuccess(t("device.settings.deviceNameUpdatedSuccessfully"));
       } else {
         const nameParam = device?.params?.find(
-          (param) => param.type === "esp.param.name",
+          (param) => param.type === ESPRM_NAME_PARAM_TYPE,
         );
 
         if (nameParam) {
@@ -199,7 +196,7 @@ const Settings = observer(() => {
           toast.showError(t("device.errors.failedToUpdateDeviceName"));
         }
       }
-    } catch (error) {
+    } catch {
       toast.showError(t("device.errors.failedToUpdateDeviceName"));
     } finally {
       setIsSavingName(false);
@@ -227,7 +224,7 @@ const Settings = observer(() => {
         toast.showWarning(t("device.settings.noOTAUpdateAvailable"));
         setOtaInfo((prev) => ({ ...prev, isUpdateAvailable: false }));
       }
-    } catch (error) {
+    } catch {
       toast.showError(t("device.errors.checkOTAUpdateError"));
     } finally {
       setIsCheckingUpdate(false);
@@ -250,7 +247,7 @@ const Settings = observer(() => {
         isUpdating: false,
       }));
       toast.showSuccess(t("device.settings.otaUpdateStarted"));
-    } catch (error) {
+    } catch {
       toast.showError(t("device.errors.otaUpdateStartError"));
       setOtaInfo((prev) => ({ ...prev, isUpdating: false }));
     }
