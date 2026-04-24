@@ -426,24 +426,13 @@ export const useProvision = (): UseProvisionReturn => {
   // Handle continue
   const handleContinue = useCallback(() => {
     const provisionedNode = provisionedNodeRef.current;
-    if (provisionedNode) {
-      const readmeUrl = provisionedNode?.nodeConfig?.info?.readme;
-      if (readmeUrl) {
-        const headerName = provisionedNode?.nodeConfig?.info?.name || "Device";
-        const device = provisionedNode?.devices?.[0];
-        const deviceDisplayName = device?.displayName || headerName;
 
-        router.replace({
-          pathname: "/(control)/Guide" as any,
-          params: {
-            url: readmeUrl,
-            title: headerName,
-            deviceName: deviceDisplayName,
-            fromProvisionFlow: "true",
-          },
-        });
-        return;
-      }
+    if (provisionedNode) {
+      router.replace({
+        pathname: "/(provision)/UpdateDeviceName" as any,
+        params: { nodeId: provisionedNode.id },
+      });
+      return;
     }
 
     router.dismissTo("/(group)/Home");

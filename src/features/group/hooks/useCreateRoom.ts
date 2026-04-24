@@ -32,7 +32,17 @@ import { getFeatures } from "@config/features.config";
 export interface UseCreateRoomOptions {
   homeId: string | undefined;
   roomId: string | undefined;
+  /** Initial room name from the router (screen should pass a single `string` via `firstRouteParam` / navigation `params`). */
   paramRoomName: string | undefined;
+  /** On create success, navigate here via `router.dismissTo` (e.g. provision room picker) */
+  dismissTo?: string;
+  /**
+   * Provisioned device node id: forwarded to success / `dismissTo`; when `showSelection` is false,
+   * seeds the new room’s member list.
+   */
+  nodeId?: string;
+  /** When false, device add/remove UI is hidden (use with `nodeId` for provision). */
+  showSelection?: boolean;
   toast: {
     showSuccess: (message: string) => void;
     showError: (message: string) => void;
@@ -103,7 +113,17 @@ function mapNodeToDisplay(node: any): Node {
 export function useCreateRoom(
   options: UseCreateRoomOptions
 ): UseCreateRoomResult {
-  const { homeId, roomId, paramRoomName, toast, t, router } = options;
+  const {
+    homeId,
+    roomId,
+    paramRoomName,
+    dismissTo,
+    nodeId,
+    showSelection = true,
+    toast,
+    t,
+    router,
+  } = options;
   const { store } = useCDF();
 
   const [roomName, setRoomName] = useState(paramRoomName || "");
@@ -132,6 +152,8 @@ export function useCreateRoom(
   const [transferRoomAndAssignRole, setTransferRoomAndAssignRole] =
     useState(false);
   const [isRoomInviteValid, setIsRoomInviteValid] = useState(false);
+
+  const provisionSeedKeyRef = useRef<string | null>(null);
 
   const roomInviteValidator = useMemo(
     () =>
@@ -167,17 +189,27 @@ export function useCreateRoom(
     [nodes, selectedNodesIds]
   );
 
-  const availableNodes: Node[] = useMemo(
-    () =>
-      nodes
-        .filter((node) => !selectedNodesIds.includes(node.id))
-        .map(mapNodeToDisplay),
-    [nodes, selectedNodesIds]
-  );
+  const availableNodes: Node[] = useMemo(() => {
+    if (!showSelection) {
+      return [];
+    }
+    return nodes
+      .filter((node) => !selectedNodesIds.includes(node.id))
+      .map(mapNodeToDisplay);
+  }, [nodes, selectedNodesIds, showSelection]);
 
   useEffect(() => {
     if (home) fetchNodesIfEmpty(home);
   }, [home]);
+
+  useEffect(() => {
+    if (room) return;
+    if (showSelection) return;
+    if (!nodeId) return;
+    if (provisionSeedKeyRef.current === nodeId) return;
+    provisionSeedKeyRef.current = nodeId;
+    setSelectedNodesIds([nodeId]);
+  }, [room, showSelection, nodeId]);
 
   useEffect(() => {
     if (room) {
@@ -197,17 +229,40 @@ export function useCreateRoom(
   const handleCustomRoomName = useCallback(() => {
     router.push({
       pathname: "/(group)/CustomizeRoomName",
-      params: { currentRoomName: roomName, id: homeId, roomId },
+      params: {
+        currentRoomName: roomName,
+        id: homeId,
+        roomId,
+        ...(dismissTo ? { dismissTo } : {}),
+        ...(nodeId ? { nodeId } : {}),
+        ...(!showSelection ? { showSelection: "0" } : {}),
+      },
     } as any);
-  }, [router, roomName, homeId, roomId]);
+  }, [
+    router,
+    roomName,
+    homeId,
+    roomId,
+    dismissTo,
+    nodeId,
+    showSelection,
+  ]);
 
-  const handleAddDevice = useCallback((node: Node) => {
-    setSelectedNodesIds((prev) => [...prev, node.id]);
-  }, []);
+  const handleAddDevice = useCallback(
+    (node: Node) => {
+      if (!showSelection) return;
+      setSelectedNodesIds((prev) => [...prev, node.id]);
+    },
+    [showSelection]
+  );
 
-  const handleRemoveDevice = useCallback((node: Node) => {
-    setSelectedNodesIds((prev) => prev.filter((id) => id !== node.id));
-  }, []);
+  const handleRemoveDevice = useCallback(
+    (node: Node) => {
+      if (!showSelection) return;
+      setSelectedNodesIds((prev) => prev.filter((id) => id !== node.id));
+    },
+    [showSelection]
+  );
 
   const handleSave = useCallback(() => {
     if (!home) return;
@@ -224,9 +279,21 @@ export function useCreateRoom(
         if (group) {
           toast.showSuccess(t("group.createRoom.roomCreatedSuccessfully"));
           await new Promise((r) => setTimeout(r, 500));
+          const params: Record<string, string> = {
+            id: homeId as string,
+          };
+          if (dismissTo) {
+            params.dismissTo = dismissTo;
+            if (nodeId) {
+              params.nodeId = nodeId;
+            }
+            if (group.id) {
+              params.selectedRoomId = group.id;
+            }
+          }
           router.replace({
             pathname: "/(group)/CreateRoomSuccess",
-            params: { id: homeId },
+            params,
           } as any);
         }
       })
@@ -244,6 +311,8 @@ export function useCreateRoom(
     t,
     router,
     homeId,
+    dismissTo,
+    nodeId,
   ]);
 
   const handleUpdate = useCallback(async () => {

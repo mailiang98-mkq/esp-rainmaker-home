@@ -697,7 +697,6 @@ export const globalStyles = StyleSheet.create({
     bottom: 10,
     right: 10,
   },
-
   deviceIconContainer: {
     width: 60,
     height: 60,

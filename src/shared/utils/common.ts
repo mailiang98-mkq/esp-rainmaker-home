@@ -6,8 +6,57 @@
 
 import * as WebBrowser from "expo-web-browser";
 import { POLLING, USER_PERMISSION } from "./constants";
-import { PollOptions, PollResult } from "@src/types/global";
+import type { PollOptions, PollResult } from "@src/types/global";
 import { ESPCDFUser, ESPCDFUserCustomDataRequest } from "@store";
+
+/**
+ * First value from Expo Router `useLocalSearchParams` when the value may be `string` or `string[]`.
+ * Returns `undefined` for non-stringifiable values (e.g. mistaken object params) so UI never shows wrong values.
+ * 
+ * Expo is unreliable about the type of the params values at the runtime, so we need to coerce them to strings.
+ */
+export function firstRouteParam(
+  value: string | string[] | undefined | unknown
+): string | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (raw === undefined || raw === null) {
+    return undefined;
+  }
+  if (typeof raw === "string") {
+    return raw;
+  }
+  if (typeof raw === "number" || typeof raw === "boolean") {
+    return String(raw);
+  }
+  return undefined;
+}
+
+const ROUTE_PARAM_TRUE = new Set(["true", "1"]);
+const ROUTE_PARAM_FALSE = new Set(["false", "0"]);
+
+/**
+ * Interprets a string route param as a boolean. `"true"` / `"1"` → `true`, `"false"` / `"0"` → `false`.
+ * Any other value (including empty) falls back to `defaultValue` — use when the param is optional.
+ */
+export function parseRouteParamBoolean(
+  value: string | undefined,
+  defaultValue: boolean
+): boolean {
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const v = value.trim().toLowerCase();
+  if (ROUTE_PARAM_TRUE.has(v)) {
+    return true;
+  }
+  if (ROUTE_PARAM_FALSE.has(v)) {
+    return false;
+  }
+  return defaultValue;
+}
 
 /**
  * Handles open url logic for this module.
@@ -36,6 +85,13 @@ export const deepClone = <T>(obj: T): T => {
 
   return clonedObj;
 };
+
+/** One ring in a stacked node avatar row (device type + connectivity for imagery). */
+export interface NodeDeviceImageEntry {
+  key: string;
+  type: string | undefined;
+  connected: boolean;
+}
 
 /**
  * Generates a 4-character random ID

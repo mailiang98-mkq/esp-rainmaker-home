@@ -8,11 +8,16 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import type { TFunction } from "i18next";
 import type { RoomType } from "@src/types/global";
 import { getPredefinedRoomOptions } from "@features/group/utils/customizeRoomNameHelpers";
+import { firstRouteParam, parseRouteParamBoolean } from "@shared/utils/common";
 
 export interface UseCustomizeRoomNameOptions {
   currentRoomName: string | string[] | undefined;
   id: string | string[] | undefined;
   roomId: string | string[] | undefined;
+  /** Carried from Create Room (e.g. provision `dismissTo`). */
+  dismissTo?: string | string[] | undefined;
+  nodeId?: string | string[] | undefined;
+  showSelection?: string | string[] | undefined;
   router: { dismissTo: (opts: { pathname: string; params: Record<string, unknown> }) => void; back: () => void };
   t: TFunction;
 }
@@ -33,7 +38,16 @@ export interface UseCustomizeRoomNameResult {
 export function useCustomizeRoomName(
   options: UseCustomizeRoomNameOptions
 ): UseCustomizeRoomNameResult {
-  const { currentRoomName, id, roomId, router, t } = options;
+  const {
+    currentRoomName,
+    id,
+    roomId,
+    dismissTo,
+    nodeId,
+    showSelection,
+    router,
+    t,
+  } = options;
 
   const [selectedRoom, setSelectedRoom] = useState("");
   const [roomName, setRoomName] = useState("");
@@ -59,14 +73,38 @@ export function useCustomizeRoomName(
   const handleConfirm = useCallback(() => {
     const finalRoomName = roomName.trim() || selectedRoom;
     if (finalRoomName) {
+      const dismissToParam = firstRouteParam(dismissTo);
+      const nodeIdParam  = firstRouteParam(nodeId);
+      const showSelectionBool = parseRouteParamBoolean(
+        firstRouteParam(showSelection),
+        true
+      );
+      const homeId = firstRouteParam(id);
+      const roomIdParam = firstRouteParam(roomId);
       router.dismissTo({
         pathname: "/(group)/CreateRoom",
-        params: { roomName: finalRoomName, id, roomId },
+        params: {
+          roomName: finalRoomName,
+          ...(homeId ? { id: homeId } : {}),
+          ...(roomIdParam ? { roomId: roomIdParam } : {}),
+          ...(dismissToParam ? { dismissTo: dismissToParam } : {}),
+          ...(nodeIdParam ? { nodeId: nodeIdParam } : {}),
+          ...(!showSelectionBool ? { showSelection: "0" } : {}),
+        },
       });
     } else {
       router.back();
     }
-  }, [roomName, selectedRoom, router, id, roomId]);
+  }, [
+    roomName,
+    selectedRoom,
+    router,
+    id,
+    roomId,
+    dismissTo,
+    nodeId,
+    showSelection,
+  ]);
 
   const handleCustomRoomNameChange = useCallback((value: string) => {
     setRoomName(value);
