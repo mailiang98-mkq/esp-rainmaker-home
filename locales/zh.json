@@ -318,7 +318,11 @@
       "roomAllDevicesPowerOn": "{{roomName}} 中的所有设备现已打开。",
       "roomAllDevicesPowerOff": "{{roomName}} 中的所有设备现已关闭。",
       "singleDeviceCountPostfix": "个设备",
-      "multipleDeviceCountPostfix": "个设备"
+      "multipleDeviceCountPostfix": "个设备",
+      "allOn": "全部开启",
+      "allOff": "全部关闭",
+      "filterAll": "全部",
+      "filterOther": "其他"
     },
     "homeManagement": {
       "title": "家庭管理",

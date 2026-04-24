@@ -29,6 +29,7 @@ export { default as Input } from "./Form/Input";
 export { default as DangerButton } from "./Form/DangerButton";
 export { default as Button } from "./Form/Button";
 export { default as ActionButton } from "./Form/ActionButton";
+export { default as SwitchButton } from "./Form/SwitchButton";
 
 // Info
 export { default as InfoRow } from "./Info/InfoRow";
