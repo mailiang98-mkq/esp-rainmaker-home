@@ -101,6 +101,12 @@ const DeviceName: React.FC<DeviceNameProps> = ({
           paddingHorizontal={false}
           marginBottom={false}
           editable={!disabled}
+          returnKeyType="done"
+          onSubmitEditing={() => {
+            if (deviceName?.trim() && !disabled && !isSaving) {
+              handleSaveDeviceName();
+            }
+          }}
           qaId="device_name"
         />
         <View style={[styles.editIcon]}>

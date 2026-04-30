@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { DeviceAction } from "@shared/components";
 import type { DeviceSelectionData } from "@src/types/global";
@@ -15,9 +15,7 @@ export interface EventDeviceSelectionDeviceItemProps {
   device: DeviceSelectionData;
   currentEventInfo: CreateAutomationEventInfo | null;
   isCurrentEventDevice: boolean;
-  isDisabled: boolean;
-  offlineLabel: string;
-  treatOfflineAsOnline?: boolean;
+  isDisabled?: boolean;
   onPress: () => void;
 }
 
@@ -30,14 +28,9 @@ export const EventDeviceSelectionDeviceItem: React.FC<
   device,
   currentEventInfo,
   isCurrentEventDevice,
-  isDisabled,
-  offlineLabel,
-  treatOfflineAsOnline = false,
+  isDisabled = false,
   onPress,
 }) => {
-  const isOnline = device.node.connectivityStatus?.isConnected ?? false;
-  const showAsOnline = treatOfflineAsOnline || isOnline;
-
   const eventConditions =
     isCurrentEventDevice && currentEventInfo
       ? {
@@ -52,7 +45,6 @@ export const EventDeviceSelectionDeviceItem: React.FC<
     <View
       style={[
         globalStyles.sceneDeviceSection,
-        !showAsOnline && globalStyles.deviceCardDisabled,
         isDisabled && globalStyles.deviceCardDisabled,
       ]}
     >
@@ -63,13 +55,6 @@ export const EventDeviceSelectionDeviceItem: React.FC<
         onPress={() => !isDisabled && onPress()}
         eventConditions={eventConditions}
         isEventMode={!!isCurrentEventDevice}
-        badgeLable={
-          !showAsOnline ? (
-            <Text style={[globalStyles.fontXs, globalStyles.textGray]}>
-              {offlineLabel}
-            </Text>
-          ) : undefined
-        }
       />
     </View>
   );

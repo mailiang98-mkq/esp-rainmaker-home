@@ -5,7 +5,7 @@
  */
 
 
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Text,
@@ -17,7 +17,13 @@ import { UserPlus, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 // Components
-import { CollapsibleCard, ActionButton } from "@shared/components";
+import { CollapsibleCard, ActionButton, ConfirmationDialog } from "@shared/components";
+
+import {
+  GROUP_SHARING_REVOKE_PENDING,
+  GROUP_SHARING_REVOKE_SHARED,
+  type GroupSharingRevokeKind,
+} from "@/src/features/group/utils/constants";
 
 // Styles
 import { tokens } from "@shared/theme/tokens";
@@ -35,7 +41,7 @@ import type { GroupSharedUser, GroupSharingProps } from "@src/types/global";
  * - Pending for Acceptance section (conditional)
  * - Shared With section (conditional)
  * - Add User functionality
- * - Remove user functionality
+ * - Remove user functionality (with confirmation)
  * - Excludes primary user from lists
  * @param props - Component properties for group sharing functionality
  */
@@ -51,6 +57,56 @@ const GroupSharing: React.FC<GroupSharingProps> = ({
   containerStyle,
 }) => {
   const { t } = useTranslation();
+
+  const [revokeTarget, setRevokeTarget] = useState<{
+    kind: GroupSharingRevokeKind;
+    username: string;
+  } | null>(null);
+
+  /**
+   * Handler that opens the revoke confirmation dialog for a pending invite or an accepted member.
+   */
+  const handleOpenRevokeDialog = useCallback(
+    (kind: GroupSharingRevokeKind, username: string) => {
+      setRevokeTarget({ kind, username });
+    },
+    []
+  );
+
+  /**
+   * Runs the store remove/revoke action after confirmation, then closes the dialog.
+   */
+  const handleConfirmRevoke = useCallback(async () => {
+    if (!revokeTarget) return;
+    const { kind, username } = revokeTarget;
+    try {
+      if (kind === GROUP_SHARING_REVOKE_PENDING && onRemovePendingUser) {
+        await onRemovePendingUser(username);
+      } else if (kind === GROUP_SHARING_REVOKE_SHARED) {
+        await onRemoveUser(username);
+      }
+    } finally {
+      setRevokeTarget(null);
+    }
+  }, [revokeTarget, onRemovePendingUser, onRemoveUser]);
+
+  const dialogTitle =
+    revokeTarget === null
+      ? ""
+      : revokeTarget.kind === GROUP_SHARING_REVOKE_PENDING
+        ? t("group.settings.confirmRevokePendingShareTitle")
+        : t("group.settings.confirmRemoveSharedUserTitle");
+
+  const dialogDescription =
+    revokeTarget === null
+      ? ""
+      : revokeTarget.kind === GROUP_SHARING_REVOKE_PENDING
+        ? t("group.settings.confirmRevokePendingShareMessage", {
+            username: revokeTarget.username,
+          })
+        : t("group.settings.confirmRemoveSharedUserMessage", {
+            username: revokeTarget.username,
+          });
 
   const cardStyle = [styles.contentWrapper, containerStyle];
 
@@ -130,7 +186,9 @@ const GroupSharing: React.FC<GroupSharingProps> = ({
               </View>
               <Pressable
                 style={globalStyles.removeButton}
-                onPress={() => onRemovePendingUser?.(user.username)}
+                onPress={() =>
+                  handleOpenRevokeDialog(GROUP_SHARING_REVOKE_PENDING, user.username)
+                }
               >
                 <X size={16} color={tokens.colors.red} />
               </Pressable>
@@ -158,7 +216,9 @@ const GroupSharing: React.FC<GroupSharingProps> = ({
               </View>
               <Pressable
                 style={globalStyles.removeButton}
-                onPress={() => onRemoveUser(user.username)}
+                onPress={() =>
+                  handleOpenRevokeDialog(GROUP_SHARING_REVOKE_SHARED, user.username)
+                }
               >
                 <X size={16} color={tokens.colors.red} />
               </Pressable>
@@ -166,6 +226,21 @@ const GroupSharing: React.FC<GroupSharingProps> = ({
           ))}
         </View>
       )}
+
+      <ConfirmationDialog
+        open={revokeTarget !== null}
+        title={dialogTitle}
+        description={dialogDescription}
+        confirmText={t("layout.shared.remove")}
+        cancelText={t("layout.shared.cancel")}
+        onConfirm={() => {
+          void handleConfirmRevoke();
+        }}
+        onCancel={() => setRevokeTarget(null)}
+        confirmColor={tokens.colors.red}
+        isLoading={isLoading}
+        qaId="revoke_group_sharing"
+      />
     </CollapsibleCard>
   );
 };

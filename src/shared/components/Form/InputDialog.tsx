@@ -113,6 +113,12 @@ const InputDialog: React.FC<InputDialogProps> = ({
               border={true}
               paddingHorizontal={false}
               marginBottom={true}
+              returnKeyType="done"
+              onSubmitEditing={() => {
+                if (!loading && value.trim()) {
+                  onSubmit(value);
+                }
+              }}
             />
             <View style={styles.dialogButtonRow}>
               <TouchableOpacity

@@ -100,10 +100,15 @@ export function ForgotPasswordScreen() {
                 placeholder={usernameFieldProps.placeholder}
                 onFieldChange={handleEmailChange}
                 validator={emailValidator}
-                validateOnChange={true}
-                debounceDelay={500}
+                validateOnBlur={true}
                 inputMode={usernameFieldProps.inputMode}
                 keyboardType={usernameFieldProps.keyboardType}
+                returnKeyType="go"
+                onSubmitEditing={() => {
+                  if (isEmailValid && email && !isLoading) {
+                    void sendVerificationCode();
+                  }
+                }}
                 autoFocus
                 qaId="email_forgot"
               />

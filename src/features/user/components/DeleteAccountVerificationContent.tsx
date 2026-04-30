@@ -52,7 +52,8 @@ const DeleteAccountVerificationContent: React.FC<
   isCodeValid,
   isLoading,
   countdown,
-}) => (
+}) => {
+  return (
   <View
     {...testProps("view_verification_delete_account")}
     style={[globalStyles.flex1, globalStyles.itemCenter]}
@@ -95,6 +96,12 @@ const DeleteAccountVerificationContent: React.FC<
           keyboardType="numeric"
           maxLength={6}
           autoFocus
+          returnKeyType="done"
+          onSubmitEditing={() => {
+            if (isCodeValid && code.length === 6 && !isLoading) {
+              void onVerify();
+            }
+          }}
           qaId="code_delete_account"
         />
       </View>
@@ -130,6 +137,7 @@ const DeleteAccountVerificationContent: React.FC<
       </View>
     </View>
   </View>
-);
+  );
+};
 
 export default DeleteAccountVerificationContent;

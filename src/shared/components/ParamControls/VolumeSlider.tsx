@@ -51,12 +51,6 @@ const VolumeSlider = observer(
       onValueChange(event, roundedValue);
     };
 
-    const handleTamaguiValueChange = (values: number[]) => {
-      const raw = values[0];
-      if (typeof raw !== "number" || !Number.isFinite(raw)) return;
-      commitValue(null, raw);
-    };
-
     // 3. Render
     return (
       <View style={[styles.container, disabled && styles.disabled]}>
@@ -72,7 +66,6 @@ const VolumeSlider = observer(
             max={max}
             step={step}
             onSlideMove={commitValue}
-            onValueChange={handleTamaguiValueChange}
             disabled={disabled}
             style={styles.slider}
           >

@@ -77,6 +77,12 @@ export function ConfirmationCodeScreen() {
               ]}
               keyboardType="numeric"
               maxLength={6}
+              returnKeyType="go"
+              onSubmitEditing={() => {
+                if (isCodeValid && !isLoading) {
+                  void handleVerify();
+                }
+              }}
               autoFocus
               qaId="confirmation_code"
             />

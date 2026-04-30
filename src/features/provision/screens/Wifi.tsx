@@ -120,6 +120,12 @@ const Wifi = () => {
                   placeholder={t("device.wifi.password")}
                   onChangePassword={setPassword}
                   onToggleShowPassword={() => setShowPassword(!showPassword)}
+                  returnKeyType="done"
+                  onSubmitEditing={() => {
+                    if (!isConnectDisabled) {
+                      void handleConnect();
+                    }
+                  }}
                 />
               )}
 

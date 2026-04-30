@@ -214,7 +214,12 @@
       "passwordResetFailed": "Failed to reset password",
       "autoSignInFailed": "Failed to auto sign in",
       "failedToSaveProfile": "Failed to save profile",
-      "pleaseTryAgain": "Please try again"
+      "pleaseTryAgain": "Please try again",
+      "oauthCancelled": "OAuth login was cancelled.",
+      "oauthNoBrowser": "No browser app found. Please install a browser.",
+      "oauthErrorWithMessage": "OAuth error: {{message}}",
+      "oauthUnknownFailure": "OAuth login failed. Please try again.",
+      "oauthLoginFailedTitle": "OAuth Login Failed"
     }
   },
   "user": {
@@ -382,7 +387,11 @@
       "expiresInDays": "{{count}} days",
       "expiresInDay": "1 day",
       "expiresToday": "Expires today",
-      "sharing": "Sharing"
+      "sharing": "Sharing",
+      "confirmRevokePendingShareTitle": "Revoke invite?",
+      "confirmRevokePendingShareMessage": "This will cancel the pending share request for {{username}}.",
+      "confirmRemoveSharedUserTitle": "Remove access?",
+      "confirmRemoveSharedUserMessage": "Access for {{username}} will be removed. They will no longer see this Home."
     },
     "deviceGroups": {
       "addYourFirstGroup": "Add your first group",

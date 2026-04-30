@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { useMemo, useRef } from "react";
+import { View, Text, TouchableOpacity, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
@@ -50,6 +50,9 @@ export function SignupScreen() {
     signup,
   } = useSignup();
 
+  const passwordInputRef = useRef<TextInput>(null);
+  const confirmPasswordInputRef = useRef<TextInput>(null);
+
   const usernameFieldProps = useMemo(() => {
     const allowsPhone = getAuthAllowedUsernameTypes().includes("phone");
     return {
@@ -93,32 +96,49 @@ export function SignupScreen() {
               placeholder={usernameFieldProps.placeholder}
               onFieldChange={handleEmailChange}
               validator={emailValidator}
-              validateOnChange={true}
-              debounceDelay={500}
+              validateOnBlur={true}
               inputMode={usernameFieldProps.inputMode}
               keyboardType={usernameFieldProps.keyboardType}
+              returnKeyType="next"
+              onSubmitEditing={() => {
+                if (isEmailValid) {
+                  passwordInputRef.current?.focus();
+                }
+              }}
               qaId="email"
             />
 
             <Input
+              ref={passwordInputRef}
               isPassword
               icon="lock-closed"
               placeholder={t("auth.shared.passwordPlaceholder")}
               onFieldChange={handlePasswordChange}
               validator={passwordValidator}
-              validateOnChange={true}
-              debounceDelay={500}
+              validateOnBlur={true}
+              returnKeyType="next"
+              onSubmitEditing={() => {
+                if (isPasswordValid) {
+                  confirmPasswordInputRef.current?.focus();
+                }
+              }}
               qaId="password"
             />
 
             <Input
+              ref={confirmPasswordInputRef}
               isPassword
               icon="lock-closed"
               placeholder={t("auth.shared.confirmPasswordPlaceholder")}
               onFieldChange={handleConfirmPasswordChange}
               validator={confirmPasswordValidator}
-              validateOnChange={true}
-              debounceDelay={500}
+              validateOnBlur={true}
+              returnKeyType="go"
+              onSubmitEditing={() => {
+                if (isFormValid) {
+                  void signup();
+                }
+              }}
               qaId="confirm_password"
             />
 

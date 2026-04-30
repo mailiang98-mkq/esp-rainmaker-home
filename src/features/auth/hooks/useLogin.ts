@@ -109,7 +109,7 @@ export function useLogin() {
   }, [oauthFlowState]);
 
   const isOAuthLoading = isOAuthLoadingStatus(oauthFlowState.status);
-  const isOAuthBrowserFlowInProgress = shouldMonitorOAuthAppLifecycle(
+  const monitorOAuthAppLifecycle = shouldMonitorOAuthAppLifecycle(
     oauthFlowState.status
   );
 
@@ -307,8 +307,8 @@ export function useLogin() {
       oauthFlowStateRef.current = failedState;
       setOAuthFlowState(failedState);
       console.error(`OAuth login failed for provider ${provider}:`, error);
-      const errorMessage = mapOAuthErrorToMessage(error);
-      toast.showError("OAuth Login Failed", errorMessage);
+      const errorMessage = mapOAuthErrorToMessage(error, t);
+      toast.showError(t("auth.errors.oauthLoginFailedTitle"), errorMessage);
       setPipelineProgress(null);
     } finally {
       if (isCurrentOAuthAttempt(oauthFlowStateRef.current, oauthAttemptId)) {
@@ -354,8 +354,6 @@ export function useLogin() {
     cancelOAuthFlow();
   }, [cancelOAuthFlow]);
 
-  const monitorOAuthAppLifecycle = isOAuthBrowserFlowInProgress;
-
   const handleConfigReset = () => {
     setShowConfigResetDialog(true);
   };
@@ -396,7 +394,6 @@ export function useLogin() {
     isPasswordValid,
     isLoading,
     isOAuthLoading,
-    isOAuthBrowserFlowInProgress,
     monitorOAuthAppLifecycle,
     pipelineProgress,
     showConfigResetDialog,

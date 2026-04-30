@@ -102,6 +102,12 @@ const POPScreen = () => {
                 ]}
                 placeholder={t("device.pop.placeholder")}
                 maxLength={8}
+                returnKeyType="done"
+                onSubmitEditing={() => {
+                  if (!isLoading) {
+                    void handleVerify();
+                  }
+                }}
                 qaId="pop_code"
               />
             </View>

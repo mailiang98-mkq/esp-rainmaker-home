@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { Header, ScreenWrapper, ConfirmationDialog } from "@shared/components";
 import {
@@ -56,34 +56,46 @@ const User: React.FC = observer(() => {
         excludeTop={true}
         qaId="screen_wrapper_user"
       >
-        <ProfileSection
-          userInfo={user?.userInfo || undefined}
-          onPress={() => handleNavigation("handleSettings")}
-        />
+        <ScrollView
+          style={globalStyles.flex1}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 100,
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <ProfileSection
+            userInfo={user?.userInfo || undefined}
+            onPress={() => handleNavigation("handleSettings")}
+          />
 
-        {features.voiceAssistants && (
-          <UserIntegrationSection
-            title={t("user.profile.thirdPartyIntegration.title")}
-            integrations={integrations}
-            onIntegrationPress={(action) =>
+          {features.voiceAssistants && (
+            <UserIntegrationSection
+              title={t("user.profile.thirdPartyIntegration.title")}
+              integrations={integrations}
+              onIntegrationPress={(action) =>
+                handleNavigation(action as RouteAction)
+              }
+            />
+          )}
+          <UserOperationsSection
+            operations={userOperations}
+            onOperationPress={(action) =>
               handleNavigation(action as RouteAction)
             }
           />
-        )}
-        <UserOperationsSection
-          operations={userOperations}
-          onOperationPress={(action) => handleNavigation(action as RouteAction)}
-        />
 
-        <View
-          {...testProps("view_user_logout")}
-          style={[
-            userStyles.section,
-            globalStyles.shadowElevationForLightTheme,
-          ]}
-        >
-          <LogoutButton onPress={handleLogout} qaId="button_logout_user" />
-        </View>
+          <View
+            {...testProps("view_user_logout")}
+            style={[
+              userStyles.section,
+              globalStyles.shadowElevationForLightTheme,
+            ]}
+          >
+            <LogoutButton onPress={handleLogout} qaId="button_logout_user" />
+          </View>
+        </ScrollView>
       </ScreenWrapper>
 
       <ConfirmationDialog

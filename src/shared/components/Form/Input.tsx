@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, forwardRef, useCallback } from "react";
+import { useState, forwardRef, useCallback, useRef } from "react";
 import {
   View,
   TextInput,
@@ -108,6 +108,8 @@ const Input = forwardRef<TextInput, InputProps>(
     const [showPassword, setShowPassword] = useState(false);
     const [value, setValue] = useState<string>(initialValue);
     const [errorMessage, setErrorMessage] = useState<string>("");
+    /** True after the user edits the field; avoids skipping blur validation when parent syncs `initialValue` on each change. */
+    const valueDirtyRef = useRef(false);
 
     // Immediate validation for button state (no error display)
     const validateImmediate = useCallback(
@@ -148,6 +150,7 @@ const Input = forwardRef<TextInput, InputProps>(
 
     // Handlers
     const handleChange = (val: string) => {
+      valueDirtyRef.current = true;
       setValue(val);
 
       // Clear error when user starts typing
@@ -180,17 +183,20 @@ const Input = forwardRef<TextInput, InputProps>(
     };
 
     const handleBlur = () => {
-      if (initialValue === value) {
-        return;
-      }
-      // Validate on blur if enabled
-      if (validator && validateOnBlur) {
-        // Immediate validation with error display on blur (no debounce needed)
-        const isValid = validateWithError(value);
-        onFieldChange?.(value, isValid, errorMessage);
+      if (validator && validateOnBlur && valueDirtyRef.current) {
+        const result = validator(value);
+        if (!result.isValid) {
+          setErrorMessage(result.error || "");
+        } else {
+          setErrorMessage("");
+        }
+        onFieldChange?.(
+          value,
+          result.isValid,
+          result.isValid ? "" : result.error ?? "",
+        );
       }
 
-      // Call custom onBlur callback if provided
       onBlur?.();
     };
 

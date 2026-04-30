@@ -41,36 +41,58 @@ export const EventDeviceParamSelectionScreen = observer(() => {
     activeEventParam,
     selectedParam,
     paramSheetVisible,
-    eventCondition,
-    eventValue,
+    draftCondition,
+    setDraftCondition,
+    persistedNodeParamsEvent,
     disableActionButton,
-    createEvent,
     handleParamSelect,
     handleParamSheetClose,
     handleEventConditionSave,
     handleParamValueChange,
-    setEventCondition,
   } = useEventDeviceParamSelection({ isEditingEvent });
 
-  const getParamDisplayValue = useCallback(
-    (param: ESPCDFDeviceParam): string => {
-      if (activeEventParam !== param.name || eventValue === null) return "";
-
+  /**
+   * Builds the list subtitle for one condition/value pair.
+   * @param condition - Operator key for {@link getConditionLabel}
+   * @param value - Raw trigger value
+   * @returns Formatted string or empty when value is null/undefined
+   */
+  const formatEventSubtitle = useCallback(
+    (condition: string, value: unknown): string => {
+      if (value == null) return "";
       const displayValue =
-        typeof eventValue === "boolean"
-          ? eventValue
+        typeof value === "boolean"
+          ? value
             ? t("automation.eventParamSelection.parameterOn")
             : t("automation.eventParamSelection.parameterOff")
-          : String(eventValue);
-      return `${getConditionLabel(eventCondition, t)} ${displayValue}`;
+          : String(value);
+      return `${getConditionLabel(condition, t)} ${displayValue}`;
     },
-    [activeEventParam, eventValue, eventCondition, t],
+    [t],
   );
 
+  /**
+   * Row subtitle from persisted context only.
+   * @param param - Device param for the row
+   * @returns Display string or empty
+   */
+  const getParamDisplayValue = useCallback(
+    (param: ESPCDFDeviceParam): string => {
+      if (persistedNodeParamsEvent?.param !== param.name) return "";
+      return formatEventSubtitle(
+        persistedNodeParamsEvent.check,
+        persistedNodeParamsEvent.value,
+      );
+    },
+    [persistedNodeParamsEvent, formatEventSubtitle],
+  );
+
+  /**
+   * Exits the screen; the trigger is already in automation context after sheet Save.
+   */
   const handleDone = useCallback(() => {
-    createEvent();
     router.dismissTo("/(automation)/CreateAutomation");
-  }, [createEvent, router]);
+  }, [router]);
 
   const renderParamControl = useCallback((param: ESPCDFDeviceParam) => {
     const Control = getParamControlComponent(param);
@@ -106,14 +128,14 @@ export const EventDeviceParamSelectionScreen = observer(() => {
       <EventDeviceParamSelectionParamSheet
         visible={paramSheetVisible}
         selectedParam={selectedParam}
-        eventCondition={eventCondition}
+        eventCondition={draftCondition}
         conditionOptions={conditionOptions}
         showConditionSelector={showConditionSelector}
         conditionLabel={t("automation.eventParamSelection.condition")}
         saveLabel={t("layout.shared.save")}
         onClose={handleParamSheetClose}
         onValueChange={handleParamValueChange}
-        onConditionChange={setEventCondition}
+        onConditionChange={setDraftCondition}
         onSave={handleEventConditionSave}
         renderParamControl={renderParamControl}
       />

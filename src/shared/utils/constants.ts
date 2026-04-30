@@ -99,6 +99,9 @@ export const POWER_PARAM_UNSUPPORTED_DEVICE_TYPES = new Set<string>([
 // PARAM NAMES
 export const VOLUME_PARAM_NAME = "Volume";
 
+/** Min ms between throttled `setValue` (burst coalesce, post-write queue). */
+export const PARAM_CONTROL_THROTTLE_MS = 100;
+
 // SUPPORTED PARAM UI TYPES
 export const ESPRM_UI_TEXT_PARAM_TYPE = "esp.ui.text";
 export const ESPRM_UI_TOGGLE_PARAM_TYPE = "esp.ui.toggle";

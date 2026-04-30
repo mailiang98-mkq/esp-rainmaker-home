@@ -51,3 +51,12 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
 
 /** Fallback icon for the "other" device category. */
 export const OTHER_CATEGORY_ICON = Grid2X2;
+/** Revoke confirmation target: pending share request */
+export const GROUP_SHARING_REVOKE_PENDING = "pending";
+
+/** Revoke confirmation target: accepted shared user */
+export const GROUP_SHARING_REVOKE_SHARED = "shared";
+
+export type GroupSharingRevokeKind =
+  | typeof GROUP_SHARING_REVOKE_PENDING
+  | typeof GROUP_SHARING_REVOKE_SHARED;

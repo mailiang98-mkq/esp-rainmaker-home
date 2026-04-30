@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type {
   ESPCDFDeviceParam,
   ESPCDFDevice,
@@ -14,52 +14,49 @@ import { ESPCDFAutomationConditionOperator } from "@store";
 import { defaultWritableParamValue, filterExcludedParamTypes } from "@shared/utils/paramUtils";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useAutomation } from "@context/automation.context";
+import { getNodeParamsEventForDevice } from "@features/automation/utils/eventDeviceParamSelection";
 
 export interface UseEventDeviceParamSelectionParams {
   isEditingEvent?: string;
 }
 
 export interface UseEventDeviceParamSelectionResult {
-  /** Selected device from context (event device) */
+  /** Device resolved from context selection */
   selectedDevice: ESPCDFDevice | null;
-  /** Filtered params with default values for display */
+  /** Params for the list (defaults + value on the row that matches saved trigger, if any) */
   params: ESPCDFDeviceParam[];
-  /** Currently selected param in the sheet */
+  /** Row open in the bottom sheet */
   selectedParam: ESPCDFDeviceParam | null;
   setSelectedParam: React.Dispatch<React.SetStateAction<ESPCDFDeviceParam | null>>;
-  /** Sheet visible */
   paramSheetVisible: boolean;
   setParamSheetVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  /** Current event condition operator */
-  eventCondition: string;
-  setEventCondition: React.Dispatch<React.SetStateAction<string>>;
-  /** Current event trigger value */
-  eventValue: unknown;
-  setEventValue: React.Dispatch<React.SetStateAction<unknown>>;
-  /** Param name that has the event configured */
+  /** Saved trigger param name from context; list selection border */
   activeEventParam: string | null;
-  /** Whether Done button should be disabled */
+  /** Draft operator in the sheet */
+  draftCondition: string;
+  setDraftCondition: React.Dispatch<React.SetStateAction<string>>;
+  /** Saved node-params event from context for this device */
+  persistedNodeParamsEvent: ESPCDFAutomationNodeParamsEvent | null;
+  /** True when user must finish sheet save first or no trigger in context yet */
   disableActionButton: boolean;
-  /** Create/save event and persist to context. Caller navigates after. */
-  createEvent: () => void;
-  /** Open sheet for param and set as selected */
-  handleParamSelect: (param: ESPCDFDeviceParam) => void;
-  /** Close sheet */
-  handleParamSheetClose: () => void;
-  /** Save condition from sheet and set active param */
+  /** Persist draft to context and close sheet */
   handleEventConditionSave: () => void;
-  /** Update value when param control changes */
+  /** Open sheet and seed draft from context or defaults */
+  handleParamSelect: (param: ESPCDFDeviceParam) => void;
+  /** Dismiss sheet without persisting */
+  handleParamSheetClose: () => void;
+  /** Draft value change from param control */
   handleParamValueChange: (value: unknown) => void;
-  /** Is editing existing event */
+  /** Route flag for edit vs create automation */
   isEditing: boolean;
 }
 
 /**
- * Hook that encapsulates Event Device Param Selection business logic.
- * No UI side effects (toast, navigation, i18n).
+ * Event device param flow: bottom sheet holds draft edits; **Save** writes to automation context.
+ * `state.events` is the single source of truth for the saved trigger (no duplicate committed React state).
  */
 export function useEventDeviceParamSelection(
-  params: UseEventDeviceParamSelectionParams
+  params: UseEventDeviceParamSelectionParams,
 ): UseEventDeviceParamSelectionResult {
   const { isEditingEvent } = params;
   const { store } = useCDF();
@@ -69,11 +66,21 @@ export function useEventDeviceParamSelection(
 
   const [selectedParam, setSelectedParam] = useState<ESPCDFDeviceParam | null>(null);
   const [paramSheetVisible, setParamSheetVisible] = useState(false);
-  const [eventCondition, setEventCondition] = useState<string>(
-    ESPCDFAutomationConditionOperator.EQUAL
+  const [draftCondition, setDraftCondition] = useState<string>(
+    ESPCDFAutomationConditionOperator.EQUAL,
   );
-  const [eventValue, setEventValue] = useState<unknown>(null);
-  const [activeEventParam, setActiveEventParam] = useState<string | null>(null);
+  const [draftValue, setDraftValue] = useState<unknown>(null);
+
+  const persistedNodeParamsEvent = useMemo(
+    () =>
+      getNodeParamsEventForDevice(
+        state.events,
+        state.selectedEventDevice?.deviceName,
+      ),
+    [state.events, state.selectedEventDevice?.deviceName],
+  );
+
+  const activeEventParam = persistedNodeParamsEvent?.param ?? null;
 
   const { selectedDevice = null, params: paramsList = [] } = useMemo(() => {
     const nodeId = state.selectedEventDevice?.nodeId;
@@ -81,78 +88,66 @@ export function useEventDeviceParamSelection(
     const node = store.nodeStore.nodesByIDMap?.[nodeId];
     if (!node) return {};
     const device = node.devices?.find(
-      (d) => d.name === state.selectedEventDevice?.deviceName
+      (d) => d.name === state.selectedEventDevice?.deviceName,
     );
     if (!device) return {};
 
-    const withDefaults = (device.params ?? []).map((param) => ({
+    const storedEvent = getNodeParamsEventForDevice(state.events, device.name);
+    const withStoredOrDefaults = (device.params ?? []).map((param) => ({
       ...param,
-      value: defaultWritableParamValue(param),
+      value:
+        storedEvent !== null && storedEvent.param === param.name
+          ? storedEvent.value
+          : defaultWritableParamValue(param),
     }));
-    const filtered = filterExcludedParamTypes(withDefaults as ESPCDFDeviceParam[]);
+    const filtered = filterExcludedParamTypes(
+      withStoredOrDefaults as ESPCDFDeviceParam[],
+    );
 
     return { selectedDevice: device, params: filtered ?? [] };
-  }, [state.selectedEventDevice, store.nodeStore.nodesByIDMap]);
-
-  useEffect(() => {
-    if (!state.events?.length) return;
-    const event = state.events[0];
-    if (
-      typeof event === "object" &&
-      event !== null &&
-      "deviceName" in event &&
-      state.nodeId === state.selectedEventDevice?.nodeId
-    ) {
-      const nodeParamsEvent = event as ESPCDFAutomationNodeParamsEvent;
-      if (nodeParamsEvent.deviceName === selectedDevice?.name) {
-        setActiveEventParam(nodeParamsEvent.param);
-        setEventCondition(nodeParamsEvent.check);
-        setEventValue(nodeParamsEvent.value);
-      }
-    }
-  }, [state.events, state.nodeId, state.selectedEventDevice?.nodeId, selectedDevice?.name]);
+  }, [state.selectedEventDevice, state.events, store.nodeStore.nodesByIDMap]);
 
   const disableActionButton =
-    !selectedDevice || !activeEventParam || eventValue === null;
+    !selectedDevice || paramSheetVisible || persistedNodeParamsEvent == null;
 
-  const createEvent = useCallback(() => {
-    if (!activeEventParam || !selectedDevice || eventValue === null) return;
+  const persistNodeParamsEventToContext = useCallback(
+    (automationEvent: ESPCDFAutomationNodeParamsEvent) => {
+      if (isEditing && state.events.length > 0) {
+        updateEvent(0, automationEvent);
+      } else {
+        addEvent(automationEvent);
+      }
+      const nodeId = state.selectedEventDevice?.nodeId;
+      if (nodeId) setNodeId(nodeId);
+    },
+    [
+      isEditing,
+      state.events.length,
+      state.selectedEventDevice?.nodeId,
+      addEvent,
+      updateEvent,
+      setNodeId,
+    ],
+  );
 
-    const automationEvent: ESPCDFAutomationNodeParamsEvent = {
-      deviceName: selectedDevice.name,
-      param: activeEventParam,
-      check: eventCondition as ESPCDFAutomationConditionOperator,
-      value: eventValue,
-    };
-
-    if (isEditing && state.events.length > 0) {
-      updateEvent(0, automationEvent);
-    } else {
-      addEvent(automationEvent);
-    }
-
-    const nodeId = state.selectedEventDevice?.nodeId;
-    if (nodeId) setNodeId(nodeId);
-  }, [
-    activeEventParam,
-    selectedDevice,
-    eventValue,
-    eventCondition,
-    isEditing,
-    state.events.length,
-    state.selectedEventDevice?.nodeId,
-    addEvent,
-    updateEvent,
-    setNodeId,
-  ]);
-
-  const handleParamSelect = useCallback((param: ESPCDFDeviceParam) => {
-    setActiveEventParam(null);
-    setSelectedParam(param);
-    setEventValue(param.value);
-    setEventCondition(ESPCDFAutomationConditionOperator.EQUAL);
-    setParamSheetVisible(true);
-  }, []);
+  const handleParamSelect = useCallback(
+    (param: ESPCDFDeviceParam) => {
+      const stored = getNodeParamsEventForDevice(
+        state.events,
+        selectedDevice?.name,
+      );
+      if (stored?.param === param.name) {
+        setDraftCondition(stored.check);
+        setDraftValue(stored.value);
+      } else {
+        setDraftCondition(ESPCDFAutomationConditionOperator.EQUAL);
+        setDraftValue(param.value);
+      }
+      setSelectedParam(param);
+      setParamSheetVisible(true);
+    },
+    [state.events, selectedDevice?.name],
+  );
 
   const handleParamSheetClose = useCallback(() => {
     setParamSheetVisible(false);
@@ -160,13 +155,27 @@ export function useEventDeviceParamSelection(
   }, []);
 
   const handleEventConditionSave = useCallback(() => {
-    if (selectedParam) setActiveEventParam(selectedParam.name);
+    if (!selectedParam || !selectedDevice || draftValue == null) return;
+
+    persistNodeParamsEventToContext({
+      deviceName: selectedDevice.name,
+      param: selectedParam.name,
+      check: draftCondition as ESPCDFAutomationConditionOperator,
+      value: draftValue,
+    });
+
     setParamSheetVisible(false);
     setSelectedParam(null);
-  }, [selectedParam]);
+  }, [
+    selectedParam,
+    selectedDevice,
+    draftValue,
+    draftCondition,
+    persistNodeParamsEventToContext,
+  ]);
 
   const handleParamValueChange = useCallback((value: unknown) => {
-    setEventValue(value);
+    setDraftValue(value);
     setSelectedParam((prev) => {
       if (!prev) return null;
       return { ...prev, value } as ESPCDFDeviceParam;
@@ -180,13 +189,11 @@ export function useEventDeviceParamSelection(
     setSelectedParam,
     paramSheetVisible,
     setParamSheetVisible,
-    eventCondition,
-    setEventCondition,
-    eventValue,
-    setEventValue,
     activeEventParam,
+    draftCondition,
+    setDraftCondition,
+    persistedNodeParamsEvent,
     disableActionButton,
-    createEvent,
     handleParamSelect,
     handleParamSheetClose,
     handleEventConditionSave,

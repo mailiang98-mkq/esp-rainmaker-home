@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { TFunction } from "i18next";
 import {
   OAUTH_CANCELLED_ERROR_TAG,
   OAUTH_NO_BROWSER_FOUND_ERROR_TAG,
@@ -199,21 +200,22 @@ export function shouldMonitorOAuthAppLifecycle(
 }
 
 /**
- * Maps SDK OAuth errors to user-friendly messages.
+ * Maps SDK OAuth errors to user-friendly messages using i18n.
  * @param error Unknown thrown error from OAuth flow.
+ * @param t i18next translation function (auth namespace keys under `auth.errors.*`).
  * @returns Toast-ready message describing the error.
  */
-export function mapOAuthErrorToMessage(error: unknown): string {
+export function mapOAuthErrorToMessage(error: unknown, t: TFunction): string {
   if (error instanceof Error) {
     if (error.message.includes(OAUTH_CANCELLED_ERROR_TAG)) {
-      return "OAuth login was cancelled.";
+      return t("auth.errors.oauthCancelled");
     }
     if (error.message.includes(OAUTH_NO_BROWSER_FOUND_ERROR_TAG)) {
-      return "No browser app found. Please install a browser.";
+      return t("auth.errors.oauthNoBrowser");
     }
-    return `OAuth error: ${error.message}`;
+    return t("auth.errors.oauthErrorWithMessage", { message: error.message });
   }
-  return "OAuth login failed. Please try again.";
+  return t("auth.errors.oauthUnknownFailure");
 }
 
 /**
