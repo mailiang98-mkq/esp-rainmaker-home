@@ -21,6 +21,8 @@ export {
   HomeEmptyState,
   type HomeEmptyStateProps,
 } from "./Home/HomeEmptyState";
+export { default as DeviceTypeFilterTabs } from "./Home/DeviceTypeFilterTabs";
+export { default as RoomControlSwitch } from "./Home/RoomControlSwitch";
 export {
   MigrationPromptModal,
   type MigrationPromptModalProps,

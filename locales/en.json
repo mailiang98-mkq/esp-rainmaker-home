@@ -318,7 +318,11 @@
       "roomAllDevicesPowerOn": "All devices in {{roomName}} are now on.",
       "roomAllDevicesPowerOff": "All devices in {{roomName}} are now off.",
       "singleDeviceCountPostfix": "device",
-      "multipleDeviceCountPostfix": "devices"
+      "multipleDeviceCountPostfix": "devices",
+      "allOn": "All On",
+      "allOff": "All Off",
+      "filterAll": "All",
+      "filterOther": "Other"
     },
     "homeManagement": {
       "title": "Home Management",

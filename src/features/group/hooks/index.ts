@@ -63,3 +63,7 @@ export {
   type ParamBroadcastRow,
   type ParamBroadcastTarget,
 } from "./useGroupControl";
+export {
+  useRoomControl,
+  type UseRoomControlResult,
+} from "./useRoomControl";
