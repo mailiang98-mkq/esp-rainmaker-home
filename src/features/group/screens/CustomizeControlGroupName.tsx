@@ -71,6 +71,12 @@ const CustomizeControlGroupName = () => {
               paddingHorizontal={false}
               marginBottom={false}
               style={globalStyles.customizeRoomNameInput}
+              returnKeyType="done"
+              onSubmitEditing={() => {
+                if (canConfirm) {
+                  handleConfirm();
+                }
+              }}
             />
           </ContentWrapper>
         </View>

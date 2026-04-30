@@ -805,8 +805,8 @@ export interface GroupSharingProps {
   sharedUsers: GroupSharedUser[];
   pendingUsers?: GroupSharedUser[];
   sharedByUser: GroupSharedUser | null;
-  onRemoveUser: (userId: string) => void;
-  onRemovePendingUser?: (userId: string) => void;
+  onRemoveUser: (username: string) => void | Promise<void>;
+  onRemovePendingUser?: (username: string) => void | Promise<void>;
   onAddUser: () => void;
   isPrimaryUser: boolean | undefined;
   isLoading: boolean;

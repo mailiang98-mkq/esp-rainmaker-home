@@ -214,7 +214,12 @@
       "passwordResetFailed": "重置密码失败",
       "autoSignInFailed": "自动登录失败",
       "failedToSaveProfile": "个人资料保存失败",
-      "pleaseTryAgain": "请重试"
+      "pleaseTryAgain": "请重试",
+      "oauthCancelled": "OAuth 登录已取消。",
+      "oauthNoBrowser": "未找到浏览器应用，请安装浏览器。",
+      "oauthErrorWithMessage": "OAuth 错误：{{message}}",
+      "oauthUnknownFailure": "OAuth 登录失败，请重试。",
+      "oauthLoginFailedTitle": "OAuth 登录失败"
     }
   },
   "user": {
@@ -382,7 +387,11 @@
       "expiresInDays": "{{count}} 天",
       "expiresInDay": "1 天",
       "expiresToday": "今天到期",
-      "sharing": "共享"
+      "sharing": "共享",
+      "confirmRevokePendingShareTitle": "撤销邀请？",
+      "confirmRevokePendingShareMessage": "将取消向 {{username}} 发送的待处理共享请求。",
+      "confirmRemoveSharedUserTitle": "移除访问权限？",
+      "confirmRemoveSharedUserMessage": "将移除 {{username}} 的访问权限，对方将无法再看到此家庭。"
     },
     "deviceGroups": {
       "addYourFirstGroup": "添加第一个群组",

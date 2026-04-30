@@ -76,12 +76,6 @@ const BrightnessSlider = observer(
       onValueChange(event, roundedValue);
     };
 
-    const handleTamaguiValueChange = (values: number[]) => {
-      const raw = values[0];
-      if (typeof raw !== "number" || !Number.isFinite(raw)) return;
-      commitValue(null, raw);
-    };
-
     return (
       <View style={[styles.container, disabled && styles.disabled]}>
         <View style={[styles.header, disabled && styles.disabledText]}>
@@ -96,7 +90,6 @@ const BrightnessSlider = observer(
             max={max}
             step={step}
             onSlideMove={commitValue}
-            onValueChange={handleTamaguiValueChange}
             disabled={disabled}
             style={styles.slider}
           >

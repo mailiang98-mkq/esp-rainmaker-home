@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useRef } from "react";
 import {
   View,
   Text,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  TextInput,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -46,6 +48,9 @@ export function ResetPasswordScreen() {
     handleResendCode,
     handleResetPassword,
   } = useResetPassword();
+
+  const newPasswordInputRef = useRef<TextInput>(null);
+  const confirmPasswordInputRef = useRef<TextInput>(null);
 
   const isFormValid =
     isCodeValid && isPasswordValid && isConfirmPasswordValid && !isLoading;
@@ -105,6 +110,12 @@ export function ResetPasswordScreen() {
                 ]}
                 keyboardType="numeric"
                 maxLength={6}
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  if (isCodeValid) {
+                    newPasswordInputRef.current?.focus();
+                  }
+                }}
                 autoFocus
                 qaId="reset_password_code"
               />
@@ -115,6 +126,7 @@ export function ResetPasswordScreen() {
               style={globalStyles.inputContainer}
             >
               <Input
+                ref={newPasswordInputRef}
                 isPassword
                 icon="lock-closed"
                 placeholder={t("auth.shared.newPasswordPlaceholder")}
@@ -122,11 +134,18 @@ export function ResetPasswordScreen() {
                 validator={passwordValidator}
                 validateOnChange={true}
                 debounceDelay={500}
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  if (isPasswordValid) {
+                    confirmPasswordInputRef.current?.focus();
+                  }
+                }}
                 qaId="new_password_reset_password"
               />
 
               <Input
                 key={newPassword}
+                ref={confirmPasswordInputRef}
                 isPassword
                 icon="lock-closed"
                 placeholder={t("auth.shared.confirmPasswordPlaceholder")}
@@ -135,6 +154,12 @@ export function ResetPasswordScreen() {
                 validator={confirmPasswordValidator}
                 validateOnChange={true}
                 debounceDelay={500}
+                returnKeyType="go"
+                onSubmitEditing={() => {
+                  if (isFormValid) {
+                    void handleResetPassword();
+                  }
+                }}
                 qaId="confirm_password_reset_password"
               />
 

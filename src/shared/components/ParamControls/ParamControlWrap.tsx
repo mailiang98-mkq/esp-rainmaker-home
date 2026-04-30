@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, ReactElement, useMemo } from "react";
+import React, { ReactElement, useEffect, useMemo, useRef } from "react";
 import { View, GestureResponderEvent } from "react-native";
 
 // Components
@@ -25,15 +25,19 @@ import {
 import {
   ESPRM_PARAM_TIME_SERIES_PROPERTY,
   ESPRM_PARAM_SIMPLE_TIME_SERIES_PROPERTY,
+  PARAM_CONTROL_THROTTLE_MS,
 } from "@shared/utils/constants";
 
 /**
  * ParamControlWrap
  *
  * A wrapper component for controlling device parameter.
+ *
+ * Persists numeric changes via {@link useThrottle} (latest value wins, serial async drain, spacing via
+ * `PARAM_CONTROL_THROTTLE_MS`).
  * @param param - The device parameter to control
  * @param disabled - Whether the control is disabled
- * @returns Shell around a numeric param child with bounds, throttled `setValue`, and optional chart entry
+ * @returns Shell around a numeric param child with bounds and leading/trailing-throttled `param.setValue`; optional chart entry
  */
 const ParamControlWrap = observer(
   ({
@@ -44,17 +48,18 @@ const ParamControlWrap = observer(
     children,
     style,
   }: ParamControlProps) => {
-    // 1. Computed Values
     const { min, max } = getParamBounds(param);
+    const paramUpdateDelayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const hasFiniteBounds =
       typeof min === "number" &&
       Number.isFinite(min) &&
       typeof max === "number" &&
       Number.isFinite(max);
     const toast = useToast();
+
     const state = useLocalObservable(() => ({
       value: normalizeNumericParamValue(param.value),
-      setValue: (next: any) => {
+      setValue: (next: unknown) => {
         state.value = next;
       },
     }));
@@ -69,18 +74,55 @@ const ParamControlWrap = observer(
     );
 
     useEffect(() => {
-      state.value = normalizeNumericParamValue(param.value);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
-    }, [param.value]);
+      // Debounce the update of the state.value to avoid rapid changes
+      const debounceUpdateDelay = 3000;
 
-    // 2. Handlers
+      if (paramUpdateDelayTimeoutRef.current === null) {
+        state.value = normalizeNumericParamValue(param.value);
+      }
+
+      if (paramUpdateDelayTimeoutRef.current !== null) {
+        clearTimeout(paramUpdateDelayTimeoutRef.current);
+      }
+      paramUpdateDelayTimeoutRef.current = setTimeout(() => {
+        state.value = normalizeNumericParamValue(param.value);
+        paramUpdateDelayTimeoutRef.current = null;
+      }, debounceUpdateDelay);
+
+      return () => {
+        // cancel the timeout if the value changes again
+        if (paramUpdateDelayTimeoutRef.current !== null) {
+          clearTimeout(paramUpdateDelayTimeoutRef.current);
+        }
+      };  
+    }, [param.value, state.value])
+
+    /** Latest `param` for throttled persistence (avoid stale closures). */
+    const paramRef = useRef(param);
+    paramRef.current = param;
+
+    const enqueueUpdate = useThrottle(
+      async (value: unknown) => {
+        await paramRef.current.setValue(value);
+      },
+      PARAM_CONTROL_THROTTLE_MS,
+      {
+        throttleWithLoading: true,
+        setLoadingWhilePending: setUpdating,
+      },
+    );
+
+    /**
+     * Applies optional numeric rounding and bounds checks, updates local UI state,
+     * and schedules throttled persistence (latest queued value wins).
+     */
     const handleValueChange = async (
       _event: GestureResponderEvent | null,
-      newValue: any,
+      newValue: unknown,
       validate: boolean = true,
     ) => {
       if (disabled) return;
-      if (typeof newValue == "number" && validate) {
+      if (typeof newValue === "number" && validate) {
         const roundedValue = Math.round(newValue);
         const cur = comparableRoundedParamNumber(state.value);
         if (cur !== null && roundedValue === cur) return;
@@ -96,17 +138,10 @@ const ParamControlWrap = observer(
         }
         newValue = roundedValue;
       }
-      setUpdating(true);
       state.setValue(newValue);
-      throttledValueChange();
+      enqueueUpdate(newValue);
     };
 
-    const throttledValueChange = useThrottle(async () => {
-      await param.setValue(state.value);
-      setTimeout(() => setUpdating(false), 100);
-    }, 100);
-
-    // 3. Render
     return (
       <View style={[style]}>
         {React.Children.map(children, (child) => {

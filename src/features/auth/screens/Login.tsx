@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useRef } from "react";
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
   ImageSourcePropType,
+  TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -80,6 +81,8 @@ export function LoginScreen() {
     getCurrentFriendlyMessage,
   } = useLogin();
 
+  const passwordInputRef = useRef<TextInput>(null);
+
   const usernameFieldProps = useMemo(() => {
     const allowsPhone = getAuthAllowedUsernameTypes().includes("phone");
     return {
@@ -134,14 +137,20 @@ export function LoginScreen() {
               initialValue={email}
               onFieldChange={handleEmailChange}
               validator={emailValidator}
-              validateOnChange={true}
-              debounceDelay={500}
+              validateOnBlur={true}
               inputMode={usernameFieldProps.inputMode}
               keyboardType={usernameFieldProps.keyboardType}
+              returnKeyType="next"
+              onSubmitEditing={() => {
+                if (isEmailValid) {
+                  passwordInputRef.current?.focus();
+                }
+              }}
               qaId="email"
             />
 
             <Input
+              ref={passwordInputRef}
               key={`login-pw-${authFieldsKey}`}
               icon="lock-closed"
               placeholder={t("auth.shared.passwordPlaceholder")}
@@ -149,7 +158,13 @@ export function LoginScreen() {
               initialValue={password}
               onFieldChange={handlePasswordChange}
               validator={passwordValidator}
-              validateOnChange={true}
+              validateOnBlur={true}
+              returnKeyType="go"
+              onSubmitEditing={() => {
+                if (isEmailValid && isPasswordValid && !isLoading) {
+                  void login();
+                }
+              }}
               qaId="password"
             />
 

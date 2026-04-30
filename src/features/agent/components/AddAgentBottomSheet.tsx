@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 
 import { useTranslation } from "react-i18next";
@@ -62,6 +63,7 @@ const AddAgentBottomSheet: React.FC<AddAgentBottomSheetProps> = ({
   );
   const [formKey, setFormKey] = useState(0);
   const [hasValidatedAgentId, setHasValidatedAgentId] = useState(false);
+  const agentIdInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (!visible) {
@@ -266,6 +268,12 @@ const AddAgentBottomSheet: React.FC<AddAgentBottomSheetProps> = ({
                           ? t("aiSettings.errors.fillAllFields")
                           : undefined,
                     })}
+                    returnKeyType="next"
+                    onSubmitEditing={() => {
+                      if (!initialAgentName && isNameValid) {
+                        agentIdInputRef.current?.focus();
+                      }
+                    }}
                   />
                 </View>
 
@@ -282,6 +290,7 @@ const AddAgentBottomSheet: React.FC<AddAgentBottomSheetProps> = ({
                     </View>
                   )}
                   <Input
+                    ref={agentIdInputRef}
                     key={`id-${formKey}-${
                       hasValidatedAgentId ? "validated" : "not-validated"
                     }-${agentIdError ? "error" : "no-error"}`}
@@ -329,6 +338,12 @@ const AddAgentBottomSheet: React.FC<AddAgentBottomSheetProps> = ({
                         isValid: true,
                         error: undefined,
                       };
+                    }}
+                    returnKeyType="go"
+                    onSubmitEditing={() => {
+                      if (!isSaveDisabled) {
+                        void handleSave();
+                      }
                     }}
                   />
                 </View>

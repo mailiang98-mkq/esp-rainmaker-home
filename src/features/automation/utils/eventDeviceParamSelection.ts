@@ -4,12 +4,38 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { ESPCDFAutomationNodeParamsEvent } from "@store";
 import { ESPCDFAutomationConditionOperator } from "@store";
 
 export interface EventConditionOption {
   label: string;
   value: ESPCDFAutomationConditionOperator;
   isVisible?: boolean;
+}
+
+/**
+ * Returns the first draft event when it is a node-params trigger for the given device.
+ * @param events - Automation context `state.events`
+ * @param deviceName - Logical device name on the event node
+ * @returns The node-params event or null
+ */
+export function getNodeParamsEventForDevice(
+  events: readonly unknown[] | undefined,
+  deviceName: string | undefined,
+): ESPCDFAutomationNodeParamsEvent | null {
+  if (!deviceName || !events?.length) return null;
+  const event = events[0];
+  if (typeof event !== "object" || event === null) return null;
+  if (
+    !("deviceName" in event) ||
+    !("param" in event) ||
+    !("check" in event) ||
+    !("value" in event)
+  ) {
+    return null;
+  }
+  const nodeParams = event as ESPCDFAutomationNodeParamsEvent;
+  return nodeParams.deviceName === deviceName ? nodeParams : null;
 }
 
 /**

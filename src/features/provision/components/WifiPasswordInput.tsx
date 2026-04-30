@@ -5,13 +5,20 @@
  */
 
 import React from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  type TextInputProps,
+} from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
 import { testProps } from "@shared/utils/testProps";
 
-interface WifiPasswordInputProps {
+interface WifiPasswordInputProps
+  extends Pick<TextInputProps, "returnKeyType" | "onSubmitEditing"> {
   password: string;
   showPassword: boolean;
   placeholder: string;
@@ -30,6 +37,8 @@ export const WifiPasswordInput: React.FC<WifiPasswordInputProps> = ({
   placeholder,
   onChangePassword,
   onToggleShowPassword,
+  returnKeyType = "next",
+  onSubmitEditing,
 }) => (
   <View style={styles.passwordSection} {...testProps("view_wifi")}>
     <TextInput
@@ -43,6 +52,8 @@ export const WifiPasswordInput: React.FC<WifiPasswordInputProps> = ({
       value={password}
       onChangeText={onChangePassword}
       secureTextEntry={!showPassword}
+      returnKeyType={returnKeyType}
+      onSubmitEditing={onSubmitEditing}
       {...testProps("input_password")}
     />
     <TouchableOpacity

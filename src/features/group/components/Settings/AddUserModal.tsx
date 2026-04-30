@@ -153,6 +153,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             inputMode={inviteFieldProps.inputMode}
             keyboardType={inviteFieldProps.keyboardType}
             style={{ width: "100%" }}
+            returnKeyType="done"
+            validateOnBlur={true}
+            onSubmitEditing={() => {
+              if (isInviteValid && !isLoading) {
+                void onAdd();
+              }
+            }}
           />
 
           {/* Ownership Checkbox */}

@@ -424,12 +424,7 @@ export function useCreateRoom(
             expirationMessage: formatExpirationMessage(req.timestamp, t),
           }));
 
-        setRoomPendingUsers((prev) => {
-          const map = new Map<string, GroupSharedUser>();
-          prev.forEach((u) => map.set(u.username, u));
-          pendingRequests.forEach((u) => map.set(u.username, u));
-          return sortByExpirationDate(Array.from(map.values()));
-        });
+        setRoomPendingUsers(sortByExpirationDate(pendingRequests));
 
         const acceptedUsers = [
           ...primaryUsers.filter((u) => u.username !== currentUsername),

@@ -257,6 +257,12 @@ const AgentTermsBottomSheet: React.FC<AgentTermsBottomSheetProps> = ({
                   validateOnChange={true}
                   debounceDelay={300}
                   maxLength={30}
+                  returnKeyType="go"
+                  onSubmitEditing={() => {
+                    if (canContinue) {
+                      void handleContinue();
+                    }
+                  }}
                   qaId="nickname"
                 />
               </View>
