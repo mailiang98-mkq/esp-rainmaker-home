@@ -501,6 +501,22 @@
       "placeholder": "Code",
       "verify": "Connect device"
     },
+    "deviceDetails": {
+      "nameRequired": "Please enter a device name",
+      "updateNameTitle": "Name your device",
+      "selectRoomTitle": "Add to a room",
+      "createRoomAction": "Create new room",
+      "continue": "Continue",
+      "enterName": "Enter Device Name",
+      "selectARoom": "Select a room",
+      "cancel": "Cancel",
+      "deviceAddedToRoom": "Device added to room",
+      "noRoomsAvailable": "No rooms available. Choose a name to create one.",
+      "skip": "Skip",
+      "exitSetupToHomeTitle": "Leave setup?",
+      "exitSetupToHomeMessage": "You can finish naming your device and setting its room later from the home screen.",
+      "goToHome": "Go to home"
+    },
     "provision": {
       "title": "Connecting Device",
       "success": "Device provisioned successfully",

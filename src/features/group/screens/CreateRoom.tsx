@@ -24,6 +24,7 @@ import {
   type UseCreateRoomOptions,
 } from "@features/group/hooks";
 import { getFeatures } from "@config/features.config";
+import { firstRouteParam, parseRouteParamBoolean } from "@shared/utils/common";
 
 /**
  * Create Room screen – UI / presentation layer.
@@ -33,15 +34,24 @@ const CreateRoom = () => {
   const { t } = useTranslation();
   const toast = useToast();
   const router = useRouter();
-  const {
-    roomName: paramRoomName,
-    id,
-    roomId,
-  } = useLocalSearchParams<{
-    roomName?: string;
-    id?: string;
-    roomId?: string;
+  const raw = useLocalSearchParams<{
+    roomName?: string | string[];
+    id?: string | string[];
+    roomId?: string | string[];
+    dismissTo?: string | string[];
+    nodeId?: string | string[];
+    showSelection?: string | string[];
   }>();
+
+  const paramRoomName = firstRouteParam(raw.roomName);
+  const id = firstRouteParam(raw.id);
+  const roomId = firstRouteParam(raw.roomId);
+  const dismissTo = firstRouteParam(raw.dismissTo);
+  const nodeIdStr = firstRouteParam(raw.nodeId);
+  const showSelection = parseRouteParamBoolean(
+    firstRouteParam(raw.showSelection),
+    true
+  );
 
   const {
     roomName,
@@ -84,6 +94,9 @@ const CreateRoom = () => {
     homeId: id,
     roomId,
     paramRoomName,
+    dismissTo,
+    nodeId: nodeIdStr,
+    showSelection,
     toast,
     t,
     router: router as UseCreateRoomOptions["router"],
@@ -122,30 +135,33 @@ const CreateRoom = () => {
             onPress={handleCustomRoomName}
           />
 
-          <CreateRoomDeviceSection
-            title={t("group.createRoom.existingDevice")}
-            devices={selectedNodes}
-            emptyLabel={t("group.createRoom.pleaseSelectDevices")}
-            showPlus={false}
-            showMinus={true}
-            onDevicePress={handleRemoveDevice}
-            qaId="existing_devices_create_room"
-            viewTestId="view_existing_devices_create_room"
-            placeholderTestId="text_select_devices_create_room"
-          />
-
-          <CreateRoomDeviceSection
-            title={t("group.createRoom.addDevice")}
-            devices={availableNodes}
-            emptyLabel={t("group.createRoom.noMoreDevicesAvailable")}
-            showPlus={true}
-            showMinus={false}
-            onDevicePress={handleAddDevice}
-            qaId="add_devices_create_room"
-            viewTestId="view_add_devices_create_room"
-            listTestId="view_create_room"
-            placeholderTestId="text_create_room"
-          />
+          {showSelection && (
+            <>
+              <CreateRoomDeviceSection
+                title={t("group.createRoom.existingDevice")}
+                devices={selectedNodes}
+                emptyLabel={t("group.createRoom.pleaseSelectDevices")}
+                showPlus={false}
+                showMinus={true}
+                onDevicePress={handleRemoveDevice}
+                qaId="existing_devices_create_room"
+                viewTestId="view_existing_devices_create_room"
+                placeholderTestId="text_select_devices_create_room"
+              />
+              <CreateRoomDeviceSection
+                title={t("group.createRoom.addDevice")}
+                devices={availableNodes}
+                emptyLabel={t("group.createRoom.noMoreDevicesAvailable")}
+                showPlus={true}
+                showMinus={false}
+                onDevicePress={handleAddDevice}
+                qaId="add_devices_create_room"
+                viewTestId="view_add_devices_create_room"
+                listTestId="view_create_room"
+                placeholderTestId="text_create_room"
+              />
+            </>
+          )}
 
           {subGroupSharingEnabled && room && (
             <GroupSharing

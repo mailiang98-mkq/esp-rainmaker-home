@@ -501,6 +501,22 @@
       "placeholder": "代码",
       "verify": "连接设备"
     },
+    "deviceDetails": {
+      "nameRequired": "请输入设备名称",
+      "updateNameTitle": "为设备命名",
+      "selectRoomTitle": "添加到房间",
+      "createRoomAction": "创建新房间",
+      "continue": "继续",
+      "enterName": "输入设备名称",
+      "selectARoom": "选择房间",
+      "cancel": "取消",
+      "deviceAddedToRoom": "已添加到房间",
+      "noRoomsAvailable": "暂无房间。请选择名称以创建一个。",
+      "skip": "跳过",
+      "exitSetupToHomeTitle": "离开设置？",
+      "exitSetupToHomeMessage": "您可以稍后在主屏幕完成设备命名和房间设置。",
+      "goToHome": "回到首页"
+    },
     "provision": {
       "title": "正在连接设备",
       "success": "设备配置成功",

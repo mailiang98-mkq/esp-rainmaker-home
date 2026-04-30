@@ -5,6 +5,8 @@
  */
 
 export { useProvision } from "./useProvision";
+export { useUpdateDeviceName } from "./useUpdateDeviceName";
+export { useSelectDeviceRoom } from "./useSelectDeviceRoom";
 export { useAddDeviceSelection, type DeviceOption } from "./useAddDeviceSelection";
 export { useScanBLE, type UseScanBLEReturn } from "./useScanBLE";
 export { useClaiming } from "./useClaiming";

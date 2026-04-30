@@ -5,6 +5,8 @@
  */
 
 export { default as AddDeviceSelection } from "./AddDeviceSelection";
+export { default as UpdateDeviceName } from "./UpdateDeviceName";
+export { default as SelectDeviceRoom } from "./SelectDeviceRoom";
 export { default as Provision } from "./Provision";
 export { default as ScanBLE } from "./ScanBLE";
 export { default as ScanQR } from "./ScanQR";
