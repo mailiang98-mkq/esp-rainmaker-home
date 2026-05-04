@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import type { ESPCDFGroup } from "@store";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useHomeViewModel, type UseHomeViewModelResult } from "./useHomeViewModel";
@@ -12,7 +12,8 @@ import { useMigrationPromptViewModel } from "./useMigrationPromptViewModel";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@shared/hooks/useToast";
-import { getDefaultHomeTabs } from "@features/group/utils/homeScreenHelpers";
+import { getDefaultHomeTabs, compareDeviceType } from "@features/group/utils/homeScreenHelpers";
+import { ALL_DEVICES_TAB_ID, FILTER_ALL } from "@features/group/utils/constants";
 import { startNodeLocalDiscovery } from "@features/group/utils/localDiscovery";
 import type { RoomTab } from "@src/types/global";
 import { getFeatures } from "@/config/features.config";
@@ -24,6 +25,10 @@ export interface UseHomeScreenResult {
   setSelectedRoom: (tab: RoomTab) => void;
   roomTabs: RoomTab[];
   roomDevices: UseHomeViewModelResult["roomDevices"];
+  filteredRoomDevices: UseHomeViewModelResult["roomDevices"];
+  selectedDeviceTypeFilter: string;
+  setSelectedDeviceTypeFilter: (filter: string) => void;
+  selectedRoomGroup: ESPCDFGroup | undefined;
   controlGroups: UseHomeViewModelResult["groupControlGroups"];
   homeList: ESPCDFGroup[];
   selectedHome: ESPCDFGroup | null;
@@ -56,7 +61,7 @@ export function useHomeScreen(): UseHomeScreenResult {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<RoomTab>(
-    defaultTabs[0] ?? { label: "", id: "common" }
+    defaultTabs[0] ?? { label: "", id: ALL_DEVICES_TAB_ID }
   );
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -65,14 +70,37 @@ export function useHomeScreen(): UseHomeScreenResult {
   const selectedHome = store.getCurrentHome() ?? null;
   const activeHomeNodes = store.getNodesForCurrentHome();
 
-  const { roomTabs, roomDevices, groupControlGroups: raw } = useHomeViewModel({
-    selectedHome,
-    selectedRoom,
-    activeHomeNodes,
-    defaultTabs,
-  });
+  const { roomTabs, roomDevices, rooms, groupControlGroups: raw } =
+    useHomeViewModel({
+      selectedHome,
+      selectedRoom,
+      activeHomeNodes,
+      defaultTabs,
+    });
 
   const controlGroups = getFeatures().controlGroups ? raw : [];
+
+  const [selectedDeviceTypeFilter, setSelectedDeviceTypeFilter] =
+    useState(FILTER_ALL);
+
+  useEffect(() => {
+    setSelectedDeviceTypeFilter(FILTER_ALL);
+  }, [selectedRoom.id]);
+
+  const selectedRoomGroup = useMemo(
+    () =>
+      selectedRoom.id !== ALL_DEVICES_TAB_ID
+        ? rooms.find((r) => r.id === selectedRoom.id)
+        : undefined,
+    [selectedRoom.id, rooms]
+  );
+
+  const filteredRoomDevices = useMemo(() => {
+    if (selectedDeviceTypeFilter === FILTER_ALL) return roomDevices;
+    return roomDevices.filter((d) =>
+      compareDeviceType(d.type, selectedDeviceTypeFilter)
+    );
+  }, [roomDevices, selectedDeviceTypeFilter]);
 
   const { showMigrationPrompt, handleMigrationPromptUnderstood } =
     useMigrationPromptViewModel({ store, unifiedUser });
@@ -165,6 +193,10 @@ export function useHomeScreen(): UseHomeScreenResult {
     setSelectedRoom,
     roomTabs,
     roomDevices,
+    filteredRoomDevices,
+    selectedDeviceTypeFilter,
+    setSelectedDeviceTypeFilter,
+    selectedRoomGroup,
     controlGroups,
     homeList,
     selectedHome,

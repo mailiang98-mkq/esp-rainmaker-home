@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useMemo } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Plus } from "lucide-react-native";
 import { tokens } from "@shared/theme/tokens";
@@ -14,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 import { useHomeScreen } from "@features/group/hooks";
 import { getFeatures } from "@/config/features.config";
+import { ALL_DEVICES_TAB_ID } from "@features/group/utils/constants";
 
 // Components
 import { Header, Tabs, ScreenWrapper } from "@shared/components";
@@ -25,9 +27,9 @@ import {
   HomeEmptyState,
   HomeTooltip,
   MigrationPromptModal,
+  DeviceTypeFilterTabs,
+  RoomControlSwitch,
 } from "@features/group/components";
-
-// Utils
 import { testProps } from "@shared/utils/testProps";
 
 /**
@@ -44,6 +46,10 @@ const HomeScreen = () => {
     setSelectedRoom,
     roomTabs,
     roomDevices,
+    filteredRoomDevices,
+    selectedDeviceTypeFilter,
+    setSelectedDeviceTypeFilter,
+    selectedRoomGroup,
     controlGroups,
     homeList,
     selectedHome,
@@ -61,10 +67,15 @@ const HomeScreen = () => {
   const { controlGroups: controlGroupsEnabled, aiAgent: aiAgentEnabled } =
     getFeatures();
 
+  const isRoomSelected = useMemo(
+    () => selectedRoom.id !== ALL_DEVICES_TAB_ID,
+    [selectedRoom.id]
+  );
+
   const showGroupControlOnHome =
     controlGroupsEnabled &&
     controlGroups.length > 0 &&
-    selectedRoom.id === "common";
+    !isRoomSelected;
 
   return (
     <>
@@ -96,6 +107,13 @@ const HomeScreen = () => {
           activeTab={selectedRoom}
           onSelectTab={(tab) => setSelectedRoom(tab)}
         />
+        {isRoomSelected && (
+          <DeviceTypeFilterTabs
+            roomDevices={roomDevices}
+            activeFilter={selectedDeviceTypeFilter}
+            onSelectFilter={setSelectedDeviceTypeFilter}
+          />
+        )}
         {isLoading ? (
           <ActivityIndicator
             {...testProps("activity_indicator_home")}
@@ -114,9 +132,15 @@ const HomeScreen = () => {
                 homeId={selectedHome?.id ?? ""}
               />
             )}
+            {isRoomSelected && (
+              <RoomControlSwitch
+                filteredDevices={filteredRoomDevices}
+                roomGroup={selectedRoomGroup}
+              />
+            )}
             <View style={globalStyles.flex1}>
               <HomeDeviceList
-                roomDevices={roomDevices}
+                roomDevices={isRoomSelected ? filteredRoomDevices : roomDevices}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
               />

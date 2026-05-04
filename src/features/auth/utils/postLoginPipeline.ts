@@ -169,12 +169,11 @@ export async function executePostLoginPipeline(
         const connectedConnectors = await getConnectedConnectors();
         const isConnected = connectedConnectors.some(
           (connector) => {
-            // Match by specific connectorId
-            if (connector.connectorId === RAINMAKER_MCP_CONNECTOR_ID) {
-              return true;
-            }
-            // Fallback: match by connectorUrl
-            return connector.connectorUrl === RAINMAKER_MCP_CONNECTOR_URL;
+            const hasConnectorId = connector.connectorId === RAINMAKER_MCP_CONNECTOR_ID;
+            const hasConnectorUrl = connector.connectorUrl === RAINMAKER_MCP_CONNECTOR_URL; 
+            const hasToken = connector.hasToken || false;
+            const isExpired = connector.isExpired || false;
+            return (hasConnectorId || hasConnectorUrl) && hasToken && !isExpired;
           }
         );
 

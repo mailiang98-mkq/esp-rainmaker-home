@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { View } from "react-native";
+import { useRef } from "react";
+import { View, TextInput } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { globalStyles } from "@shared/theme/globalStyleSheet";
@@ -41,6 +42,9 @@ export function ChangePasswordScreen() {
     handleConfirmPasswordChange,
     handleSubmit,
   } = useChangePassword();
+
+  const newPasswordInputRef = useRef<TextInput>(null);
+  const confirmPasswordInputRef = useRef<TextInput>(null);
 
   const isFormValid =
     isOldPasswordValid &&
@@ -82,9 +86,16 @@ export function ChangePasswordScreen() {
               validator={oldPasswordValidator}
               validateOnChange={true}
               debounceDelay={500}
+              returnKeyType="next"
+              onSubmitEditing={() => {
+                if (isOldPasswordValid) {
+                  newPasswordInputRef.current?.focus();
+                }
+              }}
               qaId="current_password"
             />
             <Input
+              ref={newPasswordInputRef}
               isPassword
               icon="lock-closed"
               placeholder={t("auth.shared.newPasswordPlaceholder")}
@@ -92,10 +103,17 @@ export function ChangePasswordScreen() {
               validator={newPasswordValidator}
               validateOnChange={true}
               debounceDelay={500}
+              returnKeyType="next"
+              onSubmitEditing={() => {
+                if (isNewPasswordValid) {
+                  confirmPasswordInputRef.current?.focus();
+                }
+              }}
               qaId="new_password"
             />
             <Input
               key={newPassword}
+              ref={confirmPasswordInputRef}
               isPassword
               icon="lock-closed"
               placeholder={t("auth.shared.confirmPasswordPlaceholder")}
@@ -104,6 +122,12 @@ export function ChangePasswordScreen() {
               validator={confirmPasswordValidator}
               validateOnChange={true}
               debounceDelay={50}
+              returnKeyType="go"
+              onSubmitEditing={() => {
+                if (isFormValid) {
+                  void handleSubmit();
+                }
+              }}
               qaId="confirm_password"
             />
             <Button

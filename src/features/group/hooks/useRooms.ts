@@ -70,7 +70,7 @@ export function useRooms(options: UseRoomsOptions): UseRoomsResult {
   const handleAddRoom = useCallback(() => {
     router.push({
       pathname: "/(group)/CreateRoom",
-      params: { id: homeId },
+      params: { id: homeId, dismissTo: "/(group)/Rooms" },
     } as any);
   }, [router, homeId]);
 

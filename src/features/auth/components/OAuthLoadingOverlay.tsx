@@ -8,17 +8,16 @@ import { useEffect, useRef } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
+
   ActivityIndicator,
   StyleSheet,
   BackHandler,
   AppState,
   AppStateStatus,
 } from "react-native";
-import { UserCircle, X } from "lucide-react-native";
+import { UserCircle } from "lucide-react-native";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
-import { testProps } from "@shared/utils/testProps";
 import {
   APP_STATE_ACTIVE,
   APP_STATE_BACKGROUND,
@@ -45,11 +44,12 @@ export function OAuthLoadingOverlay({
   onAppBecameActive,
 }: OAuthLoadingOverlayProps) {
   const previousAppStateRef = useRef<AppStateStatus>(AppState.currentState);
-  const appResumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const appResumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   useEffect(() => {
     const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-      onClose();
       return true;
     });
     return () => sub.remove();
@@ -87,22 +87,7 @@ export function OAuthLoadingOverlay({
   }, [monitorAppLifecycle, onAppBecameActive]);
 
   return (
-    <View
-      style={[
-        globalStyles.emptyStateContainer,
-        styles.container,
-      ]}
-    >
-      <View style={styles.closeButtonContainer}>
-        <TouchableOpacity
-          onPress={onClose}
-          style={styles.closeButton}
-          {...testProps("button_close_oauth")}
-        >
-          <X size={24} color={tokens.colors.text_primary} />
-        </TouchableOpacity>
-      </View>
-
+    <View style={[globalStyles.emptyStateContainer, styles.container]}>
       <View style={styles.content}>
         <View style={globalStyles.emptyStateIconContainer}>
           <UserCircle size={40} color={tokens.colors.primary} />
@@ -121,9 +106,7 @@ export function OAuthLoadingOverlay({
               color={tokens.colors.text_secondary}
               style={styles.progressSpinner}
             />
-            <Text style={styles.progressText}>
-              {progressMessage}
-            </Text>
+            <Text style={styles.progressText}>{progressMessage}</Text>
           </View>
         </View>
       )}

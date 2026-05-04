@@ -214,7 +214,12 @@
       "passwordResetFailed": "Failed to reset password",
       "autoSignInFailed": "Failed to auto sign in",
       "failedToSaveProfile": "Failed to save profile",
-      "pleaseTryAgain": "Please try again"
+      "pleaseTryAgain": "Please try again",
+      "oauthCancelled": "OAuth login was cancelled.",
+      "oauthNoBrowser": "No browser app found. Please install a browser.",
+      "oauthErrorWithMessage": "OAuth error: {{message}}",
+      "oauthUnknownFailure": "OAuth login failed. Please try again.",
+      "oauthLoginFailedTitle": "OAuth Login Failed"
     }
   },
   "user": {
@@ -318,7 +323,11 @@
       "roomAllDevicesPowerOn": "All devices in {{roomName}} are now on.",
       "roomAllDevicesPowerOff": "All devices in {{roomName}} are now off.",
       "singleDeviceCountPostfix": "device",
-      "multipleDeviceCountPostfix": "devices"
+      "multipleDeviceCountPostfix": "devices",
+      "allOn": "All On",
+      "allOff": "All Off",
+      "filterAll": "All",
+      "filterOther": "Other"
     },
     "homeManagement": {
       "title": "Home Management",
@@ -378,7 +387,11 @@
       "expiresInDays": "{{count}} days",
       "expiresInDay": "1 day",
       "expiresToday": "Expires today",
-      "sharing": "Sharing"
+      "sharing": "Sharing",
+      "confirmRevokePendingShareTitle": "Revoke invite?",
+      "confirmRevokePendingShareMessage": "This will cancel the pending share request for {{username}}.",
+      "confirmRemoveSharedUserTitle": "Remove access?",
+      "confirmRemoveSharedUserMessage": "Access for {{username}} will be removed. They will no longer see this Home."
     },
     "deviceGroups": {
       "addYourFirstGroup": "Add your first group",
@@ -500,6 +513,22 @@
       "description": "Enter the Proof of Possession code found on your device or packaging",
       "placeholder": "Code",
       "verify": "Connect device"
+    },
+    "deviceDetails": {
+      "nameRequired": "Please enter a device name",
+      "updateNameTitle": "Name your device",
+      "selectRoomTitle": "Add to a room",
+      "createRoomAction": "Create new room",
+      "continue": "Continue",
+      "enterName": "Enter Device Name",
+      "selectARoom": "Select a room",
+      "cancel": "Cancel",
+      "deviceAddedToRoom": "Device added to room",
+      "noRoomsAvailable": "No rooms available. Choose a name to create one.",
+      "skip": "Skip",
+      "exitSetupToHomeTitle": "Leave setup?",
+      "exitSetupToHomeMessage": "You can finish naming your device and setting its room later from the home screen.",
+      "goToHome": "Go to home"
     },
     "provision": {
       "title": "Connecting Device",

@@ -17,6 +17,7 @@ import { MediaStream } from "react-native-webrtc";
 import type { ReactNode } from "react";
 import { AgentConfig } from "@features/agent/utils";
 import { ESPCDFDevice, ESPCDFGroup, ESPCDFNode, ESPCDFDeviceParam, ESPCDFNodeConfig, ESPCDFAutomation, ESPCDFGroupSharingRequest } from "@store";
+import type { UseHomeViewModelResult } from "@features/group/hooks";
 
 // ============================================================================
 // Common Types
@@ -214,6 +215,34 @@ export interface RoomType {
 export interface RoomTab {
   label: string;
   id: string;
+}
+
+/** Single device entry that has a power parameter. */
+export interface RoomPowerEntry {
+  node: NonNullable<
+    ReturnType<UseHomeViewModelResult["roomDevices"][number]["node"]["deref"]>
+  >;
+  device: UseHomeViewModelResult["roomDevices"][number];
+  powerParam: ESPCDFDeviceParam;
+}
+
+/** Props for RoomControlSwitch. */
+export interface RoomControlSwitchProps {
+  filteredDevices: UseHomeViewModelResult["roomDevices"];
+  roomGroup: ESPCDFGroup | undefined;
+}
+
+/** A single tab in the device-type filter bar. */
+export interface DeviceTypeFilterTab {
+  id: string;
+  label: string;
+}
+
+/** Props for DeviceTypeFilterTabs. */
+export interface DeviceTypeFilterTabsProps {
+  roomDevices: UseHomeViewModelResult["roomDevices"];
+  activeFilter: string;
+  onSelectFilter: (filterId: string) => void;
 }
 
 export interface HomeUpdateResponse {
@@ -776,8 +805,8 @@ export interface GroupSharingProps {
   sharedUsers: GroupSharedUser[];
   pendingUsers?: GroupSharedUser[];
   sharedByUser: GroupSharedUser | null;
-  onRemoveUser: (userId: string) => void;
-  onRemovePendingUser?: (userId: string) => void;
+  onRemoveUser: (username: string) => void | Promise<void>;
+  onRemovePendingUser?: (username: string) => void | Promise<void>;
   onAddUser: () => void;
   isPrimaryUser: boolean | undefined;
   isLoading: boolean;

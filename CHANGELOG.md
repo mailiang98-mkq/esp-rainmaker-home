@@ -5,6 +5,35 @@ All notable changes to the ESP RainMaker Home app will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0]
+
+### Added
+
+#### Room-Level Device Management
+- Added room-level bulk ON/OFF control for all devices 
+- Introduced device type filtering within rooms  
+- Bulk actions now respect active filter selection  
+
+#### Post-Provision Device Details Screen
+- Added screen to rename device after provisioning  
+- Enabled room assignment during onboarding (existing, predefined, custom)  
+
+---
+
+### Enhanced
+
+- Improved automation event parameter handling during edit  
+- Allowed automation creation with offline devices  
+- Smoothed light device slider interactions  
+- Fixed Agent chat Rainmaker MCP session expired issue  
+- Fixed logout button visibility on small screens phones
+- Refined email validation timing in forms  
+- Fixed keyboard return/Done behavior in inputs  
+- Kept “Save Wi-Fi” enabled by default in provisioning  
+- Added revoke confirmation in device sharing  
+- Ensured light sliders work even when device is OFF  
+
+
 ## [4.1.0]
 
 ### Added

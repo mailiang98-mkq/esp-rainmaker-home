@@ -93,6 +93,12 @@ const HomeName: React.FC<HomeNameProps> = ({
           paddingHorizontal={false}
           marginBottom={false}
           editable={!disabled}
+          returnKeyType="done"
+          onSubmitEditing={() => {
+            if (homeName?.trim() && !disabled && !isSaving) {
+              handleSaveHomeName();
+            }
+          }}
         />
         <View style={[globalStyles.editIcon]}>
           {isSaving ? (

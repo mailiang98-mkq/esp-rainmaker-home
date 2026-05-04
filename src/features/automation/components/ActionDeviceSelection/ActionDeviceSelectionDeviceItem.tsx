@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { X } from "lucide-react-native";
 import { tokens } from "@shared/theme/tokens";
 import { globalStyles } from "@shared/theme/globalStyleSheet";
@@ -16,9 +16,7 @@ import type { DeviceSelectionData } from "@src/types/global";
 export interface ActionDeviceSelectionDeviceItemProps {
   device: DeviceSelectionData;
   actions: Record<string, unknown>;
-  isDisabled: boolean;
-  offlineLabel: string;
-  treatOfflineAsOnline?: boolean;
+  isDisabled?: boolean;
   onPress: () => void;
   onDelete: () => void;
   showDelete: boolean;
@@ -32,22 +30,16 @@ export const ActionDeviceSelectionDeviceItem: React.FC<
 > = ({
   device,
   actions,
-  isDisabled,
-  offlineLabel,
-  treatOfflineAsOnline = false,
+  isDisabled = false,
   onPress,
   onDelete,
   showDelete,
 }) => {
-  const isOnline = device.node.connectivityStatus?.isConnected ?? false;
-  const showAsOnline = treatOfflineAsOnline || isOnline;
-
   return (
     <View
       {...testProps("view_action_device_item")}
       style={[
         globalStyles.sceneDeviceSection,
-        !showAsOnline && globalStyles.deviceCardDisabled,
         isDisabled && globalStyles.deviceCardDisabled,
       ]}
     >
@@ -70,16 +62,6 @@ export const ActionDeviceSelectionDeviceItem: React.FC<
                 color={tokens.colors.red}
               />
             </Pressable>
-          ) : undefined
-        }
-        badgeLable={
-          !showAsOnline ? (
-            <Text
-              {...testProps("text_offline_action")}
-              style={[globalStyles.fontXs, globalStyles.textGray]}
-            >
-              {offlineLabel}
-            </Text>
           ) : undefined
         }
       />

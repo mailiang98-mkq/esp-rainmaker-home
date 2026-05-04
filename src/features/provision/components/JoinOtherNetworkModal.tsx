@@ -4,8 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
-import { View, Text, Modal, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { Input } from "@shared/components";
@@ -50,6 +57,7 @@ const JoinOtherNetworkModal: React.FC<JoinOtherNetworkModalProps> = ({
    * blank `initialValue` each time the modal opens.
    */
   const [inputResetKey, setInputResetKey] = useState(0);
+  const passwordInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (visible) {
@@ -108,11 +116,14 @@ const JoinOtherNetworkModal: React.FC<JoinOtherNetworkModalProps> = ({
               marginBottom={true}
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
               qaId="input_ssid_join_network_wifi"
             />
 
             {/* ── Password input ── */}
             <Input
+              ref={passwordInputRef}
               key={`join-pw-${inputResetKey}`}
               icon="lock-closed"
               isPassword={true}
@@ -122,6 +133,12 @@ const JoinOtherNetworkModal: React.FC<JoinOtherNetworkModalProps> = ({
               border={true}
               paddingHorizontal={false}
               marginBottom={false}
+              returnKeyType="done"
+              onSubmitEditing={() => {
+                if (!isConnectDisabled) {
+                  handleConnect();
+                }
+              }}
               qaId="input_password_join_network_wifi"
             />
 

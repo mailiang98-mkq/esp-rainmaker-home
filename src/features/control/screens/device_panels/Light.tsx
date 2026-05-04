@@ -284,7 +284,7 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
               <ParamControlWrap
                 key={brightnessParam.name}
                 param={brightnessParam}
-                disabled={!isConnected || !powerParam?.value}
+                disabled={!isConnected}
                 setUpdating={(s) => {
                   setScrollEnabled(!s);
                 }}
@@ -297,7 +297,7 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
               <ParamControlWrap
                 key={temperatureParam.name}
                 param={temperatureParam}
-                disabled={!isConnected || !powerParam?.value}
+                disabled={!isConnected}
                 setUpdating={(s) => {
                   setScrollEnabled(!s);
                 }}
@@ -310,7 +310,7 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
               <ParamControlWrap
                 key={cctParam.name}
                 param={cctParam}
-                disabled={!isConnected || !powerParam?.value}
+                disabled={!isConnected}
                 setUpdating={(s) => {
                   setScrollEnabled(!s);
                 }}
@@ -329,7 +329,7 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
               <ParamControlWrap
                 key={brightnessParam.name}
                 param={brightnessParam}
-                disabled={!isConnected || !powerParam?.value}
+                disabled={!isConnected}
                 setUpdating={(s) => {
                   setScrollEnabled(!s);
                 }}
@@ -342,7 +342,7 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
               <ParamControlWrap
                 key={hueParam.name}
                 param={hueParam}
-                disabled={!isConnected || !powerParam?.value}
+                disabled={!isConnected}
                 setUpdating={(s) => {
                   setScrollEnabled(!s);
                 }}
@@ -355,7 +355,7 @@ const Light: React.FC<ControlPanelProps> = ({ node, device }) => {
               <ParamControlWrap
                 key={saturationParam.name}
                 param={saturationParam}
-                disabled={!isConnected || !powerParam?.value}
+                disabled={!isConnected}
                 setUpdating={(s) => {
                   setScrollEnabled(!s);
                 }}

@@ -104,11 +104,11 @@ export const useWifi = (): UseWifiReturn => {
     const savedPassword = getNetworkPassword(selectedWifi);
     if (savedPassword) {
       setPassword(savedPassword);
-      setShouldSave(true);
     } else {
       setPassword("");
-      setShouldSave(false);
     }
+    // Save WiFi by default
+    setShouldSave(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional hook deps
   }, [selectedWifi]);
 

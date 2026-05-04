@@ -160,6 +160,29 @@ const getDeviceName = (node: ESPCDFNode): string => {
 };
 
 /**
+ * Resolves the string to show when editing a sub-device name: name param, then display name,
+ * internal device name, then parent node label.
+ * @param device - Sub-device on the node
+ * @param node - Parent CDF node
+ * @returns Initial value for a device name field
+ */
+const getSubDeviceInitialDisplayName = (
+  device: ESPCDFDevice,
+  node: ESPCDFNode
+): string => {
+  const nameParam = device.params?.find(
+    (param) => param.type === ESPRM_NAME_PARAM_TYPE
+  );
+  return (
+    (nameParam?.value as string) ||
+    device.displayName ||
+    device.name ||
+    node.nodeConfig?.info?.name ||
+    ""
+  );
+};
+
+/**
  * Determines the device category based on device type and configuration
  * @param deviceConfig The device configuration from DEVICE_TYPE_LIST
  * @returns The device category for UI rendering
@@ -392,6 +415,7 @@ export {
   getIconName,
   getDeviceImage,
   getDeviceName,
+  getSubDeviceInitialDisplayName,
   getDeviceCategory,
   isDeviceCategory,
   transformNodesToDevices,

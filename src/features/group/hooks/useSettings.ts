@@ -175,12 +175,7 @@ export function useSettings(options: UseSettingsOptions): UseSettingsResult {
             expirationMessage: formatExpirationMessage(req.timestamp, t),
           }));
 
-        setPendingUsers((prev) => {
-          const map = new Map<string, GroupSharedUser>();
-          prev.forEach((u) => map.set(u.username, u));
-          pendingRequests.forEach((u) => map.set(u.username, u));
-          return sortByExpirationDate(Array.from(map.values()));
-        });
+        setPendingUsers(sortByExpirationDate(pendingRequests));
 
         const acceptedUsers = [
           ...primaryUsers.filter((u) => u.username !== currentUsername),

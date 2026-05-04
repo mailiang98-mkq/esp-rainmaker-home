@@ -12,7 +12,6 @@ import { sortByConnectivity } from "@shared/utils/eventDeviceSelection";
 import { useCDF } from "@shared/hooks/useCDF";
 import { useAutomation } from "@context/automation.context";
 import type { DeviceSelectionData } from "@src/types/global";
-import { ESPRMNGBaseAdaptorIdentifier } from "@config/sdk.identifiers";
 
 export type SelectActionDeviceResult =
   | { success: true; navigateParams: { pathname: string; params: object } }
@@ -39,10 +38,6 @@ export interface UseActionDeviceSelectionResult {
   deleteDevice: (device: DeviceSelectionData) => void;
   /** Get actions map for a selected device (param name -> value) */
   getDeviceActions: (device: DeviceSelectionData) => Record<string, unknown>;
-  /** Check if device should be disabled (e.g. offline) */
-  checkDeviceDisabled: (isConnected: boolean) => { isDisabled: boolean; reason?: "offline" };
-  /** True when offline devices should be treated as selectable/normal in UI. */
-  allowOfflineSelection: boolean;
 }
 
 /**
@@ -56,14 +51,11 @@ export function useActionDeviceSelection(
   const { store } = useCDF();
   const {
     state,
-    checkDeviceDisabled,
     checkActionExists,
     setSelectedDevice,
     getActionValue,
     deleteAction,
   } = useAutomation();
-  const allowOfflineSelection =
-    store.getActiveAdaptorIdentifier() === ESPRMNGBaseAdaptorIdentifier;
 
   const eventInfo = useMemo(
     () => getEventInfoFromEvents(state.events),
@@ -116,12 +108,6 @@ export function useActionDeviceSelection(
 
   const selectDevice = useCallback(
     (device: DeviceSelectionData): SelectActionDeviceResult => {
-      if (
-        !allowOfflineSelection &&
-        !device.node.connectivityStatus?.isConnected
-      ) {
-        return { success: false };
-      }
       setSelectedDevice({
         nodeId: device.node.id,
         deviceName: device.device.name,
@@ -135,7 +121,7 @@ export function useActionDeviceSelection(
         },
       };
     },
-    [allowOfflineSelection, isEditingAction, setSelectedDevice]
+    [isEditingAction, setSelectedDevice]
   );
 
   const deleteDevice = useCallback(
@@ -176,7 +162,5 @@ export function useActionDeviceSelection(
     selectDevice,
     deleteDevice,
     getDeviceActions,
-    checkDeviceDisabled,
-    allowOfflineSelection,
   };
 }

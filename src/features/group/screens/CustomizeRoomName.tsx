@@ -35,7 +35,21 @@ import { testProps } from "@shared/utils/testProps";
 const CustomizeRoomName = () => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { currentRoomName, id, roomId } = useLocalSearchParams();
+  const {
+    currentRoomName,
+    id,
+    roomId,
+    dismissTo,
+    nodeId,
+    showSelection,
+  } = useLocalSearchParams<{
+    currentRoomName?: string | string[];
+    id?: string | string[];
+    roomId?: string | string[];
+    dismissTo?: string | string[];
+    nodeId?: string | string[];
+    showSelection?: string | string[];
+  }>();
 
   const {
     selectedRoom,
@@ -49,6 +63,9 @@ const CustomizeRoomName = () => {
     currentRoomName,
     id,
     roomId,
+    dismissTo,
+    nodeId,
+    showSelection,
     router: router as Parameters<typeof useCustomizeRoomName>[0]["router"],
     t,
   });
@@ -67,6 +84,12 @@ const CustomizeRoomName = () => {
               paddingHorizontal={false}
               marginBottom={false}
               style={globalStyles.customizeRoomNameInput}
+              returnKeyType="done"
+              onSubmitEditing={() => {
+                if (canConfirm) {
+                  handleConfirm();
+                }
+              }}
             />
           </ContentWrapper>
         </View>
